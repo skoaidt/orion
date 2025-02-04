@@ -1,0 +1,302 @@
+@import "../../../style.scss";
+
+.detail {
+  width: 1600px;
+  top: -50px;
+  border-radius: 30px;
+  background: #FFF;
+  box-shadow: 3px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  position: relative;
+
+  .articleTopBtns {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+
+    .actionButtons {
+      display: flex;
+      gap: 10px;
+    }
+
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    border: 1px solid #ebecef;
+    border-radius: 6px;
+
+    .inner {
+      padding: 30px;
+
+      .linkBoard {
+        font-size: 13px;
+        color: $blueColor;
+        cursor: pointer;
+      }
+
+      .titleWrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .title {
+          font-size: 26px;
+          font-weight: 400;
+        }
+
+        .idCategory {
+          width: 300px;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 10px;
+
+          div:nth-child(1) {
+            color: $grayColor;
+            font-size: 16px;
+          }
+
+          div:nth-child(2) {
+            color: $blueColor;
+            font-size: 16px;
+            font-weight: 400;
+          }
+        }
+      }
+
+      .writeInfo {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 10px 0px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #ebecef;
+
+        .left {
+          display: flex;
+          align-items: center;
+
+          img {
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+          }
+
+          .write {
+            margin-left: 5px;
+
+            .author {
+              display: flex;
+              gap: 5px;
+
+              .authorNm {
+                font-size: 13px;
+                font-weight: 500;
+              }
+
+              .authorTeam {
+                font-size: 13px;
+                font-weight: 300;
+                color: #676767;
+              }
+            }
+
+            .authorDate {
+              display: flex;
+              align-items: center;
+              font-size: 12px;
+              font-weight: 300;
+              color: #676767;
+              gap: 5px;
+
+            }
+          }
+        }
+
+        .right {
+          .comment {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 400;
+
+            img {
+              width: 35px;
+              height: 35px;
+            }
+          }
+        }
+      }
+
+
+      .descripContainer {
+        background-color: #fcfcfc;
+        // border: 1px solid #8b8b8b;
+        border-radius: 6px;
+        min-height: 300px;
+        padding: 10px;
+        overflow: auto;
+        margin-bottom: 10px;
+
+        .descrip {
+          padding: 10px;
+        }
+      }
+
+      .completeBox {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        border-radius: 6px;
+        border: 1px solid #ebecef;
+
+        .progressBox {
+          margin: 10px 0px;
+          display: flex;
+          align-items: center;
+
+          .title {
+            font-size: 16px;
+            color: $grayColor;
+            margin: 10px 10px 0px 10px;
+
+          }
+
+          .customSlider {
+            margin-left: 20px;
+            margin-right: 20px;
+            width: 300px;
+          }
+        }
+
+      }
+    }
+
+    .commentsContent {
+      padding: 0px 30px;
+
+      .commentItem {
+        padding: 14px 23px 0 0;
+        border-bottom: 1px solid #ebecef;
+
+        .commentAuthor {
+          display: flex;
+          gap: 10px;
+
+          .commentAuthorNm {
+            font-size: 14px;
+            font-weight: 500;
+          }
+
+          .commentAuthorTeam {
+            font-size: 13px;
+            font-weight: 300;
+            color: #676767;
+          }
+        }
+
+        .commentText {
+          font-size: 15px;
+          margin: 5px 0;
+        }
+
+        .commentDownWrap {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          .commentDate {
+            font-size: 13px;
+            font-weight: 300;
+            color: #676767;
+          }
+
+          Button {
+            font-size: 13px;
+          }
+        }
+      }
+
+      .addWrap {
+        border: 1px solid #757a81;
+        background-color: white;
+        border-radius: 6px;
+        margin: 30px 0;
+        padding: 10px;
+        position: relative;
+
+        .commentNm {
+          font-size: 13px;
+          margin-bottom: 5px;
+        }
+
+        .addComment {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+
+          form {
+            width: 100%;
+            margin: 5px 10px;
+
+            textarea {
+              width: 100%;
+              border: none;
+            }
+
+            .btnGroup {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              position: relative;
+
+              button {
+                color: $grayColor;
+                font-size: 14px;
+                border: none;
+                background-color: white;
+                cursor: pointer;
+
+                :hover {
+                  color: $blueColor;
+                  background-color: #ebecef;
+                }
+              }
+
+
+            }
+
+            .emojiPickerWrapper {
+              position: absolute;
+              top: 30px;
+              left: 0;
+              z-index: 1000;
+            }
+
+          }
+        }
+      }
+    }
+
+  }
+
+  .downWrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-top: 15px;
+
+    .btnList {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 15px;
+
+    }
+  }
+
+}

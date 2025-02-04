@@ -1,0 +1,617 @@
+@import "../../style.scss";
+
+
+.productContent {
+
+  .contentBox {
+    width: 1600px;
+    top: -50px;
+    border-radius: 30px;
+    background: #FFF;
+    box-shadow: 3px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    position: relative;
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+
+      .innerBox {
+        display: flex;
+
+        .leftSide {
+          font-family: $notoSans;
+          flex: 8;
+
+          .titleBox {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            .title {
+              font-size: 30px;
+              font-weight: 300;
+              color: $grayColor;
+            }
+
+          }
+
+          .edit {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: $blueColor;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 0;
+
+            &:hover {
+              color: $hotpinkColor;
+            }
+          }
+
+
+          .subTitleArea {
+            position: relative;
+            display: flex;
+            align-items: center;
+
+            .subTitleBox {
+              position: absolute;
+              top: 10;
+              left: 0;
+              width: 5px;
+              height: 20px;
+              background-color: $blueColor;
+            }
+
+            .subTitle {
+              font-size: 24px;
+              font-weight: 600;
+              color: $grayColor;
+              margin: 10px 15px;
+
+            }
+          }
+
+          .desc {
+            p {
+              text-align: justify;
+            }
+
+            .itemBox {
+              padding: 20px;
+              height: 100%;
+              background-color: #ffff;
+              color: $grayColor;
+              border-radius: 5px;
+              border: 1px solid #b6b6b6;
+            }
+          }
+        }
+
+        .rightSide {
+          flex: 4;
+          margin: 10px 10px;
+          display: flex;
+          justify-content: center;
+          width: 100%;
+
+          .devDesc {
+            text-align: center;
+
+            .devImg {
+              height: 200px;
+              width: 200px;
+              margin: 50px;
+              border-radius: 50%;
+            }
+
+            .devNm {
+              font-size: 24px;
+              font-weight: 600;
+              color: $grayColor;
+              margin: 10px 10px;
+            }
+
+
+            .langDesc {
+              padding: 10px;
+              margin-top: 20px;
+
+              table {
+                width: 100%; // 테이블이 컨테이너의 전체 너비를 차지하도록 설정
+                border-collapse: collapse; // 테이블 셀 사이의 간격 제거
+                display: flex;
+                justify-content: center;
+
+                td {
+                  font-size: 16px;
+                  padding: 10px;
+                  border-bottom: 1px solid #ccc;
+                  color: $grayColor;
+
+                  &:first-child {
+                    font-weight: bold; // 첫 번째 셀(항목 이름)에 대해 글꼴 두께를 더 굵게 설정
+                  }
+                }
+
+                tr:last-child td {
+                  border-bottom: none; // 마지막 행의 하단 경계선 제거
+                }
+              }
+            }
+
+            .devIntro {
+              margin: 30px 20px;
+
+              .title {
+                font-size: 18px;
+                font-weight: 500;
+                color: $grayColor;
+                margin: 10px 0px;
+              }
+
+              .desc {
+                background-color: #f7f7f7;
+                margin: 0 20px;
+                color: $grayColor;
+                padding: 15px;
+                font-size: 14px;
+                border-radius: 8px;
+                // border: 1px solid $whitegrayColor;
+                text-align: justify;
+              }
+            }
+          }
+
+
+        }
+      }
+    }
+
+    .solBox {
+      display: flex;
+      flex-direction: row;
+    }
+
+  }
+
+  .randomBox {
+
+    .title {
+      font-size: 30px;
+      font-family: $notoSans;
+    }
+
+    .solutionsContainer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .solBox {
+        flex: 1;
+        margin: 0 10px;
+      }
+    }
+  }
+
+}
+
+.productReviews {
+  .contentBox {
+    width: 1600px;
+    top: -50px;
+    border-radius: 30px;
+    background: #FFF;
+    box-shadow: 3px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    position: relative;
+
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+
+      .titleText {
+        color: $grayColor;
+        font-family: $notoSans;
+        font-size: 30px;
+        font-weight: 300;
+        margin-bottom: 10px;
+      }
+
+      .scored {
+        background-color: #f3f3f3;
+        padding: 20px;
+        border-radius: 10px;
+
+        .scoreBox {
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+          height: 100%;
+
+          .likeBtn {
+            font-size: 16px;
+            margin: 0px;
+
+          }
+        }
+      }
+
+      .reviewBox {
+        background-color: #edf9ff;
+        box-shadow: 3px 4px 4px 0px rgba(0, 0, 0, 0.25);
+        border-radius: 15px;
+        // min-height: 100px;
+        height: 100%;
+        margin: 10px auto;
+        padding: 5px 20px;
+
+        .reviewHeader {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          div,
+          .reviewDate {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+
+          .reviewNm {
+            font-size: 16px;
+            font-weight: 500;
+            padding-left: 10px;
+          }
+
+          .reviewNm,
+          .reviewTeam,
+          .reviewDate {
+            display: flex;
+            align-items: center;
+            margin: 10px 0px;
+          }
+
+          .reviewTeam {
+            font-size: 14px;
+            font-weight: 400;
+            color: $blueColor;
+          }
+
+          .reviewDate {
+            font-size: 12px;
+            padding-right: 10px;
+          }
+        }
+
+        .reviewContent {
+          background-color: #ffffff;
+          padding: 20px;
+          // min-height: 80px;
+          border-radius: 10px;
+          margin-bottom: 15px;
+        }
+
+        .reviewActions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+          // margin-top: 20px;
+
+          .reviewActionsBtn {
+            width: 100px;
+            font-size: 14px;
+            font-weight: 200;
+            color: $grayColor;
+            background-color: transparent;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            &:hover {
+              color: $blueColor;
+              background-color: transparent;
+            }
+          }
+
+        }
+      }
+
+      .commentForm {
+        display: flex;
+        // flex-direction: row;
+        // align-items: center;
+        gap: 10px;
+
+        .commentInput,
+        .commentBtn {
+          flex: 1;
+          height: 100px;
+        }
+
+        .commentInput {
+          // flex-grow: 1;
+          padding: 10px;
+          font-size: 16px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          resize: vertical;
+        }
+
+        .commentBtn {
+          width: 120px;
+          height: 100%;
+        }
+      }
+
+    }
+
+  }
+}
+
+
+.productUpdate {
+  .contentBox {
+    width: 1600px;
+    top: -50px;
+    border-radius: 30px;
+    background: #FFF;
+    box-shadow: 3px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    position: relative;
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+
+      .innerBox {
+        display: flex;
+
+        .leftSide {
+          font-family: $notoSans;
+          flex: 8;
+
+          .titleBox {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+          }
+
+
+          .title {
+            font-size: 30px;
+            color: $grayColor;
+          }
+
+          .subTitle {
+            font-size: 24px;
+            font-weight: 600;
+            color: $grayColor;
+            margin: 10px 0px;
+          }
+
+
+          .editorContainer {
+            height: 300px;
+            overflow: scroll;
+            border: 1px solid lightgray;
+            border-radius: 10px;
+
+            .editor {
+              height: 100%;
+              border: none;
+
+
+              .ql-toolbar {
+                position: sticky;
+                top: 0;
+                z-index: 1;
+                background: #f0f0f0;
+                border-radius: 5px;
+
+              }
+
+            }
+          }
+
+          .desc {
+            p {
+              text-align: justify;
+            }
+          }
+
+          .updBtn {
+            width: 100%;
+            font-size: 20px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0px;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 10px;
+            border: none;
+            background-color: $blueColor;
+            color: white;
+
+            &:hover {
+              background-color: $purpleColr;
+            }
+          }
+
+
+        }
+
+        .rightSide {
+          flex: 4;
+          margin: 10px 10px;
+          display: flex;
+          justify-content: center;
+          width: 100%;
+
+
+          .devDesc {
+            text-align: center;
+
+            .title {
+              font-size: 30px;
+              color: $grayColor;
+            }
+
+            .devImg {
+              height: 200px;
+              width: 200px;
+              margin: 10px;
+              border-radius: 50%;
+            }
+
+            .devNm {
+              font-size: 30px;
+              font-weight: 600;
+              color: $grayColor;
+              margin: 10px 10px;
+            }
+
+            .imgBtn {
+              display: flex;
+              gap: 20px;
+              justify-content: center;
+              flex-direction: row;
+            }
+
+            .lang {
+              display: flex;
+              justify-content: center;
+              gap: 30px;
+              margin-top: 40px;
+
+              .langIcon {
+                height: 50px;
+              }
+            }
+
+            .langDesc {
+              padding: 10px;
+
+              table {
+                width: 90%; // 테이블이 컨테이너의 전체 너비를 차지하도록 설정
+                border-collapse: collapse; // 테이블 셀 사이의 간격 제거
+
+                td {
+                  font-size: 16px;
+                  padding: 10px; // 셀 내부 패딩 설정
+                  border-bottom: 1px solid #ccc; // 각 행 사이에 경계선 추가
+
+                  &:first-child {
+                    font-weight: bold; // 첫 번째 셀(항목 이름)에 대해 글꼴 두께를 더 굵게 설정
+                  }
+                }
+
+                tr:last-child td {
+                  border-bottom: none; // 마지막 행의 하단 경계선 제거
+                }
+              }
+            }
+          }
+
+
+        }
+      }
+    }
+
+    .solBox {
+      display: flex;
+      flex-direction: row;
+    }
+
+  }
+
+  .randomBox {
+
+    .title {
+      font-size: 30px;
+      font-family: $notoSans;
+    }
+
+    .solutionsContainer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .solBox {
+        flex: 1;
+        margin: 0 10px;
+      }
+    }
+  }
+
+}
+
+
+.productPNCR {
+
+  width: 1600px;
+  top: -50px;
+  border-radius: 30px;
+  background: #FFF;
+  box-shadow: 3px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  position: relative;
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+
+    .wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+
+      .titleWrap {
+        display: flex;
+        flex-direction: column;
+
+        .title {
+          font-size: 30px;
+          font-weight: 300;
+          color: $grayColor;
+          margin-bottom: 10px;
+        }
+
+        h4 {
+          font-size: 16px;
+          color: $grayColor;
+          font-weight: 400;
+        }
+
+        p {
+          font-size: 16px;
+          color: $grayColor;
+        }
+      }
+
+
+      // .chartContainer {
+      //   width: 300px;
+      //   height: 180px;
+      //   margin: auto;
+      //   display: flex;
+      //   justify-content: center;
+      //   align-items: center;
+      // }
+
+      button {
+        width: 150px;
+        height: 50px;
+        font-size: 16px;
+        margin-right: 20px;
+
+      }
+    }
+
+  }
+
+}

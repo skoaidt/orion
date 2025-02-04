@@ -1,0 +1,43 @@
+.dataTable {
+
+  .dataGrid {
+    background: white;
+    padding: 20px;
+    margin-right: 20px;
+    min-height: 500px;
+
+    .MuiDataGrid-toolbarContainer {
+      flex-direction: row-reverse;
+    }
+
+    .MuiDataGrid-cell,
+    .MuiDataGrid-columnHeaderTitle {
+      text-align: center;
+    }
+
+    .MuiDataGrid-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+  }
+
+  .modalBox {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    outline: none;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  }
+
+  .MuiBackdrop-root {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+}

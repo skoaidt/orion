@@ -1,0 +1,62 @@
+@import "../../style.scss";
+
+
+.app {
+  &.ideaBoard-active .main {
+    width: 100vw !important;
+  }
+}
+
+.ideaBoard {
+  width: 100vw;
+  background-color: $main-dark;
+  display: flex;
+  flex-direction: column;
+
+
+  .box {
+    height: 70px;
+    width: 100%;
+
+    .bg {
+      background-color: $main-dark;
+      height: 90px;
+      left: 0;
+      position: absolute;
+      top: 0;
+      width: 100%;
+    }
+  }
+
+  .wrapp {
+    margin-top: 50px;
+    display: flex;
+
+    .sideMenu {
+      flex: 1;
+      min-width: 200px;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+
+      .menuNm {
+        padding: 10px;
+
+        &:hover {
+          background-color: $soft-dark;
+        }
+      }
+    }
+
+    .contents {
+      flex: 9;
+      color: white;
+    }
+
+
+  }
+
+}

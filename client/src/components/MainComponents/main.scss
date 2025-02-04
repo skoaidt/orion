@@ -1,0 +1,571 @@
+@import "../../style.scss";
+
+
+
+//Main Contents
+.mainContents {
+  height: 500px;
+  width: 100%;
+  margin: 0 auto;
+
+
+  .mainBg {
+    display: flex;
+    background: $linear;
+    height: 600px;
+    left: 0;
+    top: 0;
+    position: absolute;
+    width: 100vw;
+
+    .innerContainer {
+      max-width: 1600px; // 최대 너비 설정
+      margin: 0 auto; // 자동 마진으로 중앙 정렬
+      display: flex;
+      width: 100%;
+
+      .leftSide {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: left;
+        justify-content: center;
+
+        .mainTitleText {
+          color: white;
+          font-family: $notoSans;
+          font-weight: 100;
+          font-size: 36px;
+          margin-bottom: 20px;
+        }
+
+        .subText {
+          color: white;
+          margin-bottom: 20px;
+        }
+
+        .mainSearch {
+          display: flex;
+
+          .mainInputWrap {
+            display: flex;
+            border-radius: 10px;
+            margin-right: 10px;
+            width: 60%;
+            padding: 8px;
+            background-color: white;
+            border: 1px solid #e2e2e2;
+
+            input {
+              width: 100%;
+              outline: none;
+              border: none;
+              height: 16px;
+              font-size: 14px;
+              font-weight: 400;
+            }
+          }
+
+
+          .mainSearchBtn {
+            background-color: $blueColor;
+            border: none;
+            cursor: pointer;
+            color: white;
+            width: 80px;
+            border-radius: 10px;
+
+            &:hover {
+              background-color: $purpleColr;
+            }
+
+          }
+        }
+      }
+
+      .rightSide {
+        flex: 1;
+        display: flex;
+        justify-content: right;
+        align-items: center;
+
+        img {
+          height: 350px;
+        }
+      }
+    }
+
+
+
+
+  }
+}
+
+
+//Main Middle navbar
+.mainMiddleNavBar {
+  height: 70px;
+  width: 100%;
+  background-color: #333333;
+  border-radius: 20px;
+  left: 0;
+  position: relative;
+  top: 70px;
+  font-size: 14px;
+  font-family: $notoSans;
+  font-weight: 400;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  .navbarContainer {
+    max-width: 1600px;
+    padding: 0 20px;
+    display: flex;
+
+    .middleIcon {
+      margin-left: 50px;
+      margin-right: 50px;
+    }
+
+    .navLinks {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 50px;
+      gap: 50px;
+
+      li {
+        a {
+          display: block;
+          color: white;
+          text-decoration: none;
+          padding: 10px 15px;
+
+          &:hover {
+            background-color: white;
+            color: black;
+            border-radius: 10px;
+          }
+        }
+      }
+    }
+  }
+}
+
+//Main Recomment 
+.mainRecommend {
+  .titleText {
+    color: $grayColor;
+    font-family: $notoSans;
+    font-size: 30px;
+    font-weight: 350;
+    padding: 5px;
+    margin-left: 10px;
+  }
+
+  .subText {
+    color: $grayColor;
+    font-family: $notoSans;
+    font-size: 16px;
+    font-weight: 400;
+    padding: 0px;
+    margin-left: 15px;
+  }
+
+  .newBox {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+
+    .leftSide {
+      flex: 4;
+      width: 500px;
+      margin: 10px;
+      // background: url(../public/image/main/main01.png);
+      background: url(../../../public/image/main/main02.png);
+      background-repeat: no-repeat;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: left;
+      text-align: left;
+      border-radius: 20px;
+
+      .circleImg {
+        width: 80px;
+        height: 80px;
+        margin: 10px;
+        padding: 0px;
+        margin-left: 80px;
+
+      }
+
+      .text {
+        font-size: 24px;
+        font-family: $notoSans;
+        font-weight: 900;
+        color: white;
+        margin: 10px;
+        margin-left: 80px;
+      }
+
+      .subText {
+        font-size: 16px;
+        font-family: $notoSans;
+        font-weight: 200;
+        color: white;
+        margin: 10px;
+        margin-left: 80px;
+      }
+
+      .newBtn {
+        width: 150px;
+        background-color: white;
+        margin: 10px;
+        margin-left: 80px;
+        border-radius: 20px;
+      }
+    }
+
+    .rightSide {
+      flex: 6;
+
+      .solutionsContainer {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+
+        .solutionsRow {
+          display: flex;
+          justify-content: space-between;
+
+          .solutionColumn {
+            flex: 1;
+            margin: 0 10px;
+          }
+        }
+      }
+    }
+
+  }
+
+  .mainBanner {
+    margin: 10px;
+    width: 100%;
+    height: 442px;
+    border-radius: 20px;
+    background: url(../../../public/image/main/MainBanner.png);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    .left {
+      margin-top: 80px;
+
+      .text {
+        font-size: 24px;
+        font-family: $notoSans;
+        font-weight: 900;
+        color: white;
+        margin: 10px;
+        margin-left: 80px;
+      }
+
+      .subText {
+        font-size: 16px;
+        font-family: $notoSans;
+        font-weight: 300;
+        color: white;
+        margin: 10px;
+        margin-left: 80px;
+      }
+    }
+
+    .right {
+      margin-top: 80px;
+      margin-right: 50px;
+      text-align: right;
+
+      .subText {
+        font-size: 16px;
+        font-family: $notoSans;
+        font-weight: 300;
+        color: white;
+        margin: 10px;
+        margin-left: 80px;
+      }
+
+      .bannerBtn {
+        width: 200px;
+        background-color: $hotpinkColor;
+        margin: 10px;
+        margin-left: 80px;
+        border-radius: 20px;
+        padding: 5px;
+        border: none;
+
+
+        .text {
+          font-size: 16px;
+          font-weight: 400;
+          color: white;
+          margin: 0 auto;
+        }
+
+        &:hover {
+          background-color: $purpleColr;
+        }
+      }
+    }
+
+
+  }
+
+  .popularBox {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+
+    .leftSide {
+      flex: 6;
+
+      .solutionsContainer {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+
+        .solutionsRow {
+          display: flex;
+          justify-content: space-between;
+
+          .solutionColumn {
+            flex: 1;
+            margin: 0 10px;
+          }
+        }
+      }
+    }
+
+    .rightSide {
+      flex: 4;
+      width: 500px;
+      margin: 10px;
+      // background: url(../public/image/main/main02.png);
+      background: url(../../../public/image/main/main02.png);
+      background-repeat: no-repeat;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: left;
+      text-align: left;
+      border-radius: 20px;
+
+      .circleImg {
+        width: 80px;
+        height: 80px;
+        margin: 10px;
+        padding: 0px;
+        margin-left: 80px;
+
+      }
+
+      .text {
+        font-size: 24px;
+        font-family: $notoSans;
+        font-weight: 900;
+        color: white;
+        margin: 10px;
+        margin-left: 80px;
+      }
+
+      .subText {
+        font-size: 16px;
+        font-family: $notoSans;
+        font-weight: 200;
+        color: white;
+        margin: 10px;
+        margin-left: 80px;
+      }
+    }
+
+  }
+
+  .joinUsBox {
+    display: flex;
+
+    .leftSide {
+      flex: 3;
+      padding: 10px;
+      gap: 10px;
+
+
+      .title {
+        font-size: 30px;
+        font-family: $notoSans;
+        font-weight: 300;
+        color: #5395d1;
+        height: 75px;
+        margin: 0;
+      }
+
+    }
+
+    .rightSide {
+      flex: 9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+
+
+      .devBox {
+        margin: 0 auto;
+        flex: 0 0 25%; // flex-basis를 25%로 설정하여 4개의 박스가 한 줄에 나타나게 함
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        border-radius: 10px;
+        background-color: #ffffff;
+        box-shadow: -4px -4px 10px #0000001a, 4px 4px 10px #0000001a;
+        min-height: 360px;
+        width: 350px;
+        padding: 10px;
+        transition: transform 0.3s ease-out;
+
+        &:hover {
+          transform: translateY(-20px);
+        }
+
+        p {
+          padding: 0px 20px;
+        }
+      }
+
+      img.personCircle {
+        height: 100px;
+        left: 125px;
+        top: 36px;
+        width: 100px;
+        margin: 20px;
+        border-radius: 50%;
+      }
+
+      .name,
+      .team {
+        font-family: $notoSans;
+        margin: 0px;
+
+        &.name {
+          font-size: 20px;
+          font-weight: 800;
+          margin: 0px;
+          color: #5395d1;
+          margin-top: 20px;
+        }
+
+        &.team {
+          font-size: 14px;
+          font-weight: 400;
+          color: #757575;
+        }
+      }
+
+
+    }
+  }
+
+
+
+}
+
+//Search 결과
+.searchlist {
+  padding: 20px;
+
+  .titleText {
+    color: $grayColor;
+    font-family: $notoSans;
+    font-size: 30px;
+    font-weight: 400;
+    padding: 5px;
+    margin-left: 10px;
+  }
+
+  .solutionsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 auto;
+
+  }
+
+  .noResults {
+    text-align: left;
+    color: #5a5a5a;
+    font-size: 20px;
+    padding: 10px;
+    margin-left: 5px;
+  }
+
+}
+
+.allSolution {
+  .titleText {
+    color: $grayColor;
+    font-family: $notoSans;
+    font-size: 30px;
+    font-weight: 400;
+    padding: 5px;
+    margin-left: 10px;
+  }
+
+  .subText {
+    color: $grayColor;
+    font-family: $notoSans;
+    font-size: 16px;
+    font-weight: 400;
+    padding: 0px;
+    margin-left: 15px;
+  }
+
+  .solutionsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 auto;
+
+  }
+
+}
+
+.workfield {
+  .titleText {
+    color: $grayColor;
+    font-family: $notoSans;
+    font-size: 30px;
+    font-weight: 400;
+    padding: 5px;
+    margin-left: 10px;
+  }
+
+  .subText {
+    color: $grayColor;
+    font-family: $notoSans;
+    font-size: 16px;
+    font-weight: 400;
+    padding: 0px;
+    margin-left: 15px;
+  }
+
+  .solutionsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 auto;
+
+  }
+}

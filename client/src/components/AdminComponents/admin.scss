@@ -1,0 +1,152 @@
+@import "../../style.scss";
+
+
+//ADMIN PAGE
+.admin {
+  width: 100vw;
+
+  .box {
+    height: 70px;
+    width: 100%;
+
+    .bg {
+      background: $main-dark;
+      height: 90px;
+      left: 0;
+      position: absolute;
+      top: 0;
+      width: 100%;
+    }
+  }
+
+  .title {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    color: $grayColor;
+  }
+
+  .userSearch {
+
+    .tablehead {
+      background: $linear;
+
+      .cell {
+        color: white;
+      }
+    }
+  }
+
+  .content {
+    display: flex;
+    position: fixed;
+    left: 0;
+    top: 90px;
+
+    .menuSection {
+      width: 200px;
+      height: 300vh;
+      // background-color: rgb(41, 162, 208);
+      background-color: $main-dark;
+      display: flex;
+      justify-content: center;
+
+
+      ul {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .menuNm {
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 20px 0px;
+        color: white;
+      }
+
+    }
+
+    .contentSetion {
+      display: flex;
+
+      width: 200vw;
+      height: 100vh;
+      overflow-y: auto;
+
+      .registerSol {
+        width: 1600px;
+
+        .paper {
+          .table {
+            .tableHead {
+              background: $linear;
+              // background-color: black;
+
+              .MuiTableCell-head {
+                color: white;
+              }
+            }
+
+            .tableCell {
+              font-size: 12px;
+
+            }
+          }
+        }
+      }
+
+      .registerDev {
+        width: 1600px;
+        height: 150vh;
+        overflow-y: auto;
+
+        .paper {
+          .table {
+            .tableHead {
+              background: $linear;
+              // background-color: black;
+
+              .MuiTableCell-head {
+                color: white;
+              }
+            }
+
+            .tableCell {
+              font-size: 12px;
+
+            }
+          }
+        }
+      }
+
+      .modifySol {
+        width: 1600px;
+
+
+      }
+
+      .adminMgmt {
+        width: 1600px;
+        height: 150vh;
+        overflow-y: auto;
+
+        .tableHead {
+          background: $linear;
+          font-size: 12px;
+
+          .cell {
+            color: white;
+            font-size: 12px;
+
+          }
+        }
+      }
+
+    }
+  }
+}

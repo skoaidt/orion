@@ -1,0 +1,712 @@
+$blueColor: #5395d1;
+$redColor: #ef0000;
+$hotpinkColor: #DD1B8F;
+$purpleColr: rgb(119, 47, 201);
+$whitegrayColor: #b7b7b7;
+$grayColor: #5a5a5a;
+$whiteYellow: #F6DDD0;
+$pastelGreen: #79CAB6;
+$pastelViolet: #AFACD7;
+$linear: linear-gradient(100deg, rgb(41, 162, 208) 0%, rgb(119, 47, 201) 100%);
+$prductLinear: linear-gradient(100deg, #4CC5F2 0%, #1CA8DB 100%);
+$notoSans: "Noto Sans KR", Helvetica, sans-serif;
+$main-dark : #2a3447;
+$soft-dark : #384256;
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../public/fonts/NotoSansKR-Thin.ttf') format('truetype');
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../public/fonts/NotoSansKR-ExtraLight.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../public/fonts/NotoSansKR-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../public/fonts/NotoSansKR-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../public/fonts/NotoSansKR-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../public/fonts/NotoSansKR-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../public/fonts/NotoSansKR-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../public/fonts/NotoSansKR-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('../public/fonts/NotoSansKR-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+//ANIMATION-UPDOWN
+.animation-updown {
+  animation: moveUpDown 2s infinite;
+}
+
+@keyframes moveUpDown {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+  padding: 0;
+  font-family: $notoSans;
+  text-align: justify;
+}
+
+a {
+  text-decoration-line: none;
+}
+
+body {
+  background-color: #fdfdfd;
+}
+
+// APP 
+.app {
+  margin: 0 auto;
+
+  //Login Page
+  .loginContainer {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    background-image: url(../public/image/login/loginbg.jpg);
+    background-size: cover;
+
+    .leftSide {
+      position: relative;
+      flex: 60;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-image: url(../public/image/login/loginSide.png);
+      background-position: center;
+      background-size: cover;
+      padding: 20px;
+      margin: 5vw 0 100px 15vw;
+      border-top-left-radius: 20px;
+      border-bottom-left-radius: 20px;
+
+
+
+      .logoName {
+        position: absolute;
+        color: white;
+        top: 40px;
+        left: 40px;
+        font-size: 30px;
+        font-weight: 800;
+      }
+    }
+
+    .rightSide {
+      flex: 40;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 40px;
+      margin: 5vw 35vh 100px 0;
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+      gap: 50px;
+
+      .logoBox {
+
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+
+        img {
+          width: 30%;
+          margin-bottom: 10px;
+        }
+
+        .loginTitle {
+          display: flex;
+          justify-content: center;
+          color: $grayColor;
+          font-size: 26px;
+          font-weight: 200;
+          font-family: $notoSans;
+        }
+      }
+
+      .formTitle {
+        text-align: center;
+        color: $grayColor;
+        font-size: 24px;
+      }
+
+      // .inputName {
+      //   font-size: 18px;
+      //   font-weight: 400;
+      //   color: $grayColor;
+      //   margin: 20px;
+
+      // }
+
+      // .inputWrap {
+      //   display: flex;
+      //   border-radius: 10px;
+      //   padding: 16px;
+      //   margin-top: 8px;
+      //   background-color: white;
+      //   border: 1px solid #e2e2e2;
+
+      //   &:focus-within {
+      //     border: $blueColor;
+      //     // outline: none;
+      //   }
+
+      //   input {
+      //     width: 100%;
+      //     outline: none;
+      //     border: none;
+      //     height: 16px;
+      //     font-size: 14px;
+      //     font-weight: 400;
+
+      //     &::placeholder {
+      //       color: $whitegrayColor;
+      //     }
+
+      //   }
+      // }
+
+      .errorMessageWrap {
+        margin-top: 8px;
+        margin-left: 20px;
+        font-size: 12px;
+        color: $redColor;
+      }
+
+      .retryMessageWrap {
+        margin-top: 8px;
+        margin-left: 20px;
+        font-size: 12px;
+        color: $redColor;
+      }
+
+      // .bottomButton {
+      //   margin-top: 40px;
+      //   width: 100%;
+      //   height: 48px;
+      //   border: none;
+      //   font-weight: 700;
+      //   background-color: $blueColor;
+      //   color: white;
+      //   border-radius: 64px;
+      //   margin-bottom: 16px;
+      //   margin-top: 100px;
+      //   cursor: pointer;
+      // }
+      .loginBtn {
+        font-size: 20px;
+        margin-top: 20px;
+      }
+    }
+
+
+  }
+
+  //MAIN page
+  .main {
+    width: 1600px;
+    margin: 0 auto;
+
+    //MAIN NAVBAR
+    .mainNavbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: transparent;
+      height: 70px;
+      padding-top: 15px;
+      z-index: 10;
+      transition: background-color 0.3s, color 0.3s;
+
+      &.scrolled {
+        background-color: #f8f9fa; // 회색으로 직접 값을 지정해보세요.
+        color: #007bff; // 파란색으로 직접 값을 지정해보세요.
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        .inner .logo .link,
+        .inner .controls .menu {
+          color: $blueColor;
+        }
+      }
+
+      .inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+        padding: 0.5rem 1rem;
+        max-width: 1600px;
+        margin: 0 auto;
+
+
+        .logo {
+          // text-decoration: none;
+          // font-family: $notoSans;
+          // font-size: 26px;
+          // font-weight: 900;
+
+          .link {
+            text-decoration: none;
+            color: white;
+
+            // mainNavBar Logo Image
+            img {
+              width: 100px;
+              // min-width: 8%;
+              margin-left: 10px;
+            }
+
+            &:hover {
+              color: $whitegrayColor;
+            }
+          }
+
+        }
+
+        .controls {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+
+
+          .menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            width: 120px;
+
+            &:hover {
+              color: $whitegrayColor;
+            }
+          }
+
+          .regLink {
+            color: white;
+          }
+        }
+      }
+    }
+
+    //PRODUCT 설명
+    .product {
+      .mainBox {
+        height: 600px;
+        width: 100%;
+        margin: 0 auto;
+
+        .mainBg {
+          display: flex;
+          background: $prductLinear;
+          background-size: cover;
+          height: 600px;
+          left: 0;
+          top: 0;
+          position: absolute;
+          width: 100vw;
+
+          .innerContainer {
+            max-width: 1200px; // 최대 너비 설정
+            margin: 0 auto; // 자동 마진으로 중앙 정렬
+            margin-top: 40px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+
+
+            .leftSide {
+              flex: 8;
+
+              .imgBox {
+                display: flex;
+                justify-content: center;
+                width: 100%;
+              }
+
+              .btnList {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                gap: 50px;
+                margin-top: 30px;
+
+                .systemBtn,
+                .githubBtn {
+                  background-color: white;
+
+                  &:hover {
+                    background-color: $blueColor;
+                    box-shadow: 0px 5px 5px #00000040;
+                    color: white;
+                  }
+                }
+              }
+
+
+            }
+
+            .rightSide {
+              flex: 4;
+              text-align: center;
+              font-family: $notoSans;
+              padding: 0px;
+              margin: 0px;
+              color: white;
+
+              .title,
+              .fullNm,
+              .titlekr {
+                font-weight: 700;
+                font-size: 45px;
+                text-align: center;
+
+                &.title {
+                  font-weight: 700;
+                  font-size: 34px;
+                }
+
+                &.fullNm {
+                  font-weight: 400;
+                  font-size: 14px;
+                }
+
+                &.titlekr {
+                  font-weight: 500;
+                  font-size: 16px;
+                }
+              }
+
+              .btns {
+                display: flex;
+                justify-content: center;
+
+              }
+
+              .proBtn {
+                display: flex;
+                justify-content: center;
+                background-color: white;
+                color: $grayColor;
+                width: 110px;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 40px;
+                border-radius: 10px;
+                border: none;
+                margin: 20px;
+                cursor: pointer;
+
+                &:hover {
+                  background-color: $blueColor;
+                  color: white;
+                  box-shadow: 0px 5px 5px #00000040;
+                }
+              }
+
+              .scoreBox {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                height: 100%;
+                margin-top: 30px;
+                gap: 10px;
+
+                .likeBtn {
+                  font-size: 16px;
+                  margin: 0px;
+                }
+              }
+
+            }
+          }
+        }
+      }
+
+    }
+
+
+  }
+
+}
+
+//FOOTER
+.footer {
+  position: absolute;
+  background-color: #333333;
+  height: 150px;
+  width: 100%;
+  color: white;
+  padding: 0 20px;
+  left: 0;
+  z-index: -10;
+
+  .footerBox {
+    max-width: 1600px; // 컨테이너 최대 너비 설정
+    width: 100%;
+    display: flex;
+    justify-content: space-between; // 컨테이너 내부 요소를 양 끝으로 정렬
+    margin: 0 auto; // 가로 중앙 정렬
+
+    .leftSide,
+    .rightSide {
+      display: flex;
+      justify-content: center; // 가로 방향으로 내용을 가운데 정렬
+      align-items: center; // 세로 방향으로 내용을 가운데 정렬
+
+      .title {
+        font-size: 25px;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      img {
+        width: 20%;
+      }
+    }
+
+    .leftSide {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 40px;
+    }
+
+    .rightSide {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      margin-top: 40px;
+    }
+
+    .leftSide p,
+    .rightSide p {
+      margin: 5px 0;
+    }
+  }
+
+}
+
+//SOLUTION BOX
+.solutionBox {
+  width: 500px;
+  height: 100%;
+  margin: 10px;
+  position: relative;
+
+  .imgBox {
+    position: relative;
+    overflow: hidden;
+    height: auto;
+
+    &:hover .overlayWrap {
+      display: block;
+      top: 0%;
+    }
+
+    .overlayWrap {
+      position: absolute;
+      background-color: rgba(35, 35, 35, 0.9);
+      border-radius: 20px;
+      width: 100%;
+      height: 100%;
+      top: 100%;
+      display: none;
+      transition: top 5s;
+
+      img {
+        width: 50px;
+      }
+
+      .overlayBox {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: row;
+        height: 100%;
+        text-align: center;
+
+        .left {
+          flex: 1;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+          margin-left: 120px;
+
+          p {
+            color: white;
+          }
+
+
+        }
+
+        .right {
+          flex: 1;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+          margin-right: 120px;
+
+          p {
+            color: white;
+          }
+        }
+      }
+    }
+
+  }
+
+  .solTitle,
+  .solfullNm,
+  .solTitleKr {
+    font-family: $notoSans;
+    padding: 0;
+    margin: 0 0 0 10px;
+    color: #585858;
+
+    &.solTitle {
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    &.solfullNm {
+      font-weight: 400;
+      font-size: 12px;
+    }
+
+    &.solTitleKr {
+      font-weight: 500;
+      font-size: 16px;
+    }
+  }
+}
+
+//SCROLLBTN
+
+.scroll-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 26px;
+  width: 80px;
+  height: 80px;
+  cursor: pointer;
+  transition: background-color 0.3s, opacity 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scroll-button:hover {
+  background-color: #2980b9;
+}
+
+
+
+
+/* ======== gap 정의 ======== */
+.gap-100 {
+  clear: both;
+  height: 100px;
+}
+
+.gap-80 {
+  clear: both;
+  height: 80px;
+}
+
+.gap-60 {
+  clear: both;
+  height: 60px;
+}
+
+.gap-40 {
+  clear: both;
+  height: 40px;
+}
+
+.gap-30 {
+  clear: both;
+  height: 30px;
+}
+
+.gap-20 {
+  clear: both;
+  height: 20px;
+}

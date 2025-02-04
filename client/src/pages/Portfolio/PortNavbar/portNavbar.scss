@@ -1,0 +1,24 @@
+.portNavbar {
+  height: 100px;
+
+  .wrapper {
+    max-width: 1600px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+
+    .logo {
+      img {
+        height: 20px;
+      }
+
+    }
+
+    .controls {
+      display: flex;
+      gap: 20px;
+    }
+  }
+}
