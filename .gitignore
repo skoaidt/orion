@@ -1,2 +1,5 @@
 # 모든 하위 폴더의 node_modules 제외
 **/node_modules
+
+# /api/.env 파일 제외
+/api/.env
