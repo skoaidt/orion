@@ -1,17 +1,14 @@
 import mysql from "mysql2";
-import sql from "mssql"
-import 'dotenv/config';
+import sql from "mssql";
+import "dotenv/config";
 
-
-// // MySQL 설정
+// MySQL 설정
 // export const db = mysql.createConnection({
 //   host: process.env.MAC_DB_HOST,
 //   user: process.env.MAC_DB_USER,
 //   password: process.env.MAC_DB_PASSWORD,
-//   database: process.env.MAC_DB_NAME
-// })
-
-
+//   database: process.env.MAC_DB_NAME,
+// });
 
 export const db = mysql.createConnection({
   host: process.env.SPECIAL_HOST,
@@ -20,9 +17,7 @@ export const db = mysql.createConnection({
   database: process.env.SPECIAL_DB_NAME
 })
 
-
-
-// MSSQL 설정 
+// MSSQL 설정
 const mssqlConfig = {
   user: process.env.OPARKDB_USER,
   password: process.env.OPARKDB_PASSWORD,
@@ -33,7 +28,6 @@ const mssqlConfig = {
     enableArithAbort: true,
   },
 };
-
 
 // MSSQL 연결 생성
 export const mssql = new sql.ConnectionPool(mssqlConfig);

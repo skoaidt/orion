@@ -25,8 +25,8 @@ const AdminMgmt = () => {
     headquarters: "",
     team: "",
   });
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  // const [searchQuery, setSearchQuery] = useState("");
+  // const [searchResults, setSearchResults] = useState([]);
 
   // Fetch admin data
   const fetchAdmins = async () => {
@@ -47,8 +47,8 @@ const AdminMgmt = () => {
   const handleCloseModal = () => {
     setOpenModal(false);
     setAdminInfo({ n_id: "", name: "", headquarters: "", team: "" });
-    setSearchQuery("");
-    setSearchResults([]);
+    // setSearchQuery("");
+    // setSearchResults([]);
   };
 
   // Handle input change
@@ -87,14 +87,23 @@ const AdminMgmt = () => {
     <div className="adminMgmt">
       <div className="gap-40"></div>
       <Container maxWidth="xl">
-        <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
+        <Grid
+          container
+          alignItems="center"
+          justifyContent="space-between"
+          spacing={2}
+        >
           <Grid item xs>
             <Typography component="h1" variant="h5" className="title">
               <AdminPanelSettingsIcon /> Admin 계정 관리
             </Typography>
           </Grid>
           <Grid item>
-            <Button variant="contained" color="primary" onClick={handleOpenModal}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleOpenModal}
+            >
               Admin 등록
             </Button>
           </Grid>
@@ -118,7 +127,6 @@ const AdminMgmt = () => {
         <Dialog open={openModal} onClose={handleCloseModal}>
           <DialogTitle>Admin 등록</DialogTitle>
           <DialogContent>
-
             <TextField
               margin="normal"
               label="사번 (N-ID)"
@@ -137,12 +145,16 @@ const AdminMgmt = () => {
               onChange={handleInputChange}
               required
             />
-            <hr style={{ marginTop: '30px', marginBottom: '30px' }} />
+            <hr style={{ marginTop: "30px", marginBottom: "30px" }} />
           </DialogContent>
 
           <UserSearch
             onUserSelect={(user) => {
-              setAdminInfo((prev) => ({ ...prev, n_id: user.n_id, name: user.name }));
+              setAdminInfo((prev) => ({
+                ...prev,
+                n_id: user.n_id,
+                name: user.name,
+              }));
               alert(`${user.name} (${user.n_id}) 구성원이 선택되었습니다.`);
             }}
           />
@@ -150,7 +162,11 @@ const AdminMgmt = () => {
             <Button onClick={handleCloseModal} color="secondary">
               취소
             </Button>
-            <Button onClick={handleRegisterAdmin} variant="contained" color="primary">
+            <Button
+              onClick={handleRegisterAdmin}
+              variant="contained"
+              color="primary"
+            >
               등록
             </Button>
           </DialogActions>

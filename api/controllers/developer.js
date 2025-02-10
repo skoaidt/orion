@@ -1,16 +1,16 @@
 import { db } from "../db.js";
 import { mssql } from "../db.js";
 
-// 개발자 등록하기 
+// 개발자 등록하기
 export const registerDev = (req, res) => {
-
   console.log("백엔드 req.body 받은 내용: ", req.body);
   const { n_id, dev_img, introduction } = req.body;
-  const q = "SELECT * FROM special.ITAsset_developer WHERE n_id = ?"
+  const q = "SELECT * FROM special.ITAsset_developer WHERE n_id = ?";
 
   db.query(q, [n_id], (err, data) => {
     if (err) return res.status(500).json(err);
-    if (data.length) return res.status(409).json("개발자가 이미 등록 있습니다!");
+    if (data.length)
+      return res.status(409).json("개발자가 이미 등록 있습니다!");
 
     const insertQuery = `
       INSERT INTO special.ITAsset_developer
@@ -29,7 +29,7 @@ export const registerDev = (req, res) => {
   });
 };
 
-// 개발자 이미지 바꾸기 
+// 개발자 이미지 바꾸기
 export const updateDevImg = (req, res) => {
   console.log("개발자 이미지 req.body : ", req.body);
   const q = `
@@ -41,10 +41,10 @@ export const updateDevImg = (req, res) => {
   db.query(q, values, (err, data) => {
     if (err) return res.status(500).json(err);
     return res.json("개발자 이미지을 업데이트 하였습니다.");
-  })
-}
+  });
+};
 
-// 개발자 소개글 바꾸기 
+// 개발자 소개글 바꾸기
 export const updateDevIntro = (req, res) => {
   console.log("개발자 소개글 req.body : ", req.body);
   const q = `
@@ -56,10 +56,10 @@ export const updateDevIntro = (req, res) => {
   db.query(q, values, (err, data) => {
     if (err) return res.status(500).json(err);
     return res.json("개발자 소개글을 업데이트 하였습니다.");
-  })
-}
+  });
+};
 
-// 개발자 목록 가져오기 
+// 개발자 목록 가져오기
 export const getDeveloper = (req, res) => {
   const q = `
     SELECT 
@@ -74,7 +74,7 @@ export const getDeveloper = (req, res) => {
   db.query(q, (err, data) => {
     if (err) return res.status(500).json(err);
     return res.status(200).json(data);
-  })
+  });
 };
 
 // // 구성원 목록 가져오기
@@ -109,32 +109,29 @@ export const getUser = async (req, res) => {
   `;
 
   try {
-    console.log("MSSQL 연결 시작..."); // MSSQL 연결 로그
     const pool = await mssql.connect(); // MSSQL 연결
-    console.log("MSSQL 연결 성공"); // 성공 시 로그
-
-    console.log("쿼리 실행 중..."); // 쿼리 실행 전 로그
     const result = await pool.request().query(q); // 쿼리 실행
-    console.log("쿼리 실행 성공, 결과:", result.recordset); // 실행 성공 로그
 
-    
     return res.status(200).json(result.recordset); // 결과 반환
   } catch (err) {
     console.error("구성원 목록 가져오기 실패:", err);
-    return res.status(500).json({ message: "구성원 목록을 가져오는 중 오류가 발생했습니다.", error: err.message });
+    return res.status(500).json({
+      message: "구성원 목록을 가져오는 중 오류가 발생했습니다.",
+      error: err.message,
+    });
   }
 };
 
-// Admin 계정 등록하기 
+// Admin 계정 등록하기
 export const AdminReg = (req, res) => {
   console.log("백엔드 req.body 받은 내용: ", req.body);
   const { n_id } = req.body;
-  const q = "SELECT * FROM special.ITAsset_admin WHERE n_id = ?"
-
+  const q = "SELECT * FROM special.ITAsset_admin WHERE n_id = ?";
 
   db.query(q, [n_id], (err, data) => {
     if (err) return res.status(500).json(err);
-    if (data.length) return res.status(409).json("개발자가 이미 등록 있습니다!");
+    if (data.length)
+      return res.status(409).json("개발자가 이미 등록 있습니다!");
 
     const insertQuery = `INSERT INTO special.ITAsset_admin (n_id) VALUES (?)`;
     const values = [n_id];
@@ -146,8 +143,7 @@ export const AdminReg = (req, res) => {
   });
 };
 
-
-// Admin 계정 가져오기 
+// Admin 계정 가져오기
 export const getAdmin = (req, res) => {
   const q = `
     SELECT 
@@ -163,5 +159,5 @@ export const getAdmin = (req, res) => {
   db.query(q, (err, data) => {
     if (err) return res.status(500).json(err);
     return res.status(200).json(data);
-  })
+  });
 };
