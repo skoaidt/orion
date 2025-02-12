@@ -1,20 +1,21 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom';
-import { BsLockFill } from 'react-icons/bs';
+import React, { useContext, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { BsLockFill } from "react-icons/bs";
 // import { LuClipboardEdit } from "react-icons/lu";
 // import { BsClipboardData } from "react-icons/bs";
 // import { AiOutlineDashboard } from "react-icons/ai";
 import { FaCode } from "react-icons/fa6";
-import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
-import { AuthContext } from '../context/authContext';
-
+import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
+import KeyboardIcon from "@mui/icons-material/Keyboard";
+import { AuthContext } from "../context/authContext";
 
 export const MainNavBar = () => {
-
   const { currentUser, logout } = useContext(AuthContext);
   const [scrolled, setScrolled] = useState(false);
 
-  const [logoImage, setLogoImage] = useState(`${process.env.PUBLIC_URL}/image/logo/OrionLogoWhite.png`);
+  const [logoImage, setLogoImage] = useState(
+    `${process.env.PUBLIC_URL}/image/logo/OrionLogoWhite.png`
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,14 +27,14 @@ export const MainNavBar = () => {
         setLogoImage(`${process.env.PUBLIC_URL}/image/logo/OrionLogoWhite.png`);
       }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
   return (
-    <div className={`mainNavbar ${scrolled ? 'scrolled' : ''}`}>
+    <div className={`mainNavbar ${scrolled ? "scrolled" : ""}`}>
       <div className="inner">
         <div className="logo">
           <Link to="/" className="link">
@@ -53,6 +54,10 @@ export const MainNavBar = () => {
             <AiOutlineDashboard size={24} />
             <span>DashBoard</span>
           </Link> */}
+          <Link to="/typing" className="menu regLink">
+            <KeyboardIcon size={24} />
+            <span>타자 연습</span>
+          </Link>
           <Link to="/portfolio" className="menu regLink">
             <FaCode size={24} />
             <span>Working Group</span>
@@ -71,7 +76,7 @@ export const MainNavBar = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default MainNavBar;
