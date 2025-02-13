@@ -11,7 +11,8 @@ import {
   Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
+import HomeIcon from "@mui/icons-material/Home";
+import { Link } from "react-router-dom";
 // 상수 정의
 const ACCURACY_THRESHOLD = 90; // 정확도 기준값 (%)
 
@@ -426,6 +427,14 @@ const Typing = () => {
   );
   return (
     <div className="typing">
+      <div className="navbar">
+        <Link to="/" className="homeBox">
+          <div className="icon">
+            <HomeIcon />
+          </div>
+          <p>Home : Orion으로 이동</p>
+        </Link>
+      </div>
       {/* 좌측: 타자 테스트 영역 */}
       <div className="typingContent">
         <div className="headerWrap">
