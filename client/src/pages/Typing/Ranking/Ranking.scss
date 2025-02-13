@@ -1,0 +1,40 @@
+.rankingTable {
+  position: absolute;
+  top: 15rem;
+  right: 10rem;
+  width: 400px;
+  @media screen and (max-width: 1400px) {
+    top: 29rem;
+    left: 30rem;
+  }
+  border-collapse: collapse;
+  border-radius: 8px;
+  margin-top: 30px;
+
+  h2 {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 200;
+    color: #484848;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  thead th {
+    font-weight: 200;
+    font-size: 1rem;
+  }
+
+  th,
+  td {
+    padding: 5px;
+    text-align: center;
+    font-weight: 200;
+    font-size: 0.8rem;
+  }
+}

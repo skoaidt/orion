@@ -1,18 +1,11 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import "./typing.scss";
-import typingList from "./typingList.json";
+import typingList from "./typingListTest.json";
 import typingRank from "./typingRank.json";
-import {
-  LinearProgress,
-  Box,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Typography,
-} from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import HomeIcon from "@mui/icons-material/Home";
-import { Link } from "react-router-dom";
+
+import Navbar from "./Navbar/Navbar";
+import TypingContent from "./TypingContent/TypingContent";
+import RankingTable from "./Ranking/Ranking";
 // 상수 정의
 const ACCURACY_THRESHOLD = 90; // 정확도 기준값 (%)
 
@@ -67,100 +60,6 @@ const Typing = () => {
       accuracyHistory.reduce((a, b) => a + b, 0) / accuracyHistory.length
     );
   }, [accuracyHistory]);
-
-  // 결과 표시 컴포넌트
-  const ResultDisplay = () => {
-    if (!isCompleted) return null;
-
-    return (
-      <div className="resultDisplay">
-        <h2>타자 연습 결과</h2>
-        <p className="accuracyNote">
-          (정확도 {ACCURACY_THRESHOLD}% 이상인 경우만 기록)
-        </p>
-        {selectedTexts.map((text, index) => (
-          <div key={index} className="resultRow">
-            <div className="resultText">{index + 1}번 문장</div>
-            <div className="resultStats">
-              <span className="statItem">
-                <span className="statLabel">타수:</span>
-                <span className="statValue">{spmHistory[index] || 0}타</span>
-              </span>
-              <span className="statItem">
-                <span className="statLabel">정확도:</span>
-                <span className="statValue">
-                  {accuracyHistory[index] || 0}%
-                </span>
-              </span>
-            </div>
-          </div>
-        ))}
-        <div className="resultRow average">
-          <div className="resultText">전체 평균</div>
-          <div className="resultStats">
-            <span className="statItem">
-              <span className="statLabel">타수:</span>
-              <span className="statValue">{averageSPM}타</span>
-            </span>
-            <span className="statItem">
-              <span className="statLabel">정확도:</span>
-              <span className="statValue">{averageAccuracy}%</span>
-            </span>
-          </div>
-        </div>
-        <button className="typingButton" onClick={resetTest}>
-          다시 시작
-        </button>
-      </div>
-    );
-  };
-
-  // 순위표 컴포넌트 수정
-  const RankingTable = () => {
-    const top10 = typingRank.slice(0, 10);
-    return (
-      <div className="rankingTable">
-        <Accordion>
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="ranking-content"
-            id="ranking-header"
-          >
-            <Typography
-              variant="h6"
-              style={{ color: "#484848", fontSize: "20px", fontWeight: "200" }}
-            >
-              Typing Ranking
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <table>
-              <thead>
-                <tr>
-                  <th>NO</th>
-                  <th>Name</th>
-                  <th>타수</th>
-                  <th>정확도</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {top10.map((rank, index) => (
-                  <tr key={index}>
-                    <td>{index === 0 ? "👑" : index + 1}</td>
-                    <td>{rank.name}</td>
-                    <td>{rank.avgSpm}</td>
-                    <td>{rank.avgAccuracy}%</td>
-                    <td>{rank.date}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </AccordionDetails>
-        </Accordion>
-      </div>
-    );
-  };
 
   // 초기 랜덤 5개 문장 선택
   useEffect(() => {
@@ -401,94 +300,30 @@ const Typing = () => {
     });
   };
 
-  // formatTime 함수 (타이머 표시)
-  const formatTime = (ms) => {
-    const seconds = Math.floor(ms / 1000);
-    const milliseconds = Math.floor((ms % 1000) / 10);
-    return `${seconds}.${milliseconds.toString().padStart(1, "0")}`;
-  };
-
-  // 시계 아이콘과 시간을 표시하는 컴포넌트
-  const TimeDisplay = ({ time }) => {
-    return (
-      <div className="timeDisplay">
-        <span className="icon">⏰</span>
-        <span className="statsFont">{formatTime(time)}초</span>
-      </div>
-    );
-  };
-
-  // 진행률 계산
-  const progress = Math.min(
-    ((currentTextIndex + inputText.length / targetText.length) /
-      selectedTexts.length) *
-      100,
-    100
-  );
   return (
     <div className="typing">
-      <div className="navbar">
-        <Link to="/" className="homeBox">
-          <div className="icon">
-            <HomeIcon />
-          </div>
-          <p>Home : Orion으로 이동</p>
-        </Link>
-      </div>
+      <Navbar />
       {/* 좌측: 타자 테스트 영역 */}
-      <div className="typingContent">
-        <div className="headerWrap">
-          <div className="typingTitle">Typing Here !!</div>
-          <div className="countWrap">
-            {currentTextIndex + 1} / {selectedTexts.length}
-          </div>
-        </div>
-
-        <div className="typingTextWrapper">
-          <div className="targetText">{getHighlightedText()}</div>
-          <textarea
-            className="typingInput"
-            value={inputText}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            spellCheck={false}
-            autoComplete="off"
-            autoCapitalize="off"
-            autoCorrect="off"
-            disabled={isCompleted}
-          />
-        </div>
-        <div className="typingProgress">
-          <Box sx={{ width: "100%" }}>
-            <LinearProgress variant="determinate" value={progress} />
-          </Box>
-        </div>
-
-        {isCompleted ? (
-          <ResultDisplay />
-        ) : (
-          <>
-            <div className="typingStats">
-              <div className="left">
-                <TimeDisplay time={elapsedTime} />
-              </div>
-              <div className="right">
-                <p className="statsFont">타자 속도: {spm} 타</p>
-                <p className="statsFont">정확도: {accuracy} %</p>
-                <p className="statsFont">평균 속도: {averageSPM} 타</p>
-              </div>
-            </div>
-            <button className="typingButton" onClick={resetTest}>
-              Restart
-            </button>
-          </>
-        )}
-      </div>
-
+      <TypingContent
+        inputText={inputText}
+        handleChange={handleChange}
+        handleKeyDown={handleKeyDown}
+        targetText={targetText}
+        getHighlightedText={getHighlightedText}
+        isCompleted={isCompleted}
+        spm={spm}
+        accuracy={accuracy}
+        averageSPM={averageSPM}
+        averageAccuracy={averageAccuracy}
+        resetTest={resetTest}
+        elapsedTime={elapsedTime}
+        currentTextIndex={currentTextIndex}
+        selectedTexts={selectedTexts}
+        spmHistory={spmHistory}
+        accuracyHistory={accuracyHistory}
+      />
       {/* 우측: 타자 순위표 영역 */}
-      <div className="typingRanking">
-        <RankingTable />
-      </div>
+      <RankingTable typingRank={typingRank} />
     </div>
   );
 };
