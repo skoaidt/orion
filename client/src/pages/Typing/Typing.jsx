@@ -10,6 +10,7 @@ import RankingTable from "./Ranking/Ranking";
 const ACCURACY_THRESHOLD = 90; // 정확도 기준값 (%)
 
 const Typing = () => {
+  // 화면 초기화 설정
   useEffect(() => {
     const appElement = document.querySelector(".app");
     const mainElement = document.querySelector(".main");
@@ -44,6 +45,7 @@ const Typing = () => {
   // 문장관리
   const [selectedTexts, setSelectedTexts] = useState([]);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const [getsentences, GetsetSentences] = useState([]);
 
   // 평균 타수 계산
   const averageSPM = useMemo(() => {
@@ -60,6 +62,26 @@ const Typing = () => {
       accuracyHistory.reduce((a, b) => a + b, 0) / accuracyHistory.length
     );
   }, [accuracyHistory]);
+
+  // 문장 데이터 가져오기
+  useEffect(() => {
+    const fetchSentences = async () => {
+      try {
+        const response = await fetch("/api/typings/typingdata");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        GetsetSentences(data);
+        console.log("Fetched sentences:", data);
+      } catch (error) {
+        console.error("Failed to fetch sentences:", error);
+      }
+    };
+    fetchSentences();
+  }, []);
+
+  console.log("getsentences: ", getsentences);
 
   // 초기 랜덤 5개 문장 선택
   useEffect(() => {
