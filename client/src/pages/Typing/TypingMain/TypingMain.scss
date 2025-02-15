@@ -1,0 +1,58 @@
+.typingMain {
+  display: flex;
+  position: fixed;
+  height: 100vh;
+  width: 101vw;
+  background-size: cover;
+  background-color: no-repeat;
+
+  @media screen and (max-width: 1920px) {
+    background-image: url("../../../../public/image/typing/excel01.png");
+  }
+
+  @media screen and (min-width: 1921px) {
+    background-image: url("../../../../public/image/typing/excel02.png");
+  }
+
+  .typingMainContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 20px;
+    margin-right: 10rem;
+  }
+
+  h1 {
+    margin-bottom: 40px;
+    font-size: 2rem;
+    color: #333;
+    font-weight: 100;
+  }
+
+  .categoryButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    button {
+      padding: 15px 30px;
+      font-size: 1rem;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: #2980b9;
+      }
+
+      &:active {
+        background-color: #1c638d;
+      }
+    }
+  }
+}

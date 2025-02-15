@@ -18,7 +18,9 @@ import IdeaBorad from "./IdeaBoard/IdeaBorad";
 import SolMgmt from "./SolMgmt/SolMgmt";
 import DashBoard from "./DashBoard/DashBoard";
 import Portfolio from "./Portfolio/Portfolio";
-import Typing from "./Typing/Typing";
+// import Typing from "./Typing/Typing";
+import TypingMain from "./Typing/TypingMain/TypingMain";
+import TypingHome from "./Typing/TypingHome/TypingHome";
 
 export const Main = () => {
   const [getDevelopers, setGetDevelopers] = useState([]);
@@ -63,13 +65,14 @@ export const Main = () => {
       <div className="main">
         {!isPortfolioPage && !isTypingPage && <MainNavBar />}
         <Routes>
+          <Route path="/typingMain" element={<TypingMain />}></Route>
+          <Route path="/typingHome" element={<TypingHome />}></Route>
           <Route path="*" element={<Home getDevelopers={getDevelopers} />} />
           <Route
             path="/product/:productId/*"
             element={<Product getDevelopers={getDevelopers} />}
           />
           <Route path="/portfolio" element={<Portfolio />}></Route>
-          <Route path="/typing" element={<Typing />}></Route>
           {currentUser && currentUser.isAdmin && (
             <Route
               path="/controlpanel/*"

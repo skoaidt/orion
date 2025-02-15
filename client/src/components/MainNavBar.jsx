@@ -54,7 +54,7 @@ export const MainNavBar = () => {
             <AiOutlineDashboard size={24} />
             <span>DashBoard</span>
           </Link> */}
-          <Link to="/typing" className="menu regLink">
+          <Link to="/typingMain" className="menu regLink">
             <KeyboardIcon size={24} />
             <span>타자 연습</span>
           </Link>

@@ -4,6 +4,7 @@
   left: 0;
   width: 100%;
   height: 50px;
+  display: flex;
 
   .homeBox {
     width: 250px;
@@ -25,6 +26,10 @@
     }
   }
 
+  .categoryBox {
+    margin-left: 10px;
+    width: 150px;
+  }
   .icon {
     font-size: 1.5rem;
   }

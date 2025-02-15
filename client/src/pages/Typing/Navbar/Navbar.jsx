@@ -12,6 +12,9 @@ const Navbar = () => {
         </div>
         <p>Home : Orion으로 이동</p>
       </Link>
+      <Link to="/typingMain" className="homeBox categoryBox">
+        <p>Category Select</p>
+      </Link>
     </div>
   );
 };
