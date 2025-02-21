@@ -15,8 +15,9 @@ const ResultDisplay = ({
 }) => {
   const [nickName, setNickName] = useState("");
 
-  console.log("ResultDisplay category:", category);
-  console.log("ResultDisplay n_id:", n_id);
+  // useEffect(() => {
+  //   console.log("ResultDisplay props 확인:", { category, n_id });
+  // }, [category, n_id]);
 
   const handleSaveResult = async () => {
     if (!nickName) {

@@ -13,7 +13,6 @@ import RankingTable from "../Ranking/Ranking";
 import typingRank from "../typingRank.json"; // typingRank.json 파일이 존재한다고 가정
 import "./TypingHome.scss";
 import { AuthContext } from "../../../context/authContext";
-import ResultDisplay from "../TypingContent/ResultDisplay";
 
 const ACCURACY_THRESHOLD = 90; // 정확도 기준값 (%)
 
@@ -346,24 +345,11 @@ const TypingHome = () => {
   if (error) {
     return <div>에러: {error}</div>;
   }
-  console.log("TypingHome currentUser:", currentUser.userId);
-  console.log("TypingHome category:", category);
+  // console.log("TypingHome currentUser:", currentUser.userId);
+  // console.log("TypingHome category:", category);
   return (
     <div className="typingHome">
       <Navbar />
-      {isCompleted && (
-        <ResultDisplay
-          selectedTexts={selectedTexts}
-          spmHistory={spmHistory}
-          accuracyHistory={accuracyHistory}
-          averageSPM={averageSPM}
-          averageAccuracy={averageAccuracy}
-          resetTest={resetTest}
-          category={category}
-          n_id={currentUser.userId}
-        />
-      )}
-      {/* 타이핑 테스트 영역 */}
       <TypingContent
         inputText={inputText}
         handleChange={handleChange}
@@ -381,8 +367,9 @@ const TypingHome = () => {
         selectedTexts={selectedTexts}
         spmHistory={spmHistory}
         accuracyHistory={accuracyHistory}
+        category={category}
+        n_id={currentUser.userId}
       />
-      {/* 타자 순위표 영역 */}
       <RankingTable typingRank={typingRank} />
     </div>
   );

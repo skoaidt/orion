@@ -60,3 +60,25 @@ export const saveTypingResult = (req, res) => {
       .json({ message: "결과가 성공적으로 저장되었습니다." });
   });
 };
+
+// 타이핑 결과 조회
+export const getTypingResults = (req, res) => {
+  const category = req.query.category;
+  console.log("요청된 카테고리:", category);
+  const q = `
+    SELECT nickName, averageSPM, averageAccuracy, date
+    FROM special.ITAsset_TypingResults
+    WHERE category = ?
+    ORDER BY averageSPM DESC
+    LIMIT 10;
+  `;
+
+  db.query(q, [category], (err, data) => {
+    if (err) {
+      console.error("쿼리 에러:", err);
+      return res.status(500).json(err);
+    }
+    console.log("쿼리 결과:", data);
+    return res.status(200).json(data);
+  });
+};

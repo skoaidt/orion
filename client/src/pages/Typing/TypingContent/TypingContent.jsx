@@ -21,6 +21,8 @@ const TypingContent = ({
   selectedTexts,
   spmHistory,
   accuracyHistory,
+  category,
+  n_id,
 }) => {
   const progress = Math.min(
     ((currentTextIndex + inputText.length / targetText.length) /
@@ -66,6 +68,8 @@ const TypingContent = ({
           averageSPM={averageSPM}
           averageAccuracy={averageAccuracy}
           resetTest={resetTest}
+          category={category}
+          n_id={n_id}
         />
       ) : (
         <>
