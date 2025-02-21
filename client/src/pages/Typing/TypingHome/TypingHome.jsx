@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useContext,
+} from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../Navbar/Navbar";
@@ -6,6 +12,8 @@ import TypingContent from "../TypingContent/TypingContent";
 import RankingTable from "../Ranking/Ranking";
 import typingRank from "../typingRank.json"; // typingRank.json 파일이 존재한다고 가정
 import "./TypingHome.scss";
+import { AuthContext } from "../../../context/authContext";
+import ResultDisplay from "../TypingContent/ResultDisplay";
 
 const ACCURACY_THRESHOLD = 90; // 정확도 기준값 (%)
 
@@ -13,6 +21,7 @@ const TypingHome = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const category = queryParams.get("category");
+  const { currentUser } = useContext(AuthContext);
 
   // 화면 초기화 설정
   useEffect(() => {
@@ -337,10 +346,23 @@ const TypingHome = () => {
   if (error) {
     return <div>에러: {error}</div>;
   }
-
+  console.log("TypingHome currentUser:", currentUser.userId);
+  console.log("TypingHome category:", category);
   return (
     <div className="typingHome">
       <Navbar />
+      {isCompleted && (
+        <ResultDisplay
+          selectedTexts={selectedTexts}
+          spmHistory={spmHistory}
+          accuracyHistory={accuracyHistory}
+          averageSPM={averageSPM}
+          averageAccuracy={averageAccuracy}
+          resetTest={resetTest}
+          category={category}
+          n_id={currentUser.userId}
+        />
+      )}
       {/* 타이핑 테스트 영역 */}
       <TypingContent
         inputText={inputText}
