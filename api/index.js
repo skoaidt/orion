@@ -227,8 +227,9 @@ app.use("/api/developers", developerRoutes);
 app.use("/api/datatables", dataTableRoutes);
 app.use("/api/typings", typingRoutes);
 
-app.listen(8800, () => {
-  console.log("API 8800 Port 접속완료!");
+const PORT = process.env.PORT || 8800;
+app.listen(PORT, () => {
+  console.log(`서버가 포트 ${PORT}번에서 실행 중입니다.`);
 });
 
 app.get("/api/someEndpoint", (req, res) => {
