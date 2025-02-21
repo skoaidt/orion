@@ -10,7 +10,6 @@ import axios from "axios";
 import Navbar from "../Navbar/Navbar";
 import TypingContent from "../TypingContent/TypingContent";
 import RankingTable from "../Ranking/Ranking";
-import typingRank from "../typingRank.json"; // typingRank.json 파일이 존재한다고 가정
 import "./TypingHome.scss";
 import { AuthContext } from "../../../context/authContext";
 
@@ -85,6 +84,9 @@ const TypingHome = () => {
 
   // 타이머 ID 상태
   const [timerId, setTimerId] = useState(null);
+
+  // 랭킹 데이터 상태
+  const [rankingData, setRankingData] = useState([]);
 
   // 문장 데이터 가져오기 함수 정의
   const fetchSentences = useCallback(async () => {
@@ -337,6 +339,24 @@ const TypingHome = () => {
     });
   };
 
+  // 랭킹 데이터 가져오기
+  useEffect(() => {
+    const fetchRankingData = async () => {
+      try {
+        const response = await axios.get(
+          `/api/typings/getresults?category=${category}`
+        );
+        setRankingData(response.data);
+      } catch (error) {
+        console.error("랭킹 데이터 가져오기 실패:", error);
+      }
+    };
+
+    if (category) {
+      fetchRankingData();
+    }
+  }, [category]);
+
   // Hooks 호출 후 조건부 반환
   if (isLoading) {
     return <div>로딩 중입니다...</div>;
@@ -370,7 +390,7 @@ const TypingHome = () => {
         category={category}
         n_id={currentUser.userId}
       />
-      <RankingTable typingRank={typingRank} />
+      <RankingTable rankingData={rankingData} category={category} />
     </div>
   );
 };

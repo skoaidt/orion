@@ -8,8 +8,21 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import "./Ranking.scss";
 
-const RankingTable = ({ typingRank }) => {
-  const top10 = typingRank.slice(0, 10);
+const RankingTable = ({ rankingData, category }) => {
+  // 카테고리에 따른 제목 설정
+  const getRankingTitle = () => {
+    switch (category) {
+      case "01":
+        return "[일반문장] Ranking";
+      case "02":
+        return "[기술문장] Ranking";
+      case "03":
+        return "[TEST] Ranking";
+      default:
+        return "Typing Ranking";
+    }
+  };
+
   return (
     <div className="rankingTable">
       <Accordion>
@@ -22,7 +35,7 @@ const RankingTable = ({ typingRank }) => {
             variant="h6"
             style={{ color: "#484848", fontSize: "20px", fontWeight: "200" }}
           >
-            Typing Ranking
+            {getRankingTitle()}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -37,12 +50,12 @@ const RankingTable = ({ typingRank }) => {
               </tr>
             </thead>
             <tbody>
-              {top10.map((rank, index) => (
+              {rankingData.map((rank, index) => (
                 <tr key={index}>
                   <td>{index === 0 ? "👑" : index + 1}</td>
-                  <td>{rank.name}</td>
-                  <td>{rank.avgSpm}</td>
-                  <td>{rank.avgAccuracy}%</td>
+                  <td>{rank.nickName}</td>
+                  <td>{rank.averageSPM}</td>
+                  <td>{rank.averageAccuracy}%</td>
                   <td>{rank.date}</td>
                 </tr>
               ))}
