@@ -6,7 +6,7 @@ import { BsLockFill } from "react-icons/bs";
 // import { AiOutlineDashboard } from "react-icons/ai";
 import { FaCode } from "react-icons/fa6";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import KeyboardIcon from "@mui/icons-material/Keyboard";
+// import KeyboardIcon from "@mui/icons-material/Keyboard";
 import { AuthContext } from "../context/authContext";
 
 export const MainNavBar = () => {
@@ -54,10 +54,10 @@ export const MainNavBar = () => {
             <AiOutlineDashboard size={24} />
             <span>DashBoard</span>
           </Link> */}
-          <Link to="/typingMain" className="menu regLink">
+          {/* <Link to="/typingMain" className="menu regLink">
             <KeyboardIcon size={24} />
             <span>타자 연습</span>
-          </Link>
+          </Link> */}
           <Link to="/portfolio" className="menu regLink">
             <FaCode size={24} />
             <span>Working Group</span>

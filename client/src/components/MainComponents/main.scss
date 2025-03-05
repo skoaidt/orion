@@ -1,13 +1,10 @@
 @import "../../style.scss";
 
-
-
 //Main Contents
 .mainContents {
   height: 500px;
   width: 100%;
   margin: 0 auto;
-
 
   .mainBg {
     display: flex;
@@ -66,7 +63,6 @@
             }
           }
 
-
           .mainSearchBtn {
             background-color: $blueColor;
             border: none;
@@ -78,7 +74,6 @@
             &:hover {
               background-color: $purpleColr;
             }
-
           }
         }
       }
@@ -91,16 +86,12 @@
 
         img {
           height: 350px;
+          cursor: pointer;
         }
       }
     }
-
-
-
-
   }
 }
-
 
 //Main Middle navbar
 .mainMiddleNavBar {
@@ -156,7 +147,7 @@
   }
 }
 
-//Main Recomment 
+//Main Recomment
 .mainRecommend {
   .titleText {
     color: $grayColor;
@@ -201,7 +192,6 @@
         margin: 10px;
         padding: 0px;
         margin-left: 80px;
-
       }
 
       .text {
@@ -250,7 +240,6 @@
         }
       }
     }
-
   }
 
   .mainBanner {
@@ -308,7 +297,6 @@
         padding: 5px;
         border: none;
 
-
         .text {
           font-size: 16px;
           font-weight: 400;
@@ -321,8 +309,6 @@
         }
       }
     }
-
-
   }
 
   .popularBox {
@@ -370,7 +356,6 @@
         margin: 10px;
         padding: 0px;
         margin-left: 80px;
-
       }
 
       .text {
@@ -391,7 +376,6 @@
         margin-left: 80px;
       }
     }
-
   }
 
   .joinUsBox {
@@ -402,7 +386,6 @@
       padding: 10px;
       gap: 10px;
 
-
       .title {
         font-size: 30px;
         font-family: $notoSans;
@@ -411,7 +394,6 @@
         height: 75px;
         margin: 0;
       }
-
     }
 
     .rightSide {
@@ -420,7 +402,6 @@
       justify-content: center;
       align-items: center;
       gap: 20px;
-
 
       .devBox {
         margin: 0 auto;
@@ -476,13 +457,8 @@
           color: #757575;
         }
       }
-
-
     }
   }
-
-
-
 }
 
 //Search 결과
@@ -502,7 +478,6 @@
     display: flex;
     flex-wrap: wrap;
     margin: 0 auto;
-
   }
 
   .noResults {
@@ -512,7 +487,6 @@
     padding: 10px;
     margin-left: 5px;
   }
-
 }
 
 .allSolution {
@@ -538,9 +512,7 @@
     display: flex;
     flex-wrap: wrap;
     margin: 0 auto;
-
   }
-
 }
 
 .workfield {
@@ -566,6 +538,5 @@
     display: flex;
     flex-wrap: wrap;
     margin: 0 auto;
-
   }
 }
