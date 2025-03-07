@@ -1,0 +1,16 @@
+.typing {
+  display: flex;
+  position: fixed;
+  height: 100vh;
+  width: 101vw;
+  background-size: cover;
+  background-color: no-repeat;
+
+  @media screen and (max-width: 1920px) {
+    background-image: url("../../../public/image/typing/excel01.png");
+  }
+
+  @media screen and (min-width: 1921px) {
+    background-image: url("../../../public/image/typing/excel02.png");
+  }
+}

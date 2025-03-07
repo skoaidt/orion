@@ -1,0 +1,15 @@
+.timeDisplay {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .icon {
+    font-size: 1.5rem;
+  }
+
+  .statsFont {
+    font-size: 1rem;
+    font-weight: 300;
+    color: #171717;
+  }
+}

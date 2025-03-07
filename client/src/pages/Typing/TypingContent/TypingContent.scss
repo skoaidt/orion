@@ -1,0 +1,167 @@
+.typingContent {
+  position: absolute;
+  top: 15rem;
+  left: 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 800px;
+  padding: 20px;
+
+  .headerWrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    .typingTitle {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #484848;
+      font-weight: 200;
+    }
+
+    .countWrap {
+      font-size: 1rem;
+      color: #888;
+    }
+  }
+  .typingTextWrapper {
+    position: relative;
+    width: 100%;
+    min-height: 80px;
+    border: 1px solid #ccc;
+    font-family: "Nanum Gothic Coding", monospace;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .targetText {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 95%;
+    height: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+    pointer-events: none;
+    letter-spacing: normal;
+    z-index: 1;
+
+    .correct {
+      color: #2ecc71;
+    }
+
+    .incorrect {
+      color: #e74c3c;
+      position: relative;
+
+      .wrong-text {
+        position: relative;
+
+        .input-char {
+          position: absolute;
+          left: 0;
+          top: -1.2em;
+          font-size: 0.8em;
+          color: #e74c3c;
+        }
+
+        .target-char {
+          text-decoration: line-through;
+        }
+      }
+    }
+
+    .current,
+    .upcoming {
+      color: #888;
+    }
+  }
+
+  .typingInput {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 95%;
+    height: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    background: transparent;
+    border: none;
+    resize: none;
+    color: transparent;
+    caret-color: #000;
+    letter-spacing: normal;
+    font-family: "Nanum Gothic Coding", monospace;
+    z-index: 0;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .typingProgress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+
+    .MuiLinearProgress-root {
+      height: 10px !important;
+      border-radius: 5px !important;
+      background-color: #e3f2fd !important;
+    }
+
+    .MuiLinearProgress-bar {
+      background-color: #1976d2 !important;
+      border-radius: 5px !important;
+    }
+  }
+
+  .typingStats {
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+    width: 100%;
+
+    .left {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .right {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .statsFont {
+      font-size: 1rem;
+      font-weight: 300;
+      color: #171717;
+    }
+  }
+
+  .typingButton {
+    display: block;
+    margin: 0 auto;
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #2980b9;
+    }
+  }
+}

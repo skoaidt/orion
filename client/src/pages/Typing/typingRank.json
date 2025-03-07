@@ -1,0 +1,142 @@
+[
+  {
+    "n_id": "N1102216",
+    "name": "홍길동",
+    "avgSpm": 509,
+    "date": "2025-02-02",
+    "avgAccuracy": "100"
+  },
+  {
+    "n_id": "N1102201",
+    "name": "김철수",
+    "avgSpm": 480,
+    "date": "2025-02-03",
+    "avgAccuracy": "98"
+  },
+  {
+    "n_id": "N1102202",
+    "name": "이영희",
+    "avgSpm": 495,
+    "date": "2025-02-04",
+    "avgAccuracy": "97"
+  },
+  {
+    "n_id": "N1102203",
+    "name": "박민수",
+    "avgSpm": 510,
+    "date": "2025-02-05",
+    "avgAccuracy": "99"
+  },
+  {
+    "n_id": "N1102204",
+    "name": "최지우",
+    "avgSpm": 500,
+    "date": "2025-02-06",
+    "avgAccuracy": "96"
+  },
+  {
+    "n_id": "N1102205",
+    "name": "정수빈",
+    "avgSpm": 520,
+    "date": "2025-02-07",
+    "avgAccuracy": "95"
+  },
+  {
+    "n_id": "N1102206",
+    "name": "강하늘",
+    "avgSpm": 475,
+    "date": "2025-02-08",
+    "avgAccuracy": "94"
+  },
+  {
+    "n_id": "N1102207",
+    "name": "조예린",
+    "avgSpm": 530,
+    "date": "2025-02-09",
+    "avgAccuracy": "97"
+  },
+  {
+    "n_id": "N1102208",
+    "name": "윤서준",
+    "avgSpm": 515,
+    "date": "2025-02-10",
+    "avgAccuracy": "98"
+  },
+  {
+    "n_id": "N1102209",
+    "name": "임아영",
+    "avgSpm": 485,
+    "date": "2025-02-11",
+    "avgAccuracy": "96"
+  },
+  {
+    "n_id": "N1102210",
+    "name": "오민준",
+    "avgSpm": 505,
+    "date": "2025-02-12",
+    "avgAccuracy": "95"
+  },
+  {
+    "n_id": "N1102211",
+    "name": "한서연",
+    "avgSpm": 495,
+    "date": "2025-02-13",
+    "avgAccuracy": "100"
+  },
+  {
+    "n_id": "N1102212",
+    "name": "신지훈",
+    "avgSpm": 525,
+    "date": "2025-02-14",
+    "avgAccuracy": "99"
+  },
+  {
+    "n_id": "N1102213",
+    "name": "문지수",
+    "avgSpm": 490,
+    "date": "2025-02-15",
+    "avgAccuracy": "98"
+  },
+  {
+    "n_id": "N1102214",
+    "name": "류정은",
+    "avgSpm": 485,
+    "date": "2025-02-16",
+    "avgAccuracy": "97"
+  },
+  {
+    "n_id": "N1102215",
+    "name": "서유진",
+    "avgSpm": 515,
+    "date": "2025-02-17",
+    "avgAccuracy": "95"
+  },
+  {
+    "n_id": "N1102217",
+    "name": "백승호",
+    "avgSpm": 500,
+    "date": "2025-02-18",
+    "avgAccuracy": "96"
+  },
+  {
+    "n_id": "N1102218",
+    "name": "남주혁",
+    "avgSpm": 520,
+    "date": "2025-02-19",
+    "avgAccuracy": "99"
+  },
+  {
+    "n_id": "N1102219",
+    "name": "노은지",
+    "avgSpm": 475,
+    "date": "2025-02-20",
+    "avgAccuracy": "98"
+  },
+  {
+    "n_id": "N1102220",
+    "name": "변수민",
+    "avgSpm": 510,
+    "date": "2025-02-21",
+    "avgAccuracy": "100"
+  }
+]
