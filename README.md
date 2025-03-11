@@ -34,10 +34,13 @@ https://github.com/Kyuyong/skoOrion
 ## 개발환경 실행법법
 
 > api : redis-server
+
 > api : yarn start
+
 > client : yarn start
 
 ## 개발자 기여
 
 > PM : AI/DT 조규용 (mvpcouple@naver.com)
+
 > Support : 전다현 / 김민영 (참여 예정)
