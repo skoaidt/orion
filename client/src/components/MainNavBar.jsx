@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BsLockFill } from "react-icons/bs";
-// import { LuClipboardEdit } from "react-icons/lu";
+import { LuClipboardEdit } from "react-icons/lu";
 // import { BsClipboardData } from "react-icons/bs";
 // import { AiOutlineDashboard } from "react-icons/ai";
 import { FaCode } from "react-icons/fa6";
@@ -42,10 +42,10 @@ export const MainNavBar = () => {
           </Link>
         </div>
         <div className="controls">
-          {/* <Link to="/idearegister" className="menu regLink">
+          <Link to="/ideaboard" className="menu regLink">
             <LuClipboardEdit size={24} />
             <span>Idea 등록</span>
-          </Link> */}
+          </Link>
           {/* <Link to="/solmgmt" className="menu regLink">
             <BsClipboardData size={24} />
             <span>Sol Mgmt</span>
