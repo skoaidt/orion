@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import "./ideaTable.scss";
 import { useNavigate } from "react-router-dom";
+import IdeaRegister from "../IdeaModal/IdeaRegister";
 dayjs.extend(isBetween);
 
 const columns = [
@@ -269,6 +270,8 @@ const originalRows = [
 
 const IdeaTable = () => {
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   // ✅ 필터 상태를 객체로 관리 (startDate와 endDate 추가)
   const [filters, setFilters] = useState({
     status: "선택",
@@ -356,6 +359,14 @@ const IdeaTable = () => {
     navigate(url);
   };
 
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="ideaTable">
       <div className="titleHeader">
@@ -439,11 +450,19 @@ const IdeaTable = () => {
           <span className="count-number">{filteredRows.length}</span>건의 Idea가
           등록되었습니다
         </span>
-        <button>IDEA 등록</button>
+        <button onClick={handleOpenModal}>IDEA 등록</button>
       </div>
 
       {/* 데이터 테이블 */}
-      <DataTable slug="idea" columns={columns} rows={filteredRows} />
+      <DataTable
+        slug="idea"
+        columns={columns}
+        rows={filteredRows}
+        onRowClick={handleRowClick}
+      />
+
+      {/* 모달 컴포넌트 */}
+      {isModalOpen && <IdeaRegister onClose={handleCloseModal} />}
     </div>
   );
 };

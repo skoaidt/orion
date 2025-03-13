@@ -1,10 +1,22 @@
-import React from "react";
-import { useParams } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
+import IdeaSelected from "../IdeaModal/IdeaSelected";
+import IdeaPilot from "../IdeaModal/IdeaPilot";
+import IdeaVerify from "../IdeaModal/IdeaVerify";
+import IdeaDevReview from "../IdeaModal/IdeaDevReview";
+import IdeaDeveloping from "../IdeaModal/IdeaDeveloping";
+import IdeaCompleted from "../IdeaModal/IdeaCompleted";
+import IdeaDrop from "../IdeaModal/IdeaDrop";
 import "./ideaDesc.scss";
 
 const IdeaDesc = () => {
   const { id } = useParams();
+  const [openModal, setOpenModal] = useState(null);
+
+  const handleBoxClick = (modalType) => {
+    setOpenModal(modalType);
+  };
 
   return (
     <div className="ideaDesc">
@@ -15,7 +27,9 @@ const IdeaDesc = () => {
             <button>삭제</button>
           </div>
           <div className="right">
-            <button>목록</button>
+            <Link to="/ideaboard">
+              <button>목록</button>
+            </Link>
           </div>
         </div>
         <div className="contentHead">
@@ -54,6 +68,75 @@ const IdeaDesc = () => {
         </div>
         <hr style={{ margin: "20px 0", color: "#8c8c8c" }} />
       </div>
+      <div className="ideaProcess">
+        <div className="processTitle">진행 현황</div>
+        <hr style={{ margin: "10px 0", width: "100%", color: "#8c8c8c" }} />
+
+        <div className="register">등록</div>
+
+        <div
+          className="processBox"
+          onClick={() => handleBoxClick("ideaSelected")}
+        >
+          선정
+        </div>
+        <div
+          className="processBox"
+          onClick={() => handleBoxClick("ideaPiloted")}
+        >
+          Pilot
+        </div>
+        <div
+          className="processBox"
+          onClick={() => handleBoxClick("ideaVerify")}
+        >
+          검증
+        </div>
+        <div
+          className="processBox"
+          onClick={() => handleBoxClick("ideaDevReview")}
+        >
+          개발심의
+        </div>
+        <div
+          className="processBox"
+          onClick={() => handleBoxClick("ideaDeveloping")}
+        >
+          개발중
+        </div>
+        <div
+          className="processBox"
+          onClick={() => handleBoxClick("ideaCompleted")}
+        >
+          완료
+        </div>
+        <div className="processBox" onClick={() => handleBoxClick("ideaDrop")}>
+          Drop
+        </div>
+      </div>
+
+      {/* 모달 컴포넌트 렌더링 */}
+      {openModal === "ideaSelected" && (
+        <IdeaSelected onClose={() => setOpenModal(null)} />
+      )}
+      {openModal === "ideaPiloted" && (
+        <IdeaPilot onClose={() => setOpenModal(null)} />
+      )}
+      {openModal === "ideaVerify" && (
+        <IdeaVerify onClose={() => setOpenModal(null)} />
+      )}
+      {openModal === "ideaDevReview" && (
+        <IdeaDevReview onClose={() => setOpenModal(null)} />
+      )}
+      {openModal === "ideaDeveloping" && (
+        <IdeaDeveloping onClose={() => setOpenModal(null)} />
+      )}
+      {openModal === "ideaCompleted" && (
+        <IdeaCompleted onClose={() => setOpenModal(null)} />
+      )}
+      {openModal === "ideaDrop" && (
+        <IdeaDrop onClose={() => setOpenModal(null)} />
+      )}
     </div>
   );
 };

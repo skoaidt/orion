@@ -8,8 +8,17 @@ const SideBar = () => {
       <Link to="/">
         <div className="logo">Orion</div>
       </Link>
+
+      <hr
+        style={{
+          width: "70%",
+          border: "1px solid #8c8c8c",
+        }}
+      />
       <div className="menuNm">Dashboard</div>
-      <div className="menuNm">IDEA 등록</div>
+      <Link to="/ideaboard">
+        <div className="menuNm">IDEA 등록</div>
+      </Link>
       <div className="menuNm">Project 관리</div>
     </div>
   );

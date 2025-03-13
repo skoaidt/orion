@@ -4,7 +4,7 @@
   width: 1600px;
   top: -50px;
   border-radius: 30px;
-  background: #FFF;
+  background: #fff;
   box-shadow: 3px 4px 4px 0px rgba(0, 0, 0, 0.25);
   position: relative;
 
@@ -20,7 +20,6 @@
       display: flex;
       gap: 10px;
     }
-
   }
 
   .container {
@@ -112,7 +111,6 @@
               font-weight: 300;
               color: #676767;
               gap: 5px;
-
             }
           }
         }
@@ -132,7 +130,6 @@
           }
         }
       }
-
 
       .descripContainer {
         background-color: #fcfcfc;
@@ -164,7 +161,6 @@
             font-size: 16px;
             color: $grayColor;
             margin: 10px 10px 0px 10px;
-
           }
 
           .customSlider {
@@ -173,7 +169,6 @@
             width: 300px;
           }
         }
-
       }
     }
 
@@ -267,8 +262,6 @@
                   background-color: #ebecef;
                 }
               }
-
-
             }
 
             .emojiPickerWrapper {
@@ -277,12 +270,10 @@
               left: 0;
               z-index: 1000;
             }
-
           }
         }
       }
     }
-
   }
 
   .downWrap {
@@ -295,8 +286,6 @@
       align-items: center;
       justify-content: flex-end;
       gap: 15px;
-
     }
   }
-
 }

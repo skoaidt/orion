@@ -2,6 +2,8 @@ $blueColor: #5395d1;
 $redColor: #ef0000;
 $hotpinkColor: #dd1b8f;
 $purpleColr: rgb(119, 47, 201);
+$purpleIdea: #493d9e;
+$purpleIdeaLight: #989ef0;
 $whitegrayColor: #b7b7b7;
 $grayColor: #5a5a5a;
 $whiteYellow: #f6ddd0;
@@ -356,7 +358,9 @@ body {
                 .systemBtn,
                 .githubBtn {
                   background-color: white;
-
+                  width: 180px;
+                  height: 40px;
+                  padding: 0px 20px;
                   &:hover {
                     background-color: $blueColor;
                     box-shadow: 0px 5px 5px #00000040;
