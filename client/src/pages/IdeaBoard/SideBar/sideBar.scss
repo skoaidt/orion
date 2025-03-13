@@ -5,31 +5,30 @@
   flex-direction: column;
   color: white;
   align-items: center;
-  justify-content: start;
+  justify-content: flex-start;
   flex: 1;
   min-width: 150px;
   background-color: #333333;
   gap: 20px;
 
   .logo {
-    padding: 20px 0; 
-    font-size: 40px; 
+    padding: 20px 0;
+    font-size: 40px;
     font-weight: bold;
     color: white;
   }
 
-
   .menuNm {
     padding: 7px;
     border-radius: 5px; // 둥근 모서리 추가
-    width: 100px; 
-    text-align: center; 
+    width: 100px;
+    text-align: center;
     font-size: 17px;
     font-weight: bold;
 
     &:hover {
-      background-color: #B9D74D;
-      color:#262626;
+      background-color: #b9d74d;
+      color: #262626;
     }
   }
 }

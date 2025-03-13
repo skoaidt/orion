@@ -19,6 +19,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.6.7",
     "date-fns": "^3.4.0",
+    "dayjs": "^1.11.13",
     "dompurify": "^3.0.9",
     "emoji-picker-react": "^4.11.1",
     "framer-motion": "10.16.4",
