@@ -5,13 +5,14 @@ import { AuthContext } from "../../../context/authContext";
 import { FaCode } from "react-icons/fa6";
 import { BsLockFill } from "react-icons/bs";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
+import './ideaNavbar.scss'; // SCSS 파일 import
 
 const IdeaNavbar = () => {
   const { currentUser, logout } = useContext(AuthContext);
   return (
     <div className="ideaNavbar">
       <div className="controls">
-        <Link to="/ideaboard" className="menu regLink">
+        {/* <Link to="/ideaboard" className="menu regLink">
           <LuClipboardEdit size={24} />
           <span>Idea 등록</span>
         </Link>
@@ -24,9 +25,9 @@ const IdeaNavbar = () => {
             <AppRegistrationIcon size={24} />
             <span>Admin 관리</span>
           </Link>
-        )}
+        )} */}
 
-        <div className="menu" onClick={logout}>
+        <div className="menu logout" onClick={logout}>
           <BsLockFill size={24} />
           <span>{currentUser.name}님 Logout</span>
         </div>
