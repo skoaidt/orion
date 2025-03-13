@@ -3,3 +3,5 @@
 
 # /api/.env 파일 제외
 /api/.env
+
+/client/.env

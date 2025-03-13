@@ -22,7 +22,6 @@
   .menuNm {
     padding: 7px;
     border-radius: 5px; // 둥근 모서리 추가
-    background-color: #262626;
     width: 100px; 
     text-align: center; 
     font-size: 17px;
@@ -30,6 +29,7 @@
 
     &:hover {
       background-color: #B9D74D;
+      color:#262626;
     }
   }
 }
