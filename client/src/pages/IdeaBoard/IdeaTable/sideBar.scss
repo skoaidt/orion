@@ -3,19 +3,25 @@
 .sideBar {
   display: flex;
   flex-direction: column;
-  color: white;
-  align-items: center;
   justify-content: flex-start;
-  flex: 1;
+  align-items: center;
+  // flex: 1;
+  color: white;
   min-width: 150px;
   background-color: #333333;
   gap: 20px;
+  height: 100vw;
 
   .logo {
     padding: 20px 0;
-    font-size: 40px;
+    font-size: 25px;
     font-weight: bold;
     color: white;
+    font-family: "Noto Sans KR";
+
+    &:hover {
+      color: $greenColor;
+    }
   }
 
   .menuNm {
@@ -23,11 +29,11 @@
     border-radius: 5px; // 둥근 모서리 추가
     width: 100px;
     text-align: center;
-    font-size: 17px;
+    font-size: 16px;
     font-weight: bold;
 
     &:hover {
-      background-color: #b9d74d;
+      background-color: $greenColor;
       color: #262626;
     }
   }

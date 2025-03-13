@@ -7,7 +7,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import "./ideaTable.scss";
-
+import { useNavigate } from "react-router-dom";
 dayjs.extend(isBetween);
 
 const columns = [
@@ -268,6 +268,7 @@ const originalRows = [
 ];
 
 const IdeaTable = () => {
+  const navigate = useNavigate();
   // ✅ 필터 상태를 객체로 관리 (startDate와 endDate 추가)
   const [filters, setFilters] = useState({
     status: "선택",
@@ -348,13 +349,22 @@ const IdeaTable = () => {
     });
   }, [filters]);
 
+  const handleRowClick = (row) => {
+    console.log("Row clicked in IdeaTable:", row);
+    const url = `/ideaboard/detail/${row.id}`;
+    console.log("Navigating to:", url);
+    navigate(url);
+  };
+
   return (
     <div className="ideaTable">
-      <img
-        src={`${process.env.PUBLIC_URL}/image/icons/idea.png`}
-        alt="ideaicon"
-      />
-      <h1>Idea Board</h1>
+      <div className="titleHeader">
+        <img
+          src={`${process.env.PUBLIC_URL}/image/icons/idea.png`}
+          alt="ideaicon"
+        />
+        <h1>Idea Board</h1>
+      </div>
 
       {/* ✅ 필터 영역 */}
       <div className="MenuBox">

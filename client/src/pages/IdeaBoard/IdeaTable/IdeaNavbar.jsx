@@ -1,9 +1,6 @@
 import React, { useContext } from "react";
-
 import { AuthContext } from "../../../context/authContext";
-
 import { BsLockFill } from "react-icons/bs";
-
 import "./ideaNavbar.scss"; // SCSS 파일 import
 
 const IdeaNavbar = () => {

@@ -1,4 +1,4 @@
-$table-width: 1580px;
+$table-width: 1400px;
 
 .ideaTable {
   width: $table-width;
@@ -8,12 +8,21 @@ $table-width: 1580px;
   border: 1px solid #ccc;
   border-radius: 5px;
 
+  .titleHeader {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    margin: 10px 0px;
+  }
+  img {
+    width: 20px;
+    height: 25px;
+  }
   h1 {
-    font-size: 26px;
-    font-weight: bold;
+    font-size: 20px;
+    font-weight: 400;
     color: #565656;
-    margin: 4.5px 21px;
-    padding-left: 10px;
   }
 }
 
@@ -30,7 +39,7 @@ $table-width: 1580px;
 
   .MuiFormControl-root {
     min-width: 120px;
-    
+
     .MuiInputLabel-root {
       font-size: 14px;
     }
@@ -60,7 +69,7 @@ $table-width: 1580px;
     margin-left: 20px;
 
     .count-number {
-      color: #CB0047;
+      color: #cb0047;
       font-weight: bold;
       background-color: transparent;
       padding: 0;
@@ -73,7 +82,7 @@ menu {
   width: 100px;
   height: 30px;
   padding: 0;
-  background-color: #EEEEEE;
+  background-color: #eeeeee;
   color: #333333;
   cursor: pointer;
   border-radius: 5px;
@@ -89,7 +98,7 @@ button {
   width: 92px;
   height: 30px;
   background-color: #333333;
-  color: #FFFFFF;
+  color: #ffffff;
   cursor: pointer;
   border-radius: 5px;
   display: flex;
@@ -97,5 +106,3 @@ button {
   justify-content: center;
   margin-right: 4px;
 }
-
-

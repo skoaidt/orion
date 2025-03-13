@@ -48,9 +48,9 @@ export const Main = () => {
 
   useEffect(() => {
     const handleScroll = (event) => {
-      if (window.scrollY < 10) {
-        window.scrollTo(0, 10);
-      }
+      // if (window.scrollY < 10) {
+      //   window.scrollTo(0, 10);
+      // }
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -88,6 +88,7 @@ export const Main = () => {
           )}
           {/* <Route path="/fileupload" element={<FileUpload />} /> */}
           <Route path="/ideaboard" element={<IdeaBorad />} />
+          <Route path="/ideaboard/detail/:id" element={<IdeaBorad />} />
           <Route path="/solmgmt" element={<SolMgmt />} />
           <Route path="/dashboard" element={<DashBoard />} />
         </Routes>

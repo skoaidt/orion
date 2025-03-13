@@ -1,9 +1,13 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import "./ideaBorad.scss";
 import IdeaTable from "./IdeaTable/IdeaTable";
-import SideBar from "./SideBar/SideBar";
-import IdeaNavbar from "./IdeaNavbar/IdeaNavbar";
+import IdeaDesc from "./IdeaTable/IdeaDesc";
+import SideBar from "./IdeaTable/SideBar";
+import IdeaNavbar from "./IdeaTable/IdeaNavbar";
 const IdeaBorad = () => {
+  const location = useLocation();
+  const isDetailPage = location.pathname.includes("/detail/");
   // 화면 초기화 설정
   useEffect(() => {
     const appElement = document.querySelector(".app");
@@ -28,7 +32,7 @@ const IdeaBorad = () => {
         <SideBar />
         <div className="contents">
           <IdeaNavbar />
-          <IdeaTable />
+          {isDetailPage ? <IdeaDesc /> : <IdeaTable />}
         </div>
       </div>
     </div>
