@@ -1,0 +1,34 @@
+@import "../../../style.scss";
+
+.ideaNavbar {
+    display: flex;
+    justify-content: space-between; // 전체 너비에 걸쳐 배치
+    align-items: center; 
+    padding: 10px; 
+    background-color: #f0f0f0; 
+    border-bottom: 2px solid #ddd; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+    .controls {
+      display: flex;
+      align-items: center;
+      width: 100%;
+  
+      .menu {
+        display: flex;
+        flex-direction: column; // 수직으로 배치
+        align-items: center; // 수직으로 중앙에 배치
+        margin-left: auto; /* 오른쪽 끝으로 이동 */
+  
+        svg {
+          margin-right: 8px; // 아이콘과 텍스트 간격 조정
+          color: #000; /* 글씨색을 검정색으로 설정 */
+        }
+      }
+  
+      .logout {
+            color: #000; /* 글씨색을 검정색으로 설정 */
+      }
+    }
+  }
+  

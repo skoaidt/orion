@@ -1,14 +1,16 @@
 import React from "react";
 import "./sideBar.scss";
+import { Link } from "react-router-dom";
 
 const SideBar = () => {
   return (
     <div className="sideBar">
-      <div className="menuNm">아이디어 등록</div>
-      <div className="menuNm">팀 구성</div>
-      <div className="menuNm">Solution 등록</div>
-      <div className="menuNm">진행률 관리</div>
-      <div className="menuNm">과제 평가</div>
+      <Link to="/">
+        <div className="logo">Orion</div>
+      </Link>
+      <div className="menuNm">Dashboard</div>
+      <div className="menuNm">IDEA 등록</div>
+      <div className="menuNm">Project 관리</div>
     </div>
   );
 };
