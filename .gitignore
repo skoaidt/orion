@@ -4,4 +4,8 @@
 # /api/.env 파일 제외
 /api/.env
 
+# 전다ㄴ 버전
 /client/.env
+
+# redis 
+/api/dump.rdb
