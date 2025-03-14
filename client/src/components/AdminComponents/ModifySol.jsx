@@ -1,14 +1,27 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from "react";
 import "./admin.scss";
-import { Container } from '@mui/system';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, TextField, Typography } from '@mui/material';
-import NoteAltIcon from '@mui/icons-material/NoteAlt';
-import axios from 'axios';
-import DataTable from '../DataTable/DataTable';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import moment from 'moment';
-
+import { Container } from "@mui/system";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Grid,
+  Radio,
+  RadioGroup,
+  TextField,
+  Typography,
+} from "@mui/material";
+import NoteAltIcon from "@mui/icons-material/NoteAlt";
+import axios from "axios";
+import DataTable from "../DataTable/DataTable";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import moment from "moment";
 
 const ModifySol = () => {
   const [rows, setRows] = useState([]);
@@ -18,50 +31,47 @@ const ModifySol = () => {
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openRegisterModal, setOpenRegisterModal] = useState(false);
   const [newSolution, setNewSolution] = useState({
-    sol_name: '',
-    sol_full_name: '',
-    kor_name: '',
-    n_id: '',
-    url: '',
-    github_url: '',
-    work_field: '',
-    reg_date: '',
-    usedYN: 'Y', // 기본값
+    sol_name: "",
+    sol_full_name: "",
+    kor_name: "",
+    n_id: "",
+    url: "",
+    github_url: "",
+    work_field: "",
+    reg_date: "",
+    usedYN: "Y", // 기본값
   });
   const [file, setFile] = useState(null);
 
-
-
   const columns = [
-    { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'sol_name', headerName: 'Solution Name', width: 200 },
-    { field: 'sol_full_name', headerName: 'Solution Full Name', width: 200 },
-    { field: 'kor_name', headerName: '한글 명칭', width: 200 },
-    { field: 'n_id', headerName: '개발자 사번', width: 120 },
-    { field: 'name', headerName: '개발자', width: 150 },
-    { field: 'work_field', headerName: '업무 직군', width: 150 },
-    { field: 'reg_date', headerName: '개발 일자', width: 150 },
+    { field: "id", headerName: "ID", width: 90 },
+    { field: "sol_name", headerName: "Solution Name", width: 200 },
+    { field: "sol_full_name", headerName: "Solution Full Name", width: 200 },
+    { field: "kor_name", headerName: "한글 명칭", width: 200 },
+    { field: "n_id", headerName: "개발자 사번", width: 120 },
+    { field: "name", headerName: "개발자", width: 150 },
+    { field: "work_field", headerName: "업무 직군", width: 150 },
+    { field: "reg_date", headerName: "개발 일자", width: 150 },
     {
-      field: 'usedYN',
-      headerName: '사용여부',
+      field: "usedYN",
+      headerName: "사용여부",
       width: 120,
       renderCell: (params) => {
-        if (params.value === 'Y') {
-          return <CheckCircleIcon style={{ color: 'green' }} />;
-        } else if (params.value === 'N') {
-          return <CancelIcon style={{ color: 'tomato' }} />;
+        if (params.value === "Y") {
+          return <CheckCircleIcon style={{ color: "green" }} />;
+        } else if (params.value === "N") {
+          return <CancelIcon style={{ color: "tomato" }} />;
         }
         return null;
       },
     },
-
   ];
 
   // API 호출 함수
   const fetchSolutions = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/solutions/getmodifysol');
+      const response = await axios.get("/api/solutions/getmodifysol");
       const formattedRows = response.data.map((solution) => ({
         id: solution.id,
         sol_name: solution.sol_name,
@@ -76,7 +86,7 @@ const ModifySol = () => {
       // console.log("Fetched solutions:", formattedRows); // 로그 추가
       setRows(formattedRows);
     } catch (error) {
-      console.error('Error fetching solutions:', error);
+      console.error("Error fetching solutions:", error);
     } finally {
       setLoading(false);
     }
@@ -85,7 +95,6 @@ const ModifySol = () => {
   useEffect(() => {
     fetchSolutions();
   }, [fetchSolutions]);
-
 
   const handleRowClick = (row) => {
     setSelectedSolution(row);
@@ -99,14 +108,14 @@ const ModifySol = () => {
   const handleRegisterClose = () => {
     setOpenRegisterModal(false);
     setNewSolution({
-      sol_name: '',
-      sol_full_name: '',
-      kor_name: '',
-      n_id: '',
-      url: '',
-      github_url: '',
-      work_field: '',
-      reg_date: '',
+      sol_name: "",
+      sol_full_name: "",
+      kor_name: "",
+      n_id: "",
+      url: "",
+      github_url: "",
+      work_field: "",
+      reg_date: "",
     });
     setFile(null);
   };
@@ -121,7 +130,7 @@ const ModifySol = () => {
       formData.append("file", file);
       console.log("업로드 시도: ", file);
       const res = await axios.post("/api/upload/solutions", formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       console.log("업로드 성공: ", res.data);
@@ -132,13 +141,10 @@ const ModifySol = () => {
     }
   };
 
-
-
   const handleSave = async () => {
     try {
       let imgUrl = null;
       if (file) {
-
         const imgUrl = await upload();
         console.log("업로드된 파일 경로 : ", imgUrl);
       }
@@ -146,16 +152,19 @@ const ModifySol = () => {
       const updatedSolution = {
         ...selectedSolution,
         ...(imgUrl && { img: imgUrl.filePath }),
-        date: currentDateTime
+        date: currentDateTime,
       };
-      console.log("등록 요청된 데이터 : ", updatedSolution)
+      console.log("등록 요청된 데이터 : ", updatedSolution);
 
-      await axios.put(`/api/solutions/updatesoletc/${selectedSolution.id}`, updatedSolution); // 수정 API 호출
+      await axios.put(
+        `/api/solutions/updatesoletc/${selectedSolution.id}`,
+        updatedSolution
+      ); // 수정 API 호출
       fetchSolutions(); // 수정 후 데이터 갱신
       handleEditClose();
       alert("수정이 완료되었습니다.");
     } catch (error) {
-      console.error('Error updating solution:', error);
+      console.error("Error updating solution:", error);
       alert("수정에 실패했습니다.");
     }
   };
@@ -169,19 +178,22 @@ const ModifySol = () => {
       const solutionData = {
         ...newSolution,
         imgUrl,
-        date: currentDateTime
+        date: currentDateTime,
       };
-      console.log("등록 요청된 데이터 : ", solutionData)
+      console.log("등록 요청된 데이터 : ", solutionData);
 
-      const response = await axios.post('/api/solutions/register', solutionData);
+      const response = await axios.post(
+        "/api/solutions/register",
+        solutionData
+      );
 
       if (response.status >= 200 && response.status < 300) {
-        alert('Solution 등록 성공!');
+        alert("Solution 등록 성공!");
         fetchSolutions(); // 등록 후 데이터 새로고침
         handleRegisterClose(); // 등록 모달 닫기
       } else {
         console.error("등록 실패 응답: ", response.data);
-        alert('Solution 등록 실패.');
+        alert("Solution 등록 실패.");
       }
     } catch (error) {
       console.error("Error registering solution:", error);
@@ -198,15 +210,31 @@ const ModifySol = () => {
   };
 
   return (
-    <div className='modifySol'>
+    <div className="modifySol">
       <div className="gap-40" />
       <Container component="main" maxWidth="xl">
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-          <Typography component="h1" variant="h5" className="title" style={{ marginBottom: '15px' }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: "15px",
+          }}
+        >
+          <Typography
+            component="h1"
+            variant="h5"
+            className="title"
+            style={{ marginBottom: "15px" }}
+          >
             <NoteAltIcon /> Solution 관리
           </Typography>
 
-          <Button variant="contained" color="primary" onClick={() => setOpenRegisterModal(true)}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setOpenRegisterModal(true)}
+            style={{ backgroundColor: "#565656", width: "120px" }}
+          >
             등록하기
           </Button>
         </div>
@@ -222,7 +250,12 @@ const ModifySol = () => {
         )}
 
         {/* 수정 모달 */}
-        <Dialog open={openEditModal} onClose={handleEditClose} maxWidth="sm" fullWidth>
+        <Dialog
+          open={openEditModal}
+          onClose={handleEditClose}
+          maxWidth="sm"
+          fullWidth
+        >
           <DialogTitle>Solution 수정하기</DialogTitle>
           <DialogContent>
             {selectedSolution && (
@@ -232,51 +265,89 @@ const ModifySol = () => {
                   label="Solution Name"
                   fullWidth
                   value={selectedSolution.sol_name}
-                  onChange={(e) => handleChange('sol_name', e.target.value)}
+                  onChange={(e) => handleChange("sol_name", e.target.value)}
                 />
                 <TextField
                   margin="normal"
                   label="Solution Full Name"
                   fullWidth
                   value={selectedSolution.sol_full_name}
-                  onChange={(e) => handleChange('sol_full_name', e.target.value)}
+                  onChange={(e) =>
+                    handleChange("sol_full_name", e.target.value)
+                  }
                 />
                 <TextField
                   margin="normal"
                   label="한글 명칭"
                   fullWidth
                   value={selectedSolution.kor_name}
-                  onChange={(e) => handleChange('kor_name', e.target.value)}
+                  onChange={(e) => handleChange("kor_name", e.target.value)}
                 />
-                <FormControl component="fieldset" style={{ marginTop: '20px' }}>
+                <FormControl component="fieldset" style={{ marginTop: "20px" }}>
                   <FormLabel component="legend">업무 직군</FormLabel>
                   <RadioGroup
                     row
                     name="work_field"
                     value={selectedSolution.work_field}
-                    onChange={(e) => handleChange('work_field', e.target.value)}
+                    onChange={(e) => handleChange("work_field", e.target.value)}
                   >
-                    <FormControlLabel value="rm" control={<Radio />} label="RM" />
-                    <FormControlLabel value="access" control={<Radio />} label="Access" />
-                    <FormControlLabel value="wire" control={<Radio />} label="전송" />
-                    <FormControlLabel value="infra" control={<Radio />} label="Infra설비" />
-                    <FormControlLabel value="asset" control={<Radio />} label="자산" />
-                    <FormControlLabel value="so" control={<Radio />} label="SO" />
-                    <FormControlLabel value="mgmt" control={<Radio />} label="경영" />
+                    <FormControlLabel
+                      value="rm"
+                      control={<Radio />}
+                      label="RM"
+                    />
+                    <FormControlLabel
+                      value="access"
+                      control={<Radio />}
+                      label="Access"
+                    />
+                    <FormControlLabel
+                      value="wire"
+                      control={<Radio />}
+                      label="전송"
+                    />
+                    <FormControlLabel
+                      value="infra"
+                      control={<Radio />}
+                      label="Infra설비"
+                    />
+                    <FormControlLabel
+                      value="asset"
+                      control={<Radio />}
+                      label="자산"
+                    />
+                    <FormControlLabel
+                      value="so"
+                      control={<Radio />}
+                      label="SO"
+                    />
+                    <FormControlLabel
+                      value="mgmt"
+                      control={<Radio />}
+                      label="경영"
+                    />
                   </RadioGroup>
                 </FormControl>
 
                 {/* 사용여부 선택 */}
-                <FormControl component="fieldset" style={{ marginTop: '20px' }}>
+                <FormControl component="fieldset" style={{ marginTop: "20px" }}>
                   <FormLabel component="legend">사용여부</FormLabel>
                   <RadioGroup
                     row
                     name="usedYN"
                     value={selectedSolution.usedYN}
-                    onChange={(e) => handleChange('usedYN', e.target.value)}
+                    onChange={(e) => handleChange("usedYN", e.target.value)}
                   >
-                    <FormControlLabel value="Y" control={<Radio />} label="사용 (Y)" />
-                    <FormControlLabel value="N" control={<Radio />} label="미사용 (N)" />
+                    <FormControlLabel
+                      value="Y"
+                      control={<Radio />}
+                      label="사용 (Y)"
+                    />
+                    <FormControlLabel
+                      value="N"
+                      control={<Radio />}
+                      label="미사용 (N)"
+                    />
                   </RadioGroup>
                 </FormControl>
                 <Grid item xs={12}>
@@ -286,7 +357,6 @@ const ModifySol = () => {
                     onChange={handleFileChange}
                   />
                 </Grid>
-
               </>
             )}
           </DialogContent>
@@ -300,9 +370,13 @@ const ModifySol = () => {
           </DialogActions>
         </Dialog>
 
-
         {/* 등록 모달 */}
-        <Dialog open={openRegisterModal} onClose={handleRegisterClose} maxWidth="sm" fullWidth>
+        <Dialog
+          open={openRegisterModal}
+          onClose={handleRegisterClose}
+          maxWidth="sm"
+          fullWidth
+        >
           <DialogTitle>Solution 등록하기</DialogTitle>
           <DialogContent>
             <form onSubmit={handleRegister}>
@@ -313,7 +387,9 @@ const ModifySol = () => {
                     required
                     fullWidth
                     value={newSolution.sol_name}
-                    onChange={(e) => handleChange('sol_name', e.target.value, true)}
+                    onChange={(e) =>
+                      handleChange("sol_name", e.target.value, true)
+                    }
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -321,7 +397,9 @@ const ModifySol = () => {
                     label="Solution Full Name"
                     fullWidth
                     value={newSolution.sol_full_name}
-                    onChange={(e) => handleChange('sol_full_name', e.target.value, true)}
+                    onChange={(e) =>
+                      handleChange("sol_full_name", e.target.value, true)
+                    }
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -329,7 +407,9 @@ const ModifySol = () => {
                     label="한글 명칭"
                     fullWidth
                     value={newSolution.kor_name}
-                    onChange={(e) => handleChange('kor_name', e.target.value, true)}
+                    onChange={(e) =>
+                      handleChange("kor_name", e.target.value, true)
+                    }
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -338,7 +418,7 @@ const ModifySol = () => {
                     required
                     fullWidth
                     value={newSolution.n_id}
-                    onChange={(e) => handleChange('n_id', e.target.value, true)}
+                    onChange={(e) => handleChange("n_id", e.target.value, true)}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -346,7 +426,7 @@ const ModifySol = () => {
                     label="시스템 바로가기 Link"
                     fullWidth
                     value={newSolution.url}
-                    onChange={(e) => handleChange('url', e.target.value, true)}
+                    onChange={(e) => handleChange("url", e.target.value, true)}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -354,7 +434,9 @@ const ModifySol = () => {
                     label="Github 바로가기 Link"
                     fullWidth
                     value={newSolution.github_url}
-                    onChange={(e) => handleChange('github_url', e.target.value, true)}
+                    onChange={(e) =>
+                      handleChange("github_url", e.target.value, true)
+                    }
                   />
                 </Grid>
 
@@ -366,7 +448,9 @@ const ModifySol = () => {
                     id="reg_date"
                     autoComplete="reg_date"
                     value={newSolution.reg_date}
-                    onChange={(e) => handleChange('reg_date', e.target.value, true)}
+                    onChange={(e) =>
+                      handleChange("reg_date", e.target.value, true)
+                    }
                     InputLabelProps={{ shrink: true }}
                   />
                 </Grid>
@@ -377,50 +461,80 @@ const ModifySol = () => {
                     <RadioGroup
                       row
                       value={newSolution.work_field}
-                      onChange={(e) => handleChange('work_field', e.target.value, true)}
-                      sx={{ gap: '4px' }}
+                      onChange={(e) =>
+                        handleChange("work_field", e.target.value, true)
+                      }
+                      sx={{ gap: "4px" }}
                     >
                       <FormControlLabel
                         value="rm"
                         control={<Radio />}
                         label="RM"
-                        sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.7rem' } }}
+                        sx={{
+                          "& .MuiFormControlLabel-label": {
+                            fontSize: "0.7rem",
+                          },
+                        }}
                       />
                       <FormControlLabel
                         value="access"
                         control={<Radio />}
                         label="Access"
-                        sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.7rem' } }}
+                        sx={{
+                          "& .MuiFormControlLabel-label": {
+                            fontSize: "0.7rem",
+                          },
+                        }}
                       />
                       <FormControlLabel
                         value="wire"
                         control={<Radio />}
                         label="전송"
-                        sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.7rem' } }}
+                        sx={{
+                          "& .MuiFormControlLabel-label": {
+                            fontSize: "0.7rem",
+                          },
+                        }}
                       />
                       <FormControlLabel
                         value="infra"
                         control={<Radio />}
                         label="Infra설비"
-                        sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.7rem' } }}
+                        sx={{
+                          "& .MuiFormControlLabel-label": {
+                            fontSize: "0.7rem",
+                          },
+                        }}
                       />
                       <FormControlLabel
                         value="asset"
                         control={<Radio />}
                         label="자산"
-                        sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.7rem' } }}
+                        sx={{
+                          "& .MuiFormControlLabel-label": {
+                            fontSize: "0.7rem",
+                          },
+                        }}
                       />
                       <FormControlLabel
                         value="so"
                         control={<Radio />}
                         label="SO"
-                        sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.7rem' } }}
+                        sx={{
+                          "& .MuiFormControlLabel-label": {
+                            fontSize: "0.7rem",
+                          },
+                        }}
                       />
                       <FormControlLabel
                         value="mgmt"
                         control={<Radio />}
                         label="경영"
-                        sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.7rem' } }}
+                        sx={{
+                          "& .MuiFormControlLabel-label": {
+                            fontSize: "0.7rem",
+                          },
+                        }}
                       />
                     </RadioGroup>
                   </FormControl>
@@ -431,10 +545,20 @@ const ModifySol = () => {
                     <RadioGroup
                       row
                       value={newSolution.usedYN}
-                      onChange={(e) => handleChange('usedYN', e.target.value, true)}
+                      onChange={(e) =>
+                        handleChange("usedYN", e.target.value, true)
+                      }
                     >
-                      <FormControlLabel value="Y" control={<Radio />} label="사용 (Y)" />
-                      <FormControlLabel value="N" control={<Radio />} label="미사용 (N)" />
+                      <FormControlLabel
+                        value="Y"
+                        control={<Radio />}
+                        label="사용 (Y)"
+                      />
+                      <FormControlLabel
+                        value="N"
+                        control={<Radio />}
+                        label="미사용 (N)"
+                      />
                     </RadioGroup>
                   </FormControl>
                 </Grid>
@@ -448,16 +572,19 @@ const ModifySol = () => {
                 </Grid>
               </Grid>
               <DialogActions>
-                <Button onClick={handleRegisterClose} color="secondary">취소</Button>
-                <Button type="submit" color="primary">등록</Button>
+                <Button onClick={handleRegisterClose} color="secondary">
+                  취소
+                </Button>
+                <Button type="submit" color="primary">
+                  등록
+                </Button>
               </DialogActions>
             </form>
           </DialogContent>
         </Dialog>
-
       </Container>
     </div>
-  )
-}
+  );
+};
 
-export default ModifySol
+export default ModifySol;

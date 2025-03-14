@@ -67,6 +67,36 @@ const IdeaDesc = () => {
           </div>
         </div>
         <hr style={{ margin: "20px 0", color: "#8c8c8c" }} />
+
+        <div className="contentBox">
+          <div className="title">추진 배경</div>
+          <div className="description">
+            - 기존 DPRS에 적용중인 대형사업장 현황정보 다운로드 기능에 이어
+            사업장별 담당자 변경정보 및 연락처, 사업자 출입 관련 필수교육
+            이수시간 관리 등 건강도 체크기능 고도화필요(모바일화)
+          </div>
+          <div className="title">추진 방안</div>
+          <div className="description">
+            1. 지역별 PPT작성 담당자를 1명으로 지정 취합 후 업데이트하여
+            관리(24년완료_DPRS) <br></br>
+            2. 업데이트 된 대형사업장 Tool활용 간편하게 사업장 현황 및 건강도
+            체크(noti) 등 효율화(진행필요)
+          </div>
+          <div className="title">정량적 효과</div>
+          <div className="desEffect">
+            1. 지역별 PPT작성 담당자를 1명으로 지정 취합 후 업데이트하여
+            관리(24년완료_DPRS) <br></br>
+            2. 업데이트 된 대형사업장 Tool활용 간편하게 사업장 현황 및 건강도
+            체크(noti) 등 효율화(진행필요)
+          </div>
+          <div className="title">정성적 효과</div>
+          <div className="desEffect">
+            1. 지역별 PPT작성 담당자를 1명으로 지정 취합 후 업데이트하여
+            관리(24년완료_DPRS) <br></br>
+            2. 업데이트 된 대형사업장 Tool활용 간편하게 사업장 현황 및 건강도
+            체크(noti) 등 효율화(진행필요)
+          </div>
+        </div>
       </div>
       <div className="ideaProcess">
         <div className="processTitle">진행 현황</div>

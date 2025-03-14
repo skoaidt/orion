@@ -134,6 +134,35 @@
         }
       }
     }
+
+    .contentBox {
+      .title {
+        color: $purpleIdeaLight;
+        font-size: 18px;
+        font-weight: 600;
+        margin: 20px 0px 10px 0px;
+      }
+      .description {
+        height: 100px;
+        overflow-y: auto;
+        color: #565656;
+        background-color: #e1e1e1;
+        font-size: 14px;
+        font-weight: 300;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      .desEffect {
+        height: 50px;
+        overflow-y: auto;
+        color: #565656;
+        background-color: #e1e1e1;
+        font-size: 14px;
+        font-weight: 300;
+        padding: 10px;
+        border-radius: 5px;
+      }
+    }
   }
   .ideaProcess {
     width: 350px;
