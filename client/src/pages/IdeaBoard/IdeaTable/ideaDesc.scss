@@ -5,13 +5,14 @@
   // height: 100%;
   background-color: #f5f5f5;
   display: flex;
+  overflow-y: auto;
 
   .ideaDescWrap {
     // flex: 1;
     margin: 50px;
     width: 1000px;
-    height: 750px;
-    background-color: #f5f5f5;
+    min-height: 750px;
+    background-color: #ffffff;
     border-radius: 10px;
     padding: 20px;
 
@@ -61,13 +62,28 @@
           font-weight: 300;
           gap: 10px;
           .idNo {
+            min-width: 40px;
             color: #565656;
+            span:first-child {
+              color: #565565;
+              margin: 0px 5px;
+            }
+            span:last-child {
+              color: $purpleIdeaLight;
+              font-weight: 500;
+            }
           }
-          .bizCategory {
+          .category {
+            min-width: 100px;
             color: $purpleIdeaLight;
-          }
-          .workflCategory {
-            color: $purpleIdeaLight;
+            span:first-child {
+              color: #565565;
+              margin: 0px 5px;
+            }
+            span:last-child {
+              color: $purpleIdeaLight;
+              font-weight: 500;
+            }
           }
         }
       }
@@ -124,6 +140,8 @@
         border: 1px solid #8c8c8c;
         border-radius: 5px;
         padding: 5px;
+        cursor: pointer;
+
         .like {
           color: #8c8c8c;
         }
@@ -131,6 +149,20 @@
           font-size: 12px;
           font-weight: 300;
           color: #191919;
+        }
+        &:hover {
+          background-color: $purpleIdeaLight;
+          color: #ffffff;
+          border: none;
+          .like,
+          .likeCount {
+            color: #ffffff;
+          }
+        }
+        &:active {
+          background-color: $purpleIdea;
+          color: #ffffff;
+          border: none;
         }
       }
     }
@@ -143,32 +175,155 @@
         margin: 20px 0px 10px 0px;
       }
       .description {
-        height: 100px;
-        overflow-y: auto;
+        min-height: 100px;
+        // overflow-y: auto;
         color: #565656;
-        background-color: #e1e1e1;
-        font-size: 14px;
-        font-weight: 300;
-        padding: 10px;
+        background-color: #ededed;
+
+        padding: 20px;
         border-radius: 5px;
       }
       .desEffect {
         height: 50px;
         overflow-y: auto;
         color: #565656;
-        background-color: #e1e1e1;
-        font-size: 14px;
-        font-weight: 300;
-        padding: 10px;
+        background-color: #ededed;
+
+        padding: 20px;
         border-radius: 5px;
+      }
+    }
+    .hitsWrap {
+      color: #565656;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin: 10px 0 20px 0;
+      .Box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 12px;
+        gap: 5px;
+        margin: 0 20px;
+      }
+      .commentsCnt {
+        display: flex;
+        gap: 10px;
+      }
+    }
+
+    .commentsContent {
+      padding: 0px 30px;
+      color: #565656;
+      background-color: #ffffff;
+      border-radius: 5px;
+      box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+      .commentItem {
+        padding: 14px 23px 0 0;
+        border-bottom: 1px solid #ebecef;
+
+        .commentAuthor {
+          display: flex;
+          gap: 10px;
+
+          .commentAuthorNm {
+            font-size: 14px;
+            font-weight: 500;
+          }
+
+          .commentAuthorTeam {
+            font-size: 13px;
+            font-weight: 300;
+            color: #676767;
+          }
+        }
+        .commentText {
+          font-size: 15px;
+          margin: 5px 0;
+        }
+        .commentDownWrap {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          .commentDate {
+            font-size: 13px;
+            font-weight: 300;
+            color: #676767;
+          }
+          button {
+            font-size: 13px;
+          }
+        }
+      }
+
+      .addWrap {
+        border: 1px solid #757a81;
+        background-color: white;
+        border-radius: 6px;
+        margin: 30px 0;
+        padding: 10px;
+        position: relative;
+
+        .commentNm {
+          font-size: 13px;
+          margin-bottom: 5px;
+        }
+
+        .addComment {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          width: 100%;
+
+          textarea {
+            width: 100%;
+            border: none;
+            box-sizing: border-box;
+          }
+
+          form {
+            width: 100%;
+            margin: 5px 10px;
+
+            textarea {
+              width: 100%;
+              border: none;
+              box-sizing: border-box;
+            }
+
+            .btnGroup {
+              display: flex;
+              align-items: center;
+              justify-content: flex-end;
+              position: relative;
+
+              button {
+                height: 100%;
+                cursor: pointer;
+
+                :hover {
+                  color: $blueColor;
+                  background-color: #ebecef;
+                }
+              }
+            }
+
+            .emojiPickerWrapper {
+              position: absolute;
+              bottom: 100%;
+            }
+          }
+        }
       }
     }
   }
   .ideaProcess {
-    width: 350px;
-    margin: 50px;
+    width: 400px;
+    margin: 50px 0px;
+    padding: 20px;
     color: #565656;
-    width: 300px;
+    background-color: #ffffff;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -191,6 +346,148 @@
       justify-content: center;
       border: 1px solid #8c8c8c;
       cursor: pointer;
+    }
+
+    // Timeline 스타일 추가
+    .MuiTimeline-root {
+      padding: 0;
+      margin: 0;
+      width: 100%;
+    }
+
+    .MuiTimelineItem-root {
+      min-height: 100px; // 최소 높이 설정
+      align-items: center; // 세로 중앙 정렬
+
+      &::before {
+        flex: 0; // 기본 패딩 제거
+      }
+    }
+
+    .MuiTimelineOppositeContent-root {
+      max-width: 80px;
+      padding: 10px;
+      font-weight: 500;
+      color: $purpleIdeaLight;
+      flex: 0.3; // 왼쪽 영역 비율 조정
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 80px; // 최소 높이 설정
+      border: 1px solid #cacaca;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(152, 158, 240, 0.3);
+      background-color: #f9f9f9;
+      margin-right: 10px;
+    }
+
+    .MuiTimelineContent-root {
+      flex: 0.7; // 오른쪽 영역 비율 조정
+      padding: 5px 0 5px 10px;
+      display: flex;
+      align-items: center;
+      min-height: 80px; // 최소 높이 설정
+      width: 100%; // 너비 100%로 설정
+    }
+
+    .MuiTimelineSeparator-root {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      margin: 0 10px;
+    }
+
+    .MuiTimelineDot-root {
+      margin: 0;
+      padding: 4px;
+
+      &.MuiTimelineDot-filled {
+        background-color: $purpleIdea;
+      }
+
+      &.MuiTimelineDot-outlined {
+        border-color: $purpleIdea;
+        color: $purpleIdea;
+      }
+    }
+
+    .MuiTimelineConnector-root {
+      background-color: $purpleIdeaLight;
+      flex-grow: 1; // 남은 공간을 모두 차지하도록 설정
+    }
+
+    .timelineContentBox {
+      padding: 10px;
+      margin-bottom: 0;
+      background-color: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      width: 100%; // 너비 100%로 설정
+      height: 80px; // 높이 고정
+      display: flex;
+      align-items: center;
+
+      &:hover {
+        border-color: $purpleIdeaLight;
+        box-shadow: 0 0 5px rgba(152, 158, 240, 0.3);
+      }
+
+      .timelineContent {
+        padding: 5px;
+        width: 100%; // 너비 100%로 설정
+
+        .userInfo {
+          display: flex;
+          align-items: center;
+        }
+
+        .timelineUser {
+          font-size: 14px;
+          font-weight: 600;
+          color: #262626;
+          margin-right: 5px;
+        }
+
+        .timelineTeam {
+          font-size: 12px;
+          font-weight: 300;
+          color: #676767;
+          margin-bottom: 2px;
+        }
+
+        .timelineDate {
+          font-size: 12px;
+          font-weight: 300;
+          color: #8b8b8b;
+        }
+      }
+
+      .MuiTextField-root {
+        margin-bottom: 5px;
+
+        .MuiOutlinedInput-root {
+          background-color: white;
+
+          &:hover .MuiOutlinedInput-notchedOutline {
+            border-color: $purpleIdeaLight;
+          }
+
+          &.Mui-focused .MuiOutlinedInput-notchedOutline {
+            border-color: $purpleIdea;
+          }
+        }
+      }
+
+      .MuiButton-root {
+        background-color: $purpleIdea;
+        color: white;
+
+        &:hover {
+          background-color: darken($purpleIdea, 10%);
+        }
+      }
     }
   }
 }
