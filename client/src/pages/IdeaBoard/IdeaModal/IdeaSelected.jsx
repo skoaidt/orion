@@ -18,8 +18,8 @@ const IdeaSelected = ({ onClose }) => {
 
         {/* 중복 (duplication) */}
         <div className="rowContainer">
-          <div className="field-label">과제 중복</div>
-          <FormControl>
+          <div className="field-label">과제중복</div>
+          <FormControl className="fromControl">
             <RadioGroup row name="duplication-group" className="radioGroup">
               <FormControlLabel value="신규" control={<Radio />} label="신규" />
               <FormControlLabel value="기존 시스템 고도화" control={<Radio />} label="기존 시스템 고도화" />
@@ -31,8 +31,8 @@ const IdeaSelected = ({ onClose }) => {
 
         {/* 사용 범위 (scope) */}
         <div className="rowContainer">
-          <div className="field-label">사용 범위</div>
-          <FormControl>
+          <div className="field-label">사용범위</div>
+          <FormControl className="fromControl">
             <RadioGroup row name="scope-group" className="radioGroup">
               <FormControlLabel value="TBOH" control={<Radio />} label="TBOH" />
               <FormControlLabel value="TO" control={<Radio />} label="TO" />
@@ -43,9 +43,9 @@ const IdeaSelected = ({ onClose }) => {
         </div>
 
         {/* 의견 작성 (comment) */}
-        <div className="rowContainer">
-          <div className="field-label">의견 작성</div>
-          <TextField
+        <div className="rowContainerComment">
+          <div className="field-label">의견작성</div>
+          <TextField className="comment-textfield"
             variant="outlined"
             placeholder="의견을 작성해주세요"
             multiline
@@ -56,8 +56,8 @@ const IdeaSelected = ({ onClose }) => {
 
         {/* 선정 여부 (selection) */}
         <div className="rowContainer">
-          <div className="field-label">선정 여부</div>
-          <FormGroup>
+          <div className="field-label">선정여부</div>
+          <FormGroup className="fromControl">
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
               <Typography>Drop</Typography>
               <Switch defaultChecked inputProps={{ 'aria-label': 'default switch' }} />
@@ -65,9 +65,11 @@ const IdeaSelected = ({ onClose }) => {
             </Stack>
           </FormGroup>
         </div>
-        {/* 버튼 (button) */}
-        <button onClick={onClose}>취소</button>
-        <button onClick={onClose}>등록</button>
+        {/* 버튼 (button) */}  
+        <div className="buttonContainer">
+          <button onClick={onClose}>취소</button>
+          <button onClick={onClose}>등록</button>
+        </div>   
       </div>
     </div>
   );

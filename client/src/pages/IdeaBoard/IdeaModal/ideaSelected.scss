@@ -10,32 +10,75 @@
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
+  
 .modalContent {
   color: #565656;
   background: white;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
+  display: flex; //가로로 정렬되는건데
+  flex-direction: column; //이걸 쓰면 세로로 정렬하게됨
+  gap: 10px;
+  
+  .rowContainer {
+    display: flex;
+    align-items: center; /* 세로 중앙 정렬 */
+  
+    width: 597px;
+    height: 100px;
+    background-color: red;
+    gap: 10px;
+  
+    
+  .field-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 2;
+    // margin-right: 10px;
+    font-size: 14px;
+    color: white;
+    background: #565656;
+    width: 90px;
+    height: 100%;
+  
+    padding: 0px;
+    border-radius: 5px;
+    box-sizing: border-box; //90으로 고정하기
+  }
+  .fromControl {
+    flex: 8;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  }
+  
+  .rowContainerComment {
+    display: flex;
+    align-items: center; /* 세로 중앙 정렬 */
+    justify-content: space-between;
+    background-color: pink;
+    width: 597px;
+    height: 169px;
+  }
+  
+  .radioGroup {
+    
+    background-color: #f8f8f8;
+  }
+  
+  
+  .comment-textfield {
+    margin-top: 50px;
+    width: 493px;
+    height: 169px;
+    border-radius: 5px;
+    display: flex;
+  }
 }
 
-.rowContainer {
-  display: flex;
-  align-items: center; /* 세로 중앙 정렬 */
-  justify-content: space-between;
-  width: 597px;
-  height: 25px;
-  margin-bottom: 10px; /* 버튼과 라디오 그룹 사이 간격 설정 */
-}
-
-.radioGroup {
-  margin-left: 20px;
-  background-color: #f8f8f8;
-}
-
-.ideabutton1 {
-  margin-right: 10px; /* 버튼과 라디오 그룹 사이 간격 설정 */
 }
