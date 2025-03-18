@@ -9,18 +9,11 @@ import IdeaDeveloping from "../IdeaModal/IdeaDeveloping";
 import IdeaCompleted from "../IdeaModal/IdeaCompleted";
 import IdeaDrop from "../IdeaModal/IdeaDrop";
 import "./ideaDesc.scss";
-import { Button, Paper } from "@mui/material";
+import { Button } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SendIcon from "@mui/icons-material/Send";
 import StreetviewIcon from "@mui/icons-material/Streetview";
 import ChatIcon from "@mui/icons-material/Chat";
-import Timeline from "@mui/lab/Timeline";
-import TimelineItem from "@mui/lab/TimelineItem";
-import TimelineSeparator from "@mui/lab/TimelineSeparator";
-import TimelineConnector from "@mui/lab/TimelineConnector";
-import TimelineContent from "@mui/lab/TimelineContent";
-import TimelineDot from "@mui/lab/TimelineDot";
-import TimelineOppositeContent from "@mui/lab/TimelineOppositeContent";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ScienceIcon from "@mui/icons-material/Science";
@@ -148,7 +141,7 @@ const IdeaDesc = () => {
             <div className="commentsCount">100</div>
           </div>
         </div>
-
+        <div className="gap-20"></div>
         <div className="commentsContent">
           <div className="commentItem">
             <div className="commentAuthor">
@@ -217,203 +210,275 @@ const IdeaDesc = () => {
       <div className="ideaProcess">
         <div className="processTitle">진행 현황</div>
         <hr style={{ margin: "10px 0", width: "100%", color: "#8c8c8c" }} />
-
-        <Timeline position="right">
-          <TimelineItem>
-            <TimelineOppositeContent color="text.secondary">
-              등록
-            </TimelineOppositeContent>
-            <TimelineSeparator>
-              <TimelineDot color="primary">
-                <AssignmentIcon />
-              </TimelineDot>
-              <TimelineConnector />
-            </TimelineSeparator>
-            <TimelineContent>
-              <Paper elevation={3} className="timelineContentBox">
-                <div className="timelineContent">
+        {/* ================================================
+        과제 관리 Precess : 진행 현황
+        ================================================ */}
+        <div className="processBox">
+          <div className="processItem">
+            <div className="processItemTitle active">등록</div>
+            <div className="lineBox">
+              <div className="line">
+                <div className="circle">
+                  <AssignmentIcon className="icons" />
+                </div>
+              </div>
+            </div>
+            <div className="processItemContent active">
+              <div className="userInfo">
+                <div
+                  className="processItemContentTitle"
+                  style={{ fontSize: "14px", fontWeight: "500" }}
+                >
+                  전다현
+                </div>
+                <div
+                  className="processItemContentTeam"
+                  style={{ fontSize: "10px" }}
+                >
+                  종로품질개선팀
+                </div>
+              </div>
+              <div
+                className="processItemContentDate"
+                style={{ fontSize: "10px" }}
+              >
+                2025-03-14
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="processBox">
+          <div
+            className="processItem"
+            onClick={() => handleBoxClick("ideaSelected")}
+          >
+            <div className="processItemTitle">선정</div>
+            <div className="lineBox">
+              <div className="line">
+                <div className="circle">
+                  <CheckCircleIcon className="icons" />
+                </div>
+              </div>
+            </div>
+            <div className="processItemContent">
+              <div className="itemcontentWrap">
+                <div className="left">
                   <div className="userInfo">
-                    <div className="timelineUser">전다현</div>
-                    <div className="timelineTeam">종로품질개선팀</div>
+                    <div
+                      className="processItemContentTitle"
+                      style={{ fontSize: "13px", fontWeight: "300" }}
+                    >
+                      Access기술팀 검증 필요
+                    </div>
                   </div>
-                  <div className="timelineDate">2025-03-14</div>
+                  {/* <div className="processItemContentDate">2025-03-14</div> */}
                 </div>
-              </Paper>
-            </TimelineContent>
-          </TimelineItem>
-
-          <TimelineItem>
-            <TimelineOppositeContent color="text.secondary">
-              선정
-            </TimelineOppositeContent>
-            <TimelineSeparator>
-              <TimelineDot color="primary" variant="outlined">
-                <CheckCircleIcon />
-              </TimelineDot>
-              <TimelineConnector />
-            </TimelineSeparator>
-            <TimelineContent>
-              <Paper
-                elevation={3}
-                className="timelineContentBox"
-                onClick={() => handleBoxClick("ideaSelected")}
-              >
-                <div className="timelineContent">
-                  <div className="team">Access계획팀 선정 필요</div>
+                <div className="right">
+                  <div className="dDay">D-9</div>
                 </div>
-              </Paper>
-            </TimelineContent>
-          </TimelineItem>
-
-          <TimelineItem>
-            <TimelineOppositeContent color="text.secondary">
-              Pilot
-            </TimelineOppositeContent>
-            <TimelineSeparator>
-              <TimelineDot color="primary" variant="outlined">
-                <ScienceIcon />
-              </TimelineDot>
-              <TimelineConnector />
-            </TimelineSeparator>
-            <TimelineContent>
-              <Paper
-                elevation={3}
-                className="timelineContentBox"
-                onClick={() => handleBoxClick("ideaPiloted")}
-              >
-                <div className="timelineContent">
-                  <div className="timelineUser">박지민</div>
-                  <div className="timelineTeam">품질관리팀</div>
-                  <div className="timelineDate">2025-03-25</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="processBox">
+          <div
+            className="processItem"
+            onClick={() => handleBoxClick("ideaPiloted")}
+          >
+            <div className="processItemTitle">Pilot</div>
+            <div className="lineBox">
+              <div className="line">
+                <div className="circle">
+                  <ScienceIcon className="icons" />
                 </div>
-              </Paper>
-            </TimelineContent>
-          </TimelineItem>
-
-          <TimelineItem>
-            <TimelineOppositeContent color="text.secondary">
-              검증
-            </TimelineOppositeContent>
-            <TimelineSeparator>
-              <TimelineDot color="primary" variant="outlined">
-                <VerifiedIcon />
-              </TimelineDot>
-              <TimelineConnector />
-            </TimelineSeparator>
-            <TimelineContent>
-              <Paper
-                elevation={3}
-                className="timelineContentBox"
-                onClick={() => handleBoxClick("ideaVerify")}
-              >
-                <div className="timelineContent">
-                  <div className="timelineUser">이영희</div>
-                  <div className="timelineTeam">검증팀</div>
-                  <div className="timelineDate">2025-04-02</div>
+              </div>
+            </div>
+            <div className="processItemContent">
+              <div className="itemcontentWrap">
+                <div className="left">
+                  <div className="userInfo">
+                    <div
+                      className="processItemContentTitle"
+                      style={{ fontSize: "13px", fontWeight: "300" }}
+                    >
+                      종로품질개선팀 검증 필요
+                    </div>
+                  </div>
+                  {/* <div className="processItemContentDate">2025-03-14</div> */}
                 </div>
-              </Paper>
-            </TimelineContent>
-          </TimelineItem>
-
-          <TimelineItem>
-            <TimelineOppositeContent color="text.secondary">
-              개발심의
-            </TimelineOppositeContent>
-            <TimelineSeparator>
-              <TimelineDot color="primary" variant="outlined">
-                <RateReviewIcon />
-              </TimelineDot>
-              <TimelineConnector />
-            </TimelineSeparator>
-            <TimelineContent>
-              <Paper
-                elevation={3}
-                className="timelineContentBox"
-                onClick={() => handleBoxClick("ideaDevReview")}
-              >
-                <div className="timelineContent">
-                  <div className="timelineUser">최민수</div>
-                  <div className="timelineTeam">개발심의위원회</div>
-                  <div className="timelineDate">2025-04-10</div>
+                <div className="right">
+                  <div className="dDay">D-6</div>
                 </div>
-              </Paper>
-            </TimelineContent>
-          </TimelineItem>
-
-          <TimelineItem>
-            <TimelineOppositeContent color="text.secondary">
-              개발중
-            </TimelineOppositeContent>
-            <TimelineSeparator>
-              <TimelineDot color="primary" variant="outlined">
-                <DeveloperModeIcon />
-              </TimelineDot>
-              <TimelineConnector />
-            </TimelineSeparator>
-            <TimelineContent>
-              <Paper
-                elevation={3}
-                className="timelineContentBox"
-                onClick={() => handleBoxClick("ideaDeveloping")}
-              >
-                <div className="timelineContent">
-                  <div className="timelineUser">정성훈</div>
-                  <div className="timelineTeam">개발2팀</div>
-                  <div className="timelineDate">2025-04-15</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="processBox">
+          <div
+            className="processItem"
+            onClick={() => handleBoxClick("ideaVerify")}
+          >
+            <div className="processItemTitle">검증</div>
+            <div className="lineBox">
+              <div className="line">
+                <div className="circle">
+                  <VerifiedIcon className="icons" />
                 </div>
-              </Paper>
-            </TimelineContent>
-          </TimelineItem>
-
-          <TimelineItem>
-            <TimelineOppositeContent color="text.secondary">
-              완료
-            </TimelineOppositeContent>
-            <TimelineSeparator>
-              <TimelineDot color="primary" variant="outlined">
-                <TaskAltIcon />
-              </TimelineDot>
-              <TimelineConnector />
-            </TimelineSeparator>
-            <TimelineContent>
-              <Paper
-                elevation={3}
-                className="timelineContentBox"
-                onClick={() => handleBoxClick("ideaCompleted")}
-              >
-                <div className="timelineContent">
-                  <div className="timelineUser">한지원</div>
-                  <div className="timelineTeam">PM팀</div>
-                  <div className="timelineDate">2025-05-20</div>
+              </div>
+            </div>
+            <div className="processItemContent">
+              <div className="itemcontentWrap">
+                <div className="left">
+                  <div className="userInfo">
+                    <div
+                      className="processItemContentTitle"
+                      style={{ fontSize: "13px", fontWeight: "300" }}
+                    >
+                      Access기술팀 검증 필요
+                    </div>
+                  </div>
+                  {/* <div className="processItemContentDate">2025-03-14</div> */}
                 </div>
-              </Paper>
-            </TimelineContent>
-          </TimelineItem>
-
-          <TimelineItem>
-            <TimelineOppositeContent color="text.secondary">
-              Drop
-            </TimelineOppositeContent>
-            <TimelineSeparator>
-              <TimelineDot color="error">
-                <CancelIcon />
-              </TimelineDot>
-            </TimelineSeparator>
-            <TimelineContent>
-              <Paper
-                elevation={3}
-                className="timelineContentBox"
-                onClick={() => handleBoxClick("ideaDrop")}
-              >
-                <div className="timelineContent">
-                  <div className="timelineUser">오민지</div>
-                  <div className="timelineTeam">심사팀</div>
-                  <div className="timelineDate">2025-06-01</div>
+                <div className="right">
+                  <div className="dDay">D-3</div>
                 </div>
-              </Paper>
-            </TimelineContent>
-          </TimelineItem>
-        </Timeline>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="processBox">
+          <div
+            className="processItem"
+            onClick={() => handleBoxClick("ideaDevReview")}
+          >
+            <div className="processItemTitle">개발심의</div>
+            <div className="lineBox">
+              <div className="line">
+                <div className="circle">
+                  <RateReviewIcon className="icons" />
+                </div>
+              </div>
+            </div>
+            <div className="processItemContent">
+              <div className="itemcontentWrap">
+                <div className="left">
+                  <div className="userInfo">
+                    <div
+                      className="processItemContentTitle"
+                      style={{ fontSize: "13px", fontWeight: "300" }}
+                    >
+                      준비중
+                    </div>
+                  </div>
+                  {/* <div className="processItemContentDate">2025-03-14</div> */}
+                </div>
+                {/* <div className="right">
+                  <div className="dDay">D-3</div>
+                </div> */}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="processBox">
+          <div
+            className="processItem"
+            onClick={() => handleBoxClick("ideaDeveloping")}
+          >
+            <div className="processItemTitle">개발중</div>
+            <div className="lineBox">
+              <div className="line">
+                <div className="circle">
+                  <DeveloperModeIcon className="icons" />
+                </div>
+              </div>
+            </div>
+            <div className="processItemContent">
+              <div className="itemcontentWrap">
+                <div className="left">
+                  <div className="userInfo">
+                    <div
+                      className="processItemContentTitle"
+                      style={{ fontSize: "13px", fontWeight: "300" }}
+                    >
+                      준비중
+                    </div>
+                  </div>
+                  {/* <div className="processItemContentDate">2025-03-14</div> */}
+                </div>
+                {/* <div className="right">
+                  <div className="dDay">D-3</div>
+                </div> */}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="processBox">
+          <div
+            className="processItem"
+            onClick={() => handleBoxClick("ideaCompleted")}
+          >
+            <div className="processItemTitle">완료</div>
+            <div className="lineBox">
+              <div className="line">
+                <div className="circle">
+                  <TaskAltIcon className="icons" />
+                </div>
+              </div>
+            </div>
+            <div className="processItemContent">
+              <div className="itemcontentWrap">
+                <div className="left">
+                  <div className="userInfo">
+                    <div
+                      className="processItemContentTitle"
+                      style={{ fontSize: "13px", fontWeight: "300" }}
+                    >
+                      준비중
+                    </div>
+                  </div>
+                  {/* <div className="processItemContentDate">2025-03-14</div> */}
+                </div>
+                {/* <div className="right">
+                  <div className="dDay">D-3</div>
+                </div> */}
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr style={{ margin: "20px 0", color: "#8c8c8c" }} />
+        <div className="processBox">
+          <div
+            className="processItem"
+            onClick={() => handleBoxClick("ideaDrop")}
+          >
+            <div className="processItemTitle">Drop</div>
+            <div className="lineBox dropLineBox">
+              <div className="line dropLine">
+                <div className="circle">
+                  <CancelIcon className="icons" />
+                </div>
+              </div>
+            </div>
+            <div className="processItemContent">
+              <div className="itemcontentWrap">
+                <div className="left">
+                  <div className="userInfo">
+                    <div
+                      className="processItemContentTitle"
+                      style={{ fontSize: "13px", fontWeight: "300" }}
+                    >
+                      -
+                    </div>
+                  </div>
+                  {/* <div className="processItemContentDate">2025-03-14</div> */}
+                </div>
+                {/* <div className="right">
+                  <div className="dDay">D-3</div>
+                </div> */}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* 모달 컴포넌트 렌더링 */}

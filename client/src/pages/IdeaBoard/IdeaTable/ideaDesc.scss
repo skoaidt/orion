@@ -178,7 +178,7 @@
         min-height: 100px;
         // overflow-y: auto;
         color: #565656;
-        background-color: #ededed;
+        background-color: #f6f6f6;
 
         padding: 20px;
         border-radius: 5px;
@@ -187,7 +187,7 @@
         height: 50px;
         overflow-y: auto;
         color: #565656;
-        background-color: #ededed;
+        background-color: #f6f6f6;
 
         padding: 20px;
         border-radius: 5px;
@@ -329,163 +329,128 @@
     gap: 10px;
 
     .processTitle {
-      font-size: 16px;
-      font-weight: 400;
+      font-size: 18px;
+      font-weight: 500;
       color: $purpleIdeaLight;
     }
 
     .processBox {
       width: 100%;
-      height: 30px;
+      height: 50px;
       font-size: 14px;
-      background-color: #ffffff;
-      color: #565656;
+      color: $main-dark;
       border-radius: 5px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid #8c8c8c;
       cursor: pointer;
-    }
 
-    // Timeline 스타일 추가
-    .MuiTimeline-root {
-      padding: 0;
-      margin: 0;
-      width: 100%;
-    }
-
-    .MuiTimelineItem-root {
-      min-height: 100px; // 최소 높이 설정
-      align-items: center; // 세로 중앙 정렬
-
-      &::before {
-        flex: 0; // 기본 패딩 제거
-      }
-    }
-
-    .MuiTimelineOppositeContent-root {
-      max-width: 80px;
-      padding: 10px;
-      font-weight: 500;
-      color: $purpleIdeaLight;
-      flex: 0.3; // 왼쪽 영역 비율 조정
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 80px; // 최소 높이 설정
-      border: 1px solid #cacaca;
-      border-radius: 5px;
-      box-shadow: 0 0 5px rgba(152, 158, 240, 0.3);
-      background-color: #f9f9f9;
-      margin-right: 10px;
-    }
-
-    .MuiTimelineContent-root {
-      flex: 0.7; // 오른쪽 영역 비율 조정
-      padding: 5px 0 5px 10px;
-      display: flex;
-      align-items: center;
-      min-height: 80px; // 최소 높이 설정
-      width: 100%; // 너비 100%로 설정
-    }
-
-    .MuiTimelineSeparator-root {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      margin: 0 10px;
-    }
-
-    .MuiTimelineDot-root {
-      margin: 0;
-      padding: 4px;
-
-      &.MuiTimelineDot-filled {
-        background-color: $purpleIdea;
-      }
-
-      &.MuiTimelineDot-outlined {
-        border-color: $purpleIdea;
-        color: $purpleIdea;
-      }
-    }
-
-    .MuiTimelineConnector-root {
-      background-color: $purpleIdeaLight;
-      flex-grow: 1; // 남은 공간을 모두 차지하도록 설정
-    }
-
-    .timelineContentBox {
-      padding: 10px;
-      margin-bottom: 0;
-      background-color: #f9f9f9;
-      border: 1px solid #e0e0e0;
-      width: 100%; // 너비 100%로 설정
-      height: 80px; // 높이 고정
-      display: flex;
-      align-items: center;
-
-      &:hover {
-        border-color: $purpleIdeaLight;
-        box-shadow: 0 0 5px rgba(152, 158, 240, 0.3);
-      }
-
-      .timelineContent {
-        padding: 5px;
-        width: 100%; // 너비 100%로 설정
-
-        .userInfo {
+      .processItem {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        border-radius: 1px solid $main-dark;
+        .processItemTitle {
+          flex: 2;
+          height: 100%;
           display: flex;
           align-items: center;
+          justify-content: center;
+          font-size: 16px;
+          font-weight: 500;
+          color: $whitegrayColor;
+          background-color: #ffffff;
+          border: 1px solid $whitegrayColor;
+          border-radius: 5px;
+          box-shadow: 0 0 5px 0 rgba(31, 31, 31, 0.1);
         }
+        .lineBox {
+          position: relative;
+          flex: 2;
+          width: 100%;
+          height: 120%;
 
-        .timelineUser {
-          font-size: 14px;
-          font-weight: 600;
-          color: #262626;
-          margin-right: 5px;
-        }
-
-        .timelineTeam {
-          font-size: 12px;
-          font-weight: 300;
-          color: #676767;
-          margin-bottom: 2px;
-        }
-
-        .timelineDate {
-          font-size: 12px;
-          font-weight: 300;
-          color: #8b8b8b;
-        }
-      }
-
-      .MuiTextField-root {
-        margin-bottom: 5px;
-
-        .MuiOutlinedInput-root {
-          background-color: white;
-
-          &:hover .MuiOutlinedInput-notchedOutline {
-            border-color: $purpleIdeaLight;
+          .line {
+            width: 3px;
+            height: 100%;
+            background-color: $purpleIdeaLight;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
           }
-
-          &.Mui-focused .MuiOutlinedInput-notchedOutline {
-            border-color: $purpleIdea;
+          .circle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            color: white;
+            background-color: $main-dark;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            top: calc(50% - 10px);
+            transform: translateX(-50%);
+            z-index: 10;
+            .icons {
+              font-size: 14px;
+            }
           }
         }
-      }
-
-      .MuiButton-root {
-        background-color: $purpleIdea;
-        color: white;
-
-        &:hover {
-          background-color: darken($purpleIdea, 10%);
+        .processItemContent {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 0px 10px;
+          flex: 6;
+          width: 100%;
+          height: 100%;
+          border: 1px solid $whitegrayColor;
+          border-radius: 5px;
+          box-shadow: 0 0 5px 0 rgba(31, 31, 31, 0.1);
+          background-color: #ffffff;
+          .itemContentWrap {
+            display: flex;
+            justify-content: space-between;
+            gap: 5px;
+          }
+          .userInfo {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 5px;
+          }
+          .right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 5px;
+            .dDay {
+              width: 40px;
+              text-align: center;
+              font-size: 12px;
+              font-weight: 400;
+              color: white;
+              background-color: $grayColor;
+              padding: 5px;
+              border-radius: 5px;
+            }
+          }
+        }
+        .active {
+          background-color: $purpleIdea;
+          color: white;
+          border: 1px solid white;
+        }
+        .dropLineBox {
+          height: 220%;
+          color: $grayColor;
+        }
+        .dropLine {
+          background-color: $whitegrayColor !important;
         }
       }
     }

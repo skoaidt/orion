@@ -213,11 +213,15 @@ body {
         font-weight: 400;
         padding: 20px;
         margin-top: 20px;
-        background-color: #82dfff;
-        color: #4d2bb5;
+        background-color: $main-dark;
+        color: white;
         border-radius: 10px;
         border: none;
         cursor: pointer;
+        text-decoration: none;
+        &:hover {
+          background-color: $blueColor;
+        }
       }
     }
   }
