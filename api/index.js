@@ -12,6 +12,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import redis from "redis";
 import "dotenv/config";
+import fs from "fs";
 
 const app = express();
 app.use(express.json());
@@ -46,7 +47,15 @@ const solutionsStorage = multer.diskStorage({
         ? process.env.PROD_SOLUTIONS_PATH
         : process.env.DEV_SOLUTIONS_PATH;
 
-    cb(null, path.join(__dirname, `../${uploadPath}`));
+    const fullPath = path.join(__dirname, `../${uploadPath}`);
+
+    // 디렉토리가 없으면 생성
+    if (!fs.existsSync(fullPath)) {
+      fs.mkdirSync(fullPath, { recursive: true });
+      console.log(`디렉토리 생성됨: ${fullPath}`);
+    }
+
+    cb(null, fullPath);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + file.originalname);
@@ -58,24 +67,42 @@ const uploadSolutions = multer({ storage: solutionsStorage });
 app.post(
   "/api/upload/solutions",
   uploadSolutions.single("file"),
-  function (req, res) {
-    if (!req.file) {
-      return res.status(400).json({
-        message: "파일이 업로드되지 않았습니다. 파일을 첨부해주세요.",
-      });
-    }
-    console.log("업로드된 파일 정보:", req.file);
+  (req, res) => {
     try {
+      if (!req.file) {
+        console.log("No file uploaded");
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      console.log(`File uploaded: ${req.file.path}, ${req.file.originalname}`);
+
+      // 웹에서 접근 가능한 경로 생성
+      // 서버 경로: /var/www/asset/client/public/upload/solutions/filename
+      // 웹 경로: /upload/solutions/filename
       const filePath = req.file.path;
-      const fileName = req.file.filename;
-      console.log("file path: ", filePath);
-      console.log("file name: ", fileName);
-      res.status(200).json({ filePath });
+      let webPath = "";
+
+      if (filePath.includes("/upload/solutions/")) {
+        // 경로에서 /upload/solutions/ 이후 부분 추출
+        webPath =
+          "/upload/solutions/" + filePath.split("/upload/solutions/")[1];
+      } else {
+        // 경로 추출에 실패한 경우 원본 파일명만 사용
+        webPath = "/upload/solutions/" + req.file.filename;
+      }
+
+      console.log(`Web accessible path: ${webPath}`);
+
+      res.status(200).json({
+        message: "File uploaded successfully",
+        filePath: webPath, // 웹 접근 가능한 경로 반환
+        originalName: req.file.originalname,
+      });
     } catch (error) {
-      console.error("파일 업로드 중 오류 발생:", error);
+      console.error("Error uploading file:", error);
       res
         .status(500)
-        .json({ message: "파일 업로드 처리 중 서버에서 오류가 발생했습니다." });
+        .json({ error: "Error uploading file", details: error.message });
     }
   }
 );
@@ -98,13 +125,21 @@ const developersStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadPath =
       process.env.NODE_ENV === "production"
-        ? process.env.PROD_DEVELOPERS_PATH // 서버용 경로
-        : process.env.DEV_DEVELOPERS_PATH; // 개발용 경로
+        ? process.env.PROD_DEVELOPERS_PATH
+        : process.env.DEV_DEVELOPERS_PATH;
 
-    cb(null, path.join(__dirname, `../${uploadPath}`));
+    const fullPath = path.join(__dirname, `../${uploadPath}`);
+
+    // 디렉토리가 없으면 생성
+    if (!fs.existsSync(fullPath)) {
+      fs.mkdirSync(fullPath, { recursive: true });
+      console.log(`디렉토리 생성됨: ${fullPath}`);
+    }
+
+    cb(null, fullPath);
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + file.originalname); // 파일명에 타임스탬프 추가
+    cb(null, Date.now() + file.originalname);
   },
 });
 const uploadDevelopers = multer({ storage: developersStorage });
@@ -112,26 +147,42 @@ const uploadDevelopers = multer({ storage: developersStorage });
 app.post(
   "/api/upload/developers",
   uploadDevelopers.single("file"),
-  function (req, res) {
-    console.log("index req.body : ", req.body);
-    console.log("index req.file : ", req.file);
-    if (!req.file) {
-      return res.status(400).json({
-        message: "파일이 업로드되지 않았습니다. 파일을 첨부해주세요.",
-      });
-    }
-    console.log("업로드된 파일 정보:", req.file);
+  (req, res) => {
     try {
+      if (!req.file) {
+        console.log("No file uploaded");
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      console.log(`File uploaded: ${req.file.path}, ${req.file.originalname}`);
+
+      // 웹에서 접근 가능한 경로 생성
+      // 서버 경로: /var/www/asset/client/public/upload/developers/filename
+      // 웹 경로: /upload/developers/filename
       const filePath = req.file.path;
-      const fileName = req.file.filename;
-      console.log("file path: ", filePath);
-      console.log("file name: ", fileName);
-      res.status(200).json({ filePath });
+      let webPath = "";
+
+      if (filePath.includes("/upload/developers/")) {
+        // 경로에서 /upload/developers/ 이후 부분 추출
+        webPath =
+          "/upload/developers/" + filePath.split("/upload/developers/")[1];
+      } else {
+        // 경로 추출에 실패한 경우 원본 파일명만 사용
+        webPath = "/upload/developers/" + req.file.filename;
+      }
+
+      console.log(`Web accessible path: ${webPath}`);
+
+      res.status(200).json({
+        message: "File uploaded successfully",
+        filePath: webPath, // 웹 접근 가능한 경로 반환
+        originalName: req.file.originalname,
+      });
     } catch (error) {
-      console.error("파일 업로드 중 오류 발생:", error);
+      console.error("Error uploading file:", error);
       res
         .status(500)
-        .json({ message: "파일 업로드 처리 중 서버에서 오류가 발생했습니다." });
+        .json({ error: "Error uploading file", details: error.message });
     }
   }
 );

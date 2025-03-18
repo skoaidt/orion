@@ -134,7 +134,7 @@ const ModifySol = () => {
       });
 
       console.log("업로드 성공: ", res.data);
-      return res.data;
+      return res.data.filePath; // 서버에서 반환된 웹 접근 가능한 경로
     } catch (err) {
       console.error("업로드 실패: ", err);
       throw new Error("파일 업로드 실패");
@@ -143,18 +143,19 @@ const ModifySol = () => {
 
   const handleSave = async () => {
     try {
-      let imgUrl = null;
+      let imgPath = null;
       if (file) {
-        const imgUrl = await upload();
-        console.log("업로드된 파일 경로 : ", imgUrl);
+        imgPath = await upload();
+        console.log("업로드된 파일 경로 : ", imgPath);
       }
       const currentDateTime = moment().format("YYYY-MM-DD HH:mm:ss");
       const updatedSolution = {
         ...selectedSolution,
-        ...(imgUrl && { img: imgUrl.filePath }),
+        imgUrl: { filePath: imgPath }, // imgUrl.filePath 형태로 수정
         date: currentDateTime,
       };
-      console.log("등록 요청된 데이터 : ", updatedSolution);
+
+      console.log("업데이트 요청된 데이터 : ", updatedSolution);
 
       await axios.put(
         `/api/solutions/updatesoletc/${selectedSolution.id}`,
@@ -172,12 +173,19 @@ const ModifySol = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const imgUrl = await upload();
-      console.log("업로드된 파일 경로 : ", imgUrl);
+      let imgPath = null;
+      if (file) {
+        imgPath = await upload();
+        console.log("업로드된 파일 경로 : ", imgPath);
+      } else {
+        alert("이미지 파일을 선택해주세요.");
+        return;
+      }
+
       const currentDateTime = moment().format("YYYY-MM-DD HH:mm:ss");
       const solutionData = {
         ...newSolution,
-        imgUrl,
+        imgUrl: { filePath: imgPath }, // imgUrl.filePath 형태로 수정
         date: currentDateTime,
       };
       console.log("등록 요청된 데이터 : ", solutionData);
