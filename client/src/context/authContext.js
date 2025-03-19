@@ -11,7 +11,11 @@ export const AuthContextProvider = ({ children }) => {
   const login = async ({ username, password }) => {
     try {
       const response = await axios.post("/api/login", { username, password });
+      console.log("서버 응답:", response.data);
       const { data } = response;
+
+      console.log("data.success:", data.success);
+      console.log("data.data", data.data);
 
       if (data.success && data.data.authUserValue === "Y") {
         const userDetails = {};

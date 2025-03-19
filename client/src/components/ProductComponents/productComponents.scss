@@ -2,7 +2,7 @@
 
 .productContent {
   .contentBox {
-    width: 1600px;
+    width: 800px;
     top: -50px;
     border-radius: 30px;
     background: #fff;
@@ -158,29 +158,6 @@
             }
           }
         }
-      }
-    }
-
-    .solBox {
-      display: flex;
-      flex-direction: row;
-    }
-  }
-
-  .randomBox {
-    .title {
-      font-size: 30px;
-      font-family: $notoSans;
-    }
-
-    .solutionsContainer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      .solBox {
-        flex: 1;
-        margin: 0 10px;
       }
     }
   }
