@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import IdeaSelected from "../IdeaModal/IdeaSelected";
 import IdeaPilot from "../IdeaModal/IdeaPilot";
@@ -12,10 +12,15 @@ import "./ideaDesc.scss";
 
 const IdeaDesc = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [openModal, setOpenModal] = useState(null);
 
   const handleBoxClick = (modalType) => {
     setOpenModal(modalType);
+  };
+
+  const handleGanttNavigate = () => {
+    navigate(`/ideaboard/gantt/${id}`);
   };
 
   return (
@@ -98,10 +103,7 @@ const IdeaDesc = () => {
         >
           개발심의
         </div>
-        <div
-          className="processBox"
-          onClick={() => handleBoxClick("ideaDeveloping")}
-        >
+        <div className="processBox" onClick={handleGanttNavigate}>
           개발중
         </div>
         <div
