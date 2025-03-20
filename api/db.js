@@ -10,7 +10,6 @@ export const db = mysql.createConnection({
   database: process.env.LOCAL_DB_NAME,
 });
 
-
 // export const db = mysql.createConnection({
 //   host: process.env.SPECIAL_HOST,
 //   user: process.env.SPECIAL_USER,

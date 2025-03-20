@@ -181,19 +181,52 @@ const IdeaRegister = ({ onClose }) => {
     console.log("폼이 제출되었습니다");
   };
 
+  // 등록 버튼 핸들러
+  const handleSubmit = () => {
+    // 여기에 등록 로직 추가
+    console.log({
+      background,
+      progress,
+      quantitativeEffect,
+      qualitativeEffect,
+      businessField,
+      jobField,
+      usability,
+      duplication,
+      tbohStatus,
+      personName,
+    });
+    // 등록 후 모달 닫기
+    onClose();
+  };
+
   return (
     <div className="modalOverlay">
       <div className="modalContent">
-        <p>아이디어 등록</p>
+        <div className="headerTitleBox">IDEA 등록</div>
         <div className="ideaRegister">
           <div className="left">
+            <div className="titleWrap">
+              <div className="titleBox">
+                <div className="title">제목</div>
+              </div>
+              <div className="desc">
+                <input
+                  type="text"
+                  className="titleInput"
+                  placeholder="제목을 입력하세요"
+                  style={{ width: "99%" }}
+                />
+              </div>
+            </div>
+            <div className="gap-10"></div>
             <div className="contentBox">
               <div className="innerBox">
                 <div className="titleBox">
                   <div className="title">추진 배경</div>
                 </div>
-                <div className="desc">
-                  <form onSubmit={handleUpdate}>
+                <form onSubmit={handleUpdate}>
+                  <div className="desc">
                     <div className="editorContainer">
                       <ReactQuill
                         ref={backgroundRef}
@@ -204,15 +237,15 @@ const IdeaRegister = ({ onClose }) => {
                         onChange={setBackground}
                       />
                     </div>
-                  </form>
-                </div>
+                  </div>
+                </form>
               </div>
               <div className="innerBox">
                 <div className="titleBox">
                   <div className="title">추진 내역</div>
                 </div>
-                <div className="desc">
-                  <form onSubmit={handleUpdate}>
+                <form onSubmit={handleUpdate}>
+                  <div className="desc">
                     <div className="editorContainer">
                       <ReactQuill
                         ref={progressRef}
@@ -223,15 +256,15 @@ const IdeaRegister = ({ onClose }) => {
                         onChange={setProgress}
                       />
                     </div>
-                  </form>
-                </div>
+                  </div>
+                </form>
               </div>
               <div className="innerBox">
                 <div className="titleBox">
                   <div className="title">정량적 효과</div>
                 </div>
-                <div className="desc">
-                  <form onSubmit={handleUpdate}>
+                <form onSubmit={handleUpdate}>
+                  <div className="desc">
                     <div className="editorContainer">
                       <ReactQuill
                         ref={quantitativeEffectRef}
@@ -242,15 +275,15 @@ const IdeaRegister = ({ onClose }) => {
                         onChange={setQuantitativeEffect}
                       />
                     </div>
-                  </form>
-                </div>
+                  </div>
+                </form>
               </div>
               <div className="innerBox">
                 <div className="titleBox">
                   <div className="title">정성적 효과</div>
                 </div>
-                <div className="desc">
-                  <form onSubmit={handleUpdate}>
+                <form onSubmit={handleUpdate}>
+                  <div className="desc">
                     <div className="editorContainer">
                       <ReactQuill
                         ref={qualitativeEffectRef}
@@ -261,8 +294,8 @@ const IdeaRegister = ({ onClose }) => {
                         onChange={setQualitativeEffect}
                       />
                     </div>
-                  </form>
-                </div>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
@@ -315,7 +348,7 @@ const IdeaRegister = ({ onClose }) => {
             </div>
 
             <div className="projectCategory">
-              <span className="fieldLabel">사업 분야</span>
+              <span className="fieldLabel">사업분야</span>
               <div className="fieldRow">
                 <FormControl variant="standard" sx={{ m: 0, minWidth: 120 }}>
                   <Select
@@ -335,7 +368,7 @@ const IdeaRegister = ({ onClose }) => {
                     <MenuItem value="전송">전송</MenuItem>
                   </Select>
                 </FormControl>
-                <span className="fieldLabel">업무 분야</span>
+                <span className="fieldLabel">업무분야</span>
                 <FormControl variant="standard" sx={{ m: 0, minWidth: 120 }}>
                   <Select
                     id="job-field-select"
@@ -474,7 +507,7 @@ const IdeaRegister = ({ onClose }) => {
 
             <div className="projectCategory">
               <span className="fieldLabel">유용성</span>
-              <FormControl sx={{ m: 0, width: 200 }}>
+              <FormControl sx={{ m: 0, width: 300 }}>
                 <Select
                   labelId="demo-multiple-name-label"
                   id="demo-multiple-name"
@@ -499,7 +532,7 @@ const IdeaRegister = ({ onClose }) => {
 
             <div className="projectCategory">
               <span className="fieldLabel">개선내역</span>
-              <FormControl sx={{ m: 0, width: 200 }}>
+              <FormControl sx={{ m: 0, width: 300 }}>
                 <Select
                   labelId="demo-multiple-name-label"
                   id="demo-multiple-name"
@@ -521,8 +554,17 @@ const IdeaRegister = ({ onClose }) => {
                 </Select>
               </FormControl>
             </div>
-            <button onClick={onClose}>닫기</button>
           </div>
+        </div>
+
+        {/* 버튼 컨테이너 */}
+        <div className="buttonContainer">
+          <button className="cancelButton" onClick={onClose}>
+            취소
+          </button>
+          <button className="registerButton" onClick={handleSubmit}>
+            등록
+          </button>
         </div>
       </div>
     </div>

@@ -1,19 +1,95 @@
 // ideaRegister.scss
 @import "../../../style.scss";
 
+.modalContent {
+  color: #565656;
+  background: white;
+  // padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1200px;
+  max-height: 100%;
+  overflow-y: auto;
+  // margin-top: 100px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+
+  .headerTitleBox {
+    font-size: 20px;
+    font-weight: 600;
+    color: $grayColor;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+  }
+
+  // Material-UI 컴포넌트 스타일을 modalContent 내부에 중첩
+  .MuiMenuItem-root {
+    text-align: center;
+    font-size: 12px;
+    &.Mui-selected {
+      font-size: 12px;
+    }
+  }
+  .MuiFormControlLabel-label {
+    font-size: 12px;
+    margin-right: 5px; /* 라디오 버튼 옵션 간 간격 */
+  }
+}
+
 .ideaRegister {
   display: flex;
   align-items: flex-start;
   max-width: 1200px;
   width: 100%;
   height: 100%;
+  margin-bottom: 20px; /* 버튼과의 간격 확보 */
+  position: relative; /* 세로선 위치 지정을 위해 */
+
+  /* 왼쪽과 오른쪽 사이의 세로선 */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 62%; /* left가 flex: 2, right가 flex: 1이니까 2/(2+1) = 66.6% */
+    width: 1px;
+    background-color: #ddd;
+    z-index: 1;
+  }
 
   .left {
     flex: 2;
+    padding-right: 20px;
+    .titleWrap {
+      margin-bottom: 10px;
+      // background-color: violet;
+      .titleBox {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        // background-color: red;
+
+        .title {
+          font-size: 14px;
+          font-weight: 500;
+          color: $grayColor;
+        }
+      }
+
+      .desc {
+        .titleInput {
+          height: 30px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          font-size: 14px;
+        }
+      }
+    }
+
     .contentBox {
       border-radius: 5px;
-      // box-shadow: 3px 4px 4px 0px rgba(0, 0, 0, 0.25);
-      // position: relative;
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -21,8 +97,9 @@
       .innerBox {
         .titleBox {
           display: flex;
-          justify-content: space-between;
+          // justify-content: space-between;
           align-items: center;
+          margin-bottom: 10px;
 
           .title {
             font-size: 14px;
@@ -32,8 +109,23 @@
         }
         .desc {
           .editorContainer {
+            height: 120px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
             .editor {
-              height: 80px;
+              height: 100%;
+              border: none;
+              .ql-toolbar {
+                border: none;
+                position: sticky;
+                top: 0;
+                z-index: 1;
+                background: #f0f0f0;
+                border-radius: 5px;
+              }
+              .ql-container {
+                border: none;
+              }
             }
           }
         }
@@ -46,7 +138,7 @@
     font-size: 14px;
     display: flex;
     flex-direction: column;
-    padding: 15px;
+    padding-left: 20px;
 
     .projectCategory {
       margin-bottom: 15px;
@@ -55,12 +147,23 @@
       align-items: center;
 
       .fieldLabel {
-        width: 80px;
-        margin-right: 15px;
+        width: 70px;
+        margin-right: 5px;
         font-weight: bold;
         font-size: 12px;
         white-space: nowrap;
-        margin-right: 3px;
+      }
+
+      .MuiFormControl-root {
+        margin-left: 0;
+      }
+
+      /* RadioGroup 스타일 */
+      .MuiRadioGroup-root {
+        .MuiFormControlLabel-root {
+          margin-right: 5px; /* 라디오 버튼 옵션 간 간격 */
+          padding-left: 5px; /* 라디오 버튼과 텍스트 사이 간격 */
+        }
       }
 
       .fieldRow {
@@ -69,7 +172,14 @@
         align-items: center;
         flex: 1;
         font-size: 9px;
-        margin-right: 30px;
+
+        .MuiFormControl-root {
+          margin-right: 20px;
+        }
+
+        .fieldLabel {
+          margin-left: 10px;
+        }
       }
     }
   }
@@ -87,26 +197,31 @@
   align-items: center;
 }
 
-.modalContent {
-  color: #565656;
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 80%;
-  max-width: 1200px;
-  max-height: 90vh;
-  overflow-y: auto;
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  width: 100%;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
 
-  // Material-UI 컴포넌트 스타일을 modalContent 내부에 중첩
-  .MuiMenuItem-root {
-    text-align: center;
-    font-size: 12px;
-    &.Mui-selected {
-      font-size: 12px;
-    }
+  button {
+    padding: 5px 15px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    min-width: 80px;
   }
-  .MuiFormControlLabel-label {
-    font-size: 12px;
+
+  // 등록 버튼 스타일
+  .registerButton {
+    background-color: #565656;
+    color: white;
+  }
+
+  // 취소 버튼 스타일
+  .cancelButton {
+    background-color: #999;
+    color: white;
   }
 }
