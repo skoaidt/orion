@@ -384,12 +384,8 @@ const IdeaDesc = () => {
             </div>
           </div>
         </div>
-        <div className="processBox" onClick={handleGanttNavigate}>
-          개발중
         <div className="processBox">
-          <div
-            className="processItem"
-          >
+          <div className="processItem" onClick={handleGanttNavigate}>
             <div className="processItemTitle">개발중</div>
             <div className="lineBox">
               <div className="line">
@@ -485,31 +481,30 @@ const IdeaDesc = () => {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 모달 컴포넌트 렌더링 */}
-      {openModal === "ideaSelected" && (
-        <IdeaSelected onClose={() => setOpenModal(null)} />
-      )}
-      {openModal === "ideaPiloted" && (
-        <IdeaPilot onClose={() => setOpenModal(null)} />
-      )}
-      {openModal === "ideaVerify" && (
-        <IdeaVerify onClose={() => setOpenModal(null)} />
-      )}
-      {openModal === "ideaDevReview" && (
-        <IdeaDevReview onClose={() => setOpenModal(null)} />
-      )}
-      {openModal === "ideaDeveloping" && (
-        <IdeaDeveloping onClose={() => setOpenModal(null)} />
-      )}
-      {openModal === "ideaCompleted" && (
-        <IdeaCompleted onClose={() => setOpenModal(null)} />
-      )}
-      {openModal === "ideaDrop" && (
-        <IdeaDrop onClose={() => setOpenModal(null)} />
-      )}
-    </div>
+        {/* 모달 컴포넌트 렌더링 */}
+        {openModal === "ideaSelected" && (
+          <IdeaSelected onClose={() => setOpenModal(null)} />
+        )}
+        {openModal === "ideaPiloted" && (
+          <IdeaPilot onClose={() => setOpenModal(null)} />
+        )}
+        {openModal === "ideaVerify" && (
+          <IdeaVerify onClose={() => setOpenModal(null)} />
+        )}
+        {openModal === "ideaDevReview" && (
+          <IdeaDevReview onClose={() => setOpenModal(null)} />
+        )}
+        {openModal === "ideaDeveloping" && (
+          <IdeaDeveloping onClose={() => setOpenModal(null)} />
+        )}
+        {openModal === "ideaCompleted" && (
+          <IdeaCompleted onClose={() => setOpenModal(null)} />
+        )}
+        {openModal === "ideaDrop" && (
+          <IdeaDrop onClose={() => setOpenModal(null)} />
+        )}
+      </div>
     </div>
   );
 };
