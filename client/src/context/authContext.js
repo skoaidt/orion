@@ -1,37 +1,32 @@
-import React, { createContext, useCallback, useEffect, useState } from 'react'
-import axios from 'axios';
-export const AuthContext = createContext()
+import React, { createContext, useCallback, useEffect, useState } from "react";
+import axios from "axios";
+export const AuthContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(
     JSON.parse(sessionStorage.getItem("user")) || null
   );
-  const [loginAttempts, setLoginAttempts] = useState(0); // 로그인 시도 횟수 상태 추가 
+  const [loginAttempts, setLoginAttempts] = useState(0); // 로그인 시도 횟수 상태 추가
 
   const login = async ({ username, password }) => {
     try {
       const response = await axios.post("/api/login", { username, password });
-    //  console.log("서버 응답:", response.data);
       const { data } = response;
-
-
-     // console.log("data.success:", data.success);
-     // console.log("data.data", data.data);
 
       if (data.success && data.data.authUserValue === "Y") {
         const userDetails = {};
-        data.data.keyValuePairs.forEach(pair => {
+        data.data.keyValuePairs.forEach((pair) => {
           switch (pair[0]) {
-            case 'USER_ID':
+            case "USER_ID":
               userDetails.userId = pair[1];
               break;
-            case 'Name':
+            case "Name":
               userDetails.name = pair[1];
               break;
-            case 'PrntDeptName':
+            case "PrntDeptName":
               userDetails.prntDeptName = pair[1];
               break;
-            case 'DeptName':
+            case "DeptName":
               userDetails.deptName = pair[1];
               break;
             default:
@@ -41,20 +36,20 @@ export const AuthContextProvider = ({ children }) => {
 
         // Admin 여부 확인 요청 추가
         const adminResponse = await axios.get("/api/developers/getadmin");
-        userDetails.isAdmin = adminResponse.data.some(admin => admin.n_id === userDetails.userId);
-
+        userDetails.isAdmin = adminResponse.data.some(
+          (admin) => admin.n_id === userDetails.userId
+        );
 
         setCurrentUser(userDetails);
         sessionStorage.setItem("user", JSON.stringify(userDetails));
 
-        // 로그인 시간을 저장합니다. 
+        // 로그인 시간을 저장합니다.
         const loginTime = new Date().getTime();
         sessionStorage.setItem("loginTime", loginTime.toString());
 
-        // 로그인 성공시 
+        // 로그인 성공시
         console.log("로그인 성공 - 로그인 시도 횟수 초기화");
         setLoginAttempts(0); //로그인 성공시 시도 횟수 초기화
-
       } else {
         // setLoginAttempts(prev => {
         //   console.log(`로그인 실패 - 시도 횟수 증가 전: ${prev}`);
@@ -84,7 +79,9 @@ export const AuthContextProvider = ({ children }) => {
             break;
           case 500:
             console.error("서버 오류(500) 발생:", error);
-            alert(`로그인 정보 및 서버 오류 등으로 로그인에 실패했습니다. (${attempts}회 실패)`);
+            alert(
+              `로그인 정보 및 서버 오류 등으로 로그인에 실패했습니다. (${attempts}회 실패)`
+            );
             break;
           case 401:
             console.error("로그인 인증(401) 실패:", error);
@@ -107,18 +104,16 @@ export const AuthContextProvider = ({ children }) => {
     // 30분을 밀리초로 환산합니다.
     const timeout = 30 * 60 * 1000;
 
-    if (loginTime && (currentTime - loginTime > timeout)) {
+    if (loginTime && currentTime - loginTime > timeout) {
       logout();
     }
   }, []); // useCallback 의존성 배열이 비어 있으므로, 컴포넌트가 마운트될 때 한 번만 생성됩니다.\
-
 
   // 사용자 활동 감시 : session timeout reset
   const resetSessionTimeout = () => {
     const currentTime = new Date().getTime();
     sessionStorage.setItem("loginTime", currentTime.toString());
   };
-
 
   const logout = () => {
     try {
@@ -140,26 +135,25 @@ export const AuthContextProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [checkSessionTimeout]); // useEffect 의존성 배열에 checkSessionTimeout를 추가합니다.
 
-
-
   // 사용자 활동 감시 : session timeout reset
   useEffect(() => {
-    const events = ['mousemove', 'keydown', 'click', 'scroll'];
+    const events = ["mousemove", "keydown", "click", "scroll"];
     const handleUserActivity = () => resetSessionTimeout();
 
-    events.forEach(event => window.addEventListener(event, handleUserActivity));
+    events.forEach((event) =>
+      window.addEventListener(event, handleUserActivity)
+    );
     return () => {
-      events.forEach(event => window.removeEventListener(event, handleUserActivity));
+      events.forEach((event) =>
+        window.removeEventListener(event, handleUserActivity)
+      );
     };
   }, []);
 
-
   return (
-    // <AuthContext.Provider value={{ currentUser, login, logout }}>  // 로그인 횟수 추가 
+    // <AuthContext.Provider value={{ currentUser, login, logout }}>  // 로그인 횟수 추가
     <AuthContext.Provider value={{ currentUser, login, logout, loginAttempts }}>
       {children}
     </AuthContext.Provider>
   );
-}
-
-
+};
