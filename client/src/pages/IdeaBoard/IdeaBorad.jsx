@@ -5,9 +5,13 @@ import IdeaTable from "./IdeaTable/IdeaTable";
 import IdeaDesc from "./IdeaTable/IdeaDesc";
 import SideBar from "./IdeaTable/SideBar";
 import IdeaNavbar from "./IdeaTable/IdeaNavbar";
+import IdeaGantt from "./IdeaGantt/IdeaGantt";
+
 const IdeaBorad = () => {
   const location = useLocation();
   const isDetailPage = location.pathname.includes("/detail/");
+  const isGanttPage = location.pathname.includes("/gantt/");
+
   // 화면 초기화 설정
   useEffect(() => {
     const appElement = document.querySelector(".app");
@@ -26,13 +30,24 @@ const IdeaBorad = () => {
     };
   }, []);
 
+  // 컴포넌트 선택 로직
+  const renderContent = () => {
+    if (isDetailPage) {
+      return <IdeaDesc />;
+    } else if (isGanttPage) {
+      return <IdeaGantt />;
+    } else {
+      return <IdeaTable />;
+    }
+  };
+
   return (
     <div className="ideaBoard">
       <div className="wrapp">
         <SideBar />
         <div className="contents">
           <IdeaNavbar />
-          {isDetailPage ? <IdeaDesc /> : <IdeaTable />}
+          {renderContent()}
         </div>
       </div>
     </div>

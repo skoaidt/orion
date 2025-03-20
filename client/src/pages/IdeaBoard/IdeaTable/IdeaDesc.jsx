@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import IdeaSelected from "../IdeaModal/IdeaSelected";
 import IdeaPilot from "../IdeaModal/IdeaPilot";
@@ -25,10 +25,15 @@ import CancelIcon from "@mui/icons-material/Cancel";
 
 const IdeaDesc = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [openModal, setOpenModal] = useState(null);
 
   const handleBoxClick = (modalType) => {
     setOpenModal(modalType);
+  };
+
+  const handleGanttNavigate = () => {
+    navigate(`/ideaboard/gantt/${id}`);
   };
 
   return (
@@ -379,10 +384,11 @@ const IdeaDesc = () => {
             </div>
           </div>
         </div>
+        <div className="processBox" onClick={handleGanttNavigate}>
+          개발중
         <div className="processBox">
           <div
             className="processItem"
-            onClick={() => handleBoxClick("ideaDeveloping")}
           >
             <div className="processItemTitle">개발중</div>
             <div className="lineBox">
@@ -503,6 +509,7 @@ const IdeaDesc = () => {
       {openModal === "ideaDrop" && (
         <IdeaDrop onClose={() => setOpenModal(null)} />
       )}
+    </div>
     </div>
   );
 };

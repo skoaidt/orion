@@ -89,6 +89,7 @@ export const Main = () => {
           {/* <Route path="/fileupload" element={<FileUpload />} /> */}
           <Route path="/ideaboard" element={<IdeaBorad />} />
           <Route path="/ideaboard/detail/:id" element={<IdeaBorad />} />
+          <Route path="/ideaboard/gantt/:id" element={<IdeaBorad />} />
           <Route path="/solmgmt" element={<SolMgmt />} />
           <Route path="/dashboard" element={<DashBoard />} />
         </Routes>
