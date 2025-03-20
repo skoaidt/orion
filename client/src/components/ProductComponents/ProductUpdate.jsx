@@ -13,7 +13,23 @@ import {
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { BsFloppy2Fill } from "react-icons/bs";
+import {
+  Box,
+  Button,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Grid,
+  Radio,
+  RadioGroup,
+  TextField,
+} from "@mui/material";
+import axios from "axios";
+import React, { useEffect, useRef, useState } from "react";
+import { BsFloppy2Fill } from "react-icons/bs";
 import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { useNavigate } from "react-router-dom";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
 
@@ -22,6 +38,9 @@ export const ProductUpdate = ({ solutionData, productId, getDevelopers }) => {
   const [target, setTarget] = useState(solutionData.target);
   const [effect, setEffect] = useState(solutionData.effect);
   const [developerInfo, setDeveloperInfo] = useState("");
+  const developerData = getDevelopers.find(
+    (developer) => developer.n_id === solutionData.n_id
+  );
   const developerData = getDevelopers.find(
     (developer) => developer.n_id === solutionData.n_id
   );
@@ -38,10 +57,22 @@ export const ProductUpdate = ({ solutionData, productId, getDevelopers }) => {
     version: solutionData.version || "",
     reupdate: solutionData.reupdate || "",
     reg_date: solutionData.reg_date || "",
+    sol_name: solutionData.sol_name || "",
+    sol_full_name: solutionData.sol_full_name || "",
+    kor_name: solutionData.kor_name || "",
+    work_field: solutionData.work_field || "",
+    url: solutionData.url || "",
+    github_url: solutionData.github_url || "",
+    version: solutionData.version || "",
+    reupdate: solutionData.reupdate || "",
+    reg_date: solutionData.reg_date || "",
   });
 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState(
+    developerData?.dev_img ||
+      `${process.env.PUBLIC_URL}/image/developer/basic.jpg`
+  );
     developerData?.dev_img ||
       `${process.env.PUBLIC_URL}/image/developer/basic.jpg`
   );
@@ -50,6 +81,7 @@ export const ProductUpdate = ({ solutionData, productId, getDevelopers }) => {
   const quillRef = useRef(null);
   useEffect(() => {
     const observer = new MutationObserver((mutations) => {
+      console.log("ReactQuill 내부 DOM 변화 감지됨", mutations);
       console.log("ReactQuill 내부 DOM 변화 감지됨", mutations);
     });
     const config = {
@@ -63,12 +95,14 @@ export const ProductUpdate = ({ solutionData, productId, getDevelopers }) => {
     return () => observer.disconnect();
   }, []);
   // Solution Contents 수정하기
+  // Solution Contents 수정하기
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
       await axios.put(`/api/solutions/update/${productId}`, {
         direc,
         target,
+        effect,
         effect,
       });
       alert("업데이트 성공!");
@@ -102,6 +136,28 @@ export const ProductUpdate = ({ solutionData, productId, getDevelopers }) => {
       ],
       [{ align: [] }],
     ],
+      [{ header: [1, 2, 3, 4, 5, 6, false] }],
+      ["bold", "italic", "underline", "strike"],
+      ["blockquote", "code-block"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ script: "sub" }, { script: "super" }],
+      [
+        {
+          color: [
+            "black",
+            "gray",
+            "red",
+            "green",
+            "blue",
+            "orange",
+            "violet",
+            "#d0d1d2",
+          ],
+        },
+        { background: [] },
+      ],
+      [{ align: [] }],
+    ],
   };
 
   // 개발자 소개글 수정하기
@@ -112,10 +168,14 @@ export const ProductUpdate = ({ solutionData, productId, getDevelopers }) => {
   }, [developerData]);
 
   // 개발자 소개글
+  // 개발자 소개글
   const handleDevIntroUpdate = async (e) => {
     e.preventDefault();
     // 개발자 리스트가 없을 경우 저장을 중단하고 경고 메시지를 보여줍니다.
     if (developerData === undefined) {
+      alert(
+        "개발자로 등록되지 않아서, 소개글을 수정할 수 없습니다. 담당자에게 개발자 등록요청해주세요."
+      );
       alert(
         "개발자로 등록되지 않아서, 소개글을 수정할 수 없습니다. 담당자에게 개발자 등록요청해주세요."
       );
@@ -124,6 +184,7 @@ export const ProductUpdate = ({ solutionData, productId, getDevelopers }) => {
     try {
       await axios.put("/api/developers/updatedevintro", {
         n_id: solutionData.n_id,
+        introduction: developerInfo,
         introduction: developerInfo,
       });
       alert("개발자 소개글 업데이트 완료했습니다.");
@@ -183,6 +244,7 @@ export const ProductUpdate = ({ solutionData, productId, getDevelopers }) => {
             "Content-Type": "application/json",
           },
         }
+      );
       );
       if (response.status === 200) {
         console.log("서버로부터 받은 데이터:", response.data);
@@ -440,6 +502,48 @@ export const ProductUpdate = ({ solutionData, productId, getDevelopers }) => {
                                 control={<Radio />}
                                 label="경영"
                               />
+                            <RadioGroup
+                              row
+                              aria-label="work_field"
+                              name="work_field"
+                              value={formValues.work_field}
+                              onChange={handleChange}
+                            >
+                              <FormControlLabel
+                                value="rm"
+                                control={<Radio />}
+                                label="RM"
+                              />
+                              <FormControlLabel
+                                value="access"
+                                control={<Radio />}
+                                label="Access"
+                              />
+                              <FormControlLabel
+                                value="wire"
+                                control={<Radio />}
+                                label="전송"
+                              />
+                              <FormControlLabel
+                                value="infra"
+                                control={<Radio />}
+                                label="Infra설비"
+                              />
+                              <FormControlLabel
+                                value="asset"
+                                control={<Radio />}
+                                label="자산"
+                              />
+                              <FormControlLabel
+                                value="so"
+                                control={<Radio />}
+                                label="SO"
+                              />
+                              <FormControlLabel
+                                value="mgmt"
+                                control={<Radio />}
+                                label="경영"
+                              />
                             </RadioGroup>
                           </FormControl>
                         </Box>
@@ -512,6 +616,10 @@ export const ProductUpdate = ({ solutionData, productId, getDevelopers }) => {
                           variant="contained"
                           color="primary"
                         >
+                          type="submit"
+                          variant="contained"
+                          color="primary"
+                        >
                           업데이트
                         </Button>
                       </Grid>
@@ -519,6 +627,7 @@ export const ProductUpdate = ({ solutionData, productId, getDevelopers }) => {
                   </form>
                 </div>
                 <div className="gap-20"></div>
+                <hr style={{ width: "80%" }} />
                 <hr style={{ width: "80%" }} />
                 <div className="gap-20"></div>
                 <div className="title">개발자 소개글 수정</div>
@@ -535,9 +644,20 @@ export const ProductUpdate = ({ solutionData, productId, getDevelopers }) => {
                     autoComplete="introduction"
                     multiline
                     rows={6}
+                    variant="outlined"
+                    margin="none"
+                    fullWidth
+                    name="introduction"
+                    label="개발자 소개글"
+                    type="text"
+                    id="introduction"
+                    autoComplete="introduction"
+                    multiline
+                    rows={6}
                     value={developerInfo}
                     onChange={(e) => setDeveloperInfo(e.target.value)}
                     inputProps={{
+                      maxLength: maxChars,
                       maxLength: maxChars,
                     }}
                     // 입력 필드 아래에 남은 글자 수를 보여줍니다.
@@ -563,5 +683,8 @@ export const ProductUpdate = ({ solutionData, productId, getDevelopers }) => {
     </div>
   );
 };
+  );
+};
 
 export default ProductUpdate;
+
