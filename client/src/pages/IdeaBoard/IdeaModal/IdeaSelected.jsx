@@ -13,8 +13,8 @@ import Switch from "@mui/material/Switch";
 
 const IdeaSelected = ({ onClose }) => {
   return (
-    <div className="modalOverlay">
-      <div className="modalContent">
+    <div className="selectedModalOverlay">
+      <div className="selectedModalContent">
         <div className="titleBox">
           <h2>과제 선정</h2>
           <CloseIcon className="closeIcon" onClick={onClose} />
