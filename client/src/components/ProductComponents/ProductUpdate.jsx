@@ -222,6 +222,7 @@ export const ProductUpdate = ({ solutionData, productId, getDevelopers }) => {
         version: formValues.version,
         reupdate: formValues.reupdate,
         reg_date: formValues.reg_date,
+        usedYN: "Y",
       });
       alert("부가정보 업데이트 성공!");
       navigate(`/product/${productId}/`);
