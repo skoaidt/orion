@@ -2,13 +2,14 @@ import mysql from "mysql2";
 import sql from "mssql";
 import "dotenv/config";
 
-// MySQL 설정
+// // MySQL 설정
 // export const db = mysql.createConnection({
-//   host: process.env.MAC_DB_HOST,
-//   user: process.env.MAC_DB_USER,
-//   password: process.env.MAC_DB_PASSWORD,
-//   database: process.env.MAC_DB_NAME,
+//  host: process.env.LOCAL_DB_HOST,
+//  user: process.env.LOCAL_DB_USER,
+//  password: process.env.LOCAL_DB_PASSWORD,
+//  database: process.env.LOCAL_DB_NAME,
 // });
+
 
 export const db = mysql.createConnection({
   host: process.env.SPECIAL_HOST,
