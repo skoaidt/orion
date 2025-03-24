@@ -278,7 +278,7 @@ app.use("/api/developers", developerRoutes);
 app.use("/api/datatables", dataTableRoutes);
 app.use("/api/typings", typingRoutes);
 
-// 파일 업로드를 위한 저장소 설정
+// Completed 파일 업로드를 위한 저장소 설정
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadPath = path.join(
