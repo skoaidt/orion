@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import "./ideaDevReview.scss";
 import CloseIcon from "@mui/icons-material/Close";
+import { TextField, Box } from "@mui/material";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 const TransferList = () => {
   const [leftItems, setLeftItems] = useState([
@@ -17,23 +20,23 @@ const TransferList = () => {
 
   // 항목 이동 핸들러
   const moveToRight = () => {
-    setRightItems([...rightItems, ...selectedLeft]); // 오른쪽 리스트에 추가
-    setLeftItems(leftItems.filter((item) => !selectedLeft.includes(item))); // 왼쪽 리스트에서 제거
-    setSelectedLeft([]); // 선택 초기화
+    setRightItems([...rightItems, ...selectedLeft]);
+    setLeftItems(leftItems.filter((item) => !selectedLeft.includes(item)));
+    setSelectedLeft([]);
   };
 
   const moveToLeft = () => {
-    setLeftItems([...leftItems, ...selectedRight]); // 왼쪽 리스트에 추가
-    setRightItems(rightItems.filter((item) => !selectedRight.includes(item))); // 오른쪽 리스트에서 제거
-    setSelectedRight([]); // 선택 초기화
+    setLeftItems([...leftItems, ...selectedRight]);
+    setRightItems(rightItems.filter((item) => !selectedRight.includes(item)));
+    setSelectedRight([]);
   };
 
   // 항목 선택 핸들러
   const toggleSelection = (item, selectedItems, setSelectedItems) => {
     if (selectedItems.includes(item)) {
-      setSelectedItems(selectedItems.filter((i) => i !== item)); // 선택 해제
+      setSelectedItems(selectedItems.filter((i) => i !== item));
     } else {
-      setSelectedItems([...selectedItems, item]); // 선택 추가
+      setSelectedItems([...selectedItems, item]);
     }
   };
 
@@ -73,6 +76,7 @@ const TransferList = () => {
       <div className="transferList">
         {renderTable(leftItems, selectedLeft, setSelectedLeft, "left")}
       </div>
+
       {/* 이동 버튼 */}
       <div className="transferButton">
         {/* 오른쪽으로 이동 버튼 */}
@@ -103,6 +107,59 @@ const TransferList = () => {
   );
 };
 
+const ScheduleRowContainer = () => {
+  const [filters, setFilters] = useState({
+    startDate: null,
+    endDate: null,
+  });
+
+  // ✅ 날짜 변경 핸들러(useCallback으로 최적화)
+  const handleStartDateChange = useCallback((newValue) => {
+    setFilters((prev) => ({ ...prev, startDate: newValue }));
+  }, []);
+
+  const handleEndDateChange = useCallback((newValue) => {
+    setFilters((prev) => ({ ...prev, endDate: newValue }));
+  }, []);
+
+  // ✅ 개발 일정 메시지 생성 (useMemo로 최적화)
+  const scheduleMessage = useMemo(() => {
+    if (filters.startDate && filters.endDate) {
+      const startDateFormatted = filters.startDate.format("YYYY-MM-DD");
+      const endDateFormatted = filters.endDate.format("YYYY-MM-DD");
+      return `개발 일정: ${startDateFormatted} ~ ${endDateFormatted}`;
+    }
+    return "";
+  }, [filters.startDate, filters.endDate]);
+
+  return (
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {/* 시작 날짜 선택 */}
+        <DatePicker
+          label="시작 날짜"
+          value={filters.startDate}
+          onChange={handleStartDateChange}
+          renderInput={(params) => <TextField {...params} />}
+        />
+        {/* 종료 날짜 선택 */}
+        <DatePicker
+          label="종료 날짜"
+          value={filters.endDate}
+          onChange={handleEndDateChange}
+          renderInput={(params) => <TextField {...params} />}
+        />
+        {/* 출력 메시지 */}
+        {scheduleMessage && (
+          <Box sx={{ marginTop: 2, color: "green", fontWeight: "bold" }}>
+            {scheduleMessage}
+          </Box>
+        )}
+      </Box>
+    </LocalizationProvider>
+  );
+};
+
 const IdeaDevReview = ({ onClose }) => {
   return (
     <div className="reviewModalOverlay">
@@ -123,6 +180,7 @@ const IdeaDevReview = ({ onClose }) => {
         {/* 개발일정 */}
         <div className="ScheduleRowContainer">
           <div className="fieldLabel">개발 일정</div>
+          <ScheduleRowContainer />
         </div>
 
         {/* 우선순위 */}
