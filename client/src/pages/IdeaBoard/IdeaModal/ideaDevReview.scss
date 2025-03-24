@@ -1,4 +1,6 @@
-.modalOverlay {
+@import "../../../style.scss";
+
+.reviewModalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -8,12 +10,234 @@
   display: flex;
   justify-content: center;
   align-items: center;
-}
+  z-index: 1000;
 
-.modalContent {
-  color: #565656;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  .reviewModalContent {
+    color: #565656;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 700px;
+    height: 630px;
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+    .titleBox {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      h2 {
+        text-indent: 10px; //요만큼 띄워서 시작
+      }
+      .closeIcon {
+        cursor: pointer;
+        color: #565656;
+        &:hover {
+          color: #000;
+        }
+      }
+    }
+
+    .titleUnderline {
+      border: 0;
+      height: 1px;
+      background-color: #565656;
+      margin: 0;
+    }
+
+    .manRowContainer {
+      display: flex;
+      align-items: center;
+      width: 700px;
+      height: 220px;
+      background-color: white;
+      //gap: 10px;
+
+      .fieldLabel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        color: white;
+        background: #565656;
+        width: 90px;
+        height: 100%;
+        padding: 0px;
+        border-radius: 5px;
+        box-sizing: border-box;
+        flex: none;
+      }
+      .transferTable {
+        display: flex;
+        height: 100%;
+        position: relative;
+        gap: 10px;
+
+        .transferList {
+          align-items: flex-start;
+          //border: 1px solid #ddd; // 테두리 추가
+          padding: 5px; // 내부 여백
+          width: 50%; // 리스트 너비
+          height: auto;
+          box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); // 그림자 추가
+
+          .table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* 각 셀의 너비를 고정 */
+          }
+
+          .table th,
+          .table td {
+            padding: 1px; /* 셀 내부 여백 설정 */
+            text-align: center; /* 텍스트를 수평 가운데 정렬 */
+            vertical-align: top; /* 텍스트를 상단 정렬 */
+            height: auto; /* 각 행의 높이는 내용에 맞게 조정 */
+            overflow: hidden; /* 내용이 넘칠 경우 숨김 처리 */
+            white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+            text-overflow: ellipsis; /* 넘치는 텍스트에 말줄임표 추가 */
+          }
+
+          .table th {
+            background-color: #f4f4f4; /* 헤더 배경색 설정 */
+            font-size: 12px; /* 헤더 셀의 폰트 크기 설정 */
+            font-weight: bold; /* 헤더 텍스트를 굵게 표시 */
+            vertical-align: top; /* 헤더 텍스트를 상단 정렬 */
+            height: auto; /* 헤더의 높이는 내용에 맞게 조정 (필요 시 고정 가능) */
+          }
+
+          .table td {
+            font-size: 12px; /* 데이터 셀의 폰트 크기 설정 */
+            vertical-align: top; /* 데이터 셀 텍스트를 상단 정렬 */
+            width: auto; /* 셀 너비를 자동으로 조정하여 테이블 전체를 채우도록 설정 */
+          }
+
+          .table tr:hover {
+            background-color: #e6e6e6; /* 행 호버 효과로 배경색 변경 */
+          }
+
+          .table tr.selected {
+            background-color: #d1e7ff; /* 선택된 행 강조 색상 */
+          }
+        }
+        .transferButton {
+          position: absolute;
+          top: calc(50% - 20px);
+          left: calc(50% - 10px); /* 버튼이 중앙에 위치하도록 조정 */
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+
+          .moveButton {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease; /* 부드러운 애니메이션 효과 */
+
+            &:hover {
+              transform: scale(1.1); /* 버튼 크기 확대 */
+              background-color: rgba(0, 0, 0, 0.1); /* 배경색 변경 */
+            }
+
+            &:active {
+              transform: scale(0.9); /* 버튼 크기 축소 */
+              background-color: rgba(0, 0, 0, 0.2); /* 배경색 더 진하게 변경 */
+            }
+
+            &.disabled {
+              pointer-events: none; /* 클릭 이벤트 비활성화 */
+              opacity: 0.5; /* 비활성화 상태를 시각적으로 구분하기 위해 투명도 적용 */
+            }
+          }
+        }
+      }
+    }
+
+    .ScheduleRowContainer {
+      display: flex;
+      align-items: center;
+      width: 100%; //700px;
+      height: 25px;
+      background-color: tomato;
+      gap: 10px;
+
+      .fieldLabel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        //flex: 2;
+        font-size: 14px;
+        color: white;
+        background: #565656;
+        width: 90px;
+        height: 100%;
+        padding: 0px;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+    }
+
+    .priorityRowContainer {
+      display: flex;
+      align-items: center;
+      width: 100%; //700px;
+      height: 25px;
+      background-color: tomato;
+      gap: 10px;
+
+      .fieldLabel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        //flex: 2;
+        font-size: 14px;
+        color: white;
+        background: #565656;
+        width: 90px;
+        height: 100%;
+        padding: 0px;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+    }
+
+    .buttonContainer {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 0px;
+
+      button {
+        padding: 5px 15px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        min-width: 80px;
+
+        &:hover {
+          transform: scale(1.05); // Slightly enlarge the button on hover
+          background-color: #666; // Change background color on hover (default for all buttons)
+        }
+
+        &:active {
+          transform: scale(0.95); // Slightly shrink the button when clicked
+          background-color: #444; // Change background color on click (default for all buttons)
+        }
+      }
+
+      .registerButton {
+        background-color: #565656;
+        color: white;
+      }
+
+      .cancelButton {
+        background-color: #999;
+        color: white;
+      }
+    }
+  }
 }
