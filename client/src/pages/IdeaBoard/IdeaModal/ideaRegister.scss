@@ -27,6 +27,32 @@
     color: $grayColor;
   }
 
+  .titleBox {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .closeIcon {
+      cursor: pointer;
+      font-size: 24px;
+    }
+  }
+
+  .titleUnderline {
+    width: 100%;
+    border: none;
+    border-top: 1px solid #ccc;
+    margin-bottom: 20px;
+  }
+
   // Material-UI 컴포넌트 스타일을 modalContent 내부에 중첩
   .MuiMenuItem-root {
     text-align: center;
@@ -38,6 +64,22 @@
   .MuiFormControlLabel-label {
     font-size: 12px;
     margin-right: 5px; /* 라디오 버튼 옵션 간 간격 */
+  }
+
+  // Select 컴포넌트 스타일 추가
+  .MuiSelect-select {
+    font-size: 12px !important;
+    padding: 5px 10px !important;
+  }
+
+  .MuiInputBase-root {
+    font-size: 12px !important;
+  }
+
+  .MuiSelect-root {
+    .MuiSelect-select {
+      font-size: 12px !important;
+    }
   }
 }
 
@@ -112,6 +154,7 @@
             height: 140px;
             border: 1px solid #ddd;
             border-radius: 5px;
+            overflow: hidden;
 
             .editor {
               height: 100%;
@@ -123,13 +166,36 @@
                 top: 0;
                 z-index: 1;
                 background: #f0f0f0;
-                border-radius: 5px;
+                border-radius: 5px 5px 0 0;
                 display: flex;
                 flex-wrap: wrap;
               }
 
               .ql-container {
                 border: none;
+                height: calc(100% - 42px);
+                overflow-y: auto;
+                padding: 10px;
+                font-size: 12px;
+                line-height: 1.5;
+
+                &::-webkit-scrollbar {
+                  width: 6px;
+                }
+
+                &::-webkit-scrollbar-track {
+                  background: #f1f1f1;
+                  border-radius: 3px;
+                }
+
+                &::-webkit-scrollbar-thumb {
+                  background: #888;
+                  border-radius: 3px;
+                }
+
+                &::-webkit-scrollbar-thumb:hover {
+                  background: #555;
+                }
               }
             }
           }
@@ -161,6 +227,16 @@
 
       .MuiFormControl-root {
         margin-left: 0;
+        min-width: 120px;
+
+        .MuiSelect-select {
+          font-size: 12px !important;
+          padding: 5px 10px !important;
+        }
+
+        .MuiInputBase-root {
+          font-size: 12px !important;
+        }
       }
 
       /* RadioGroup 스타일 */
@@ -180,6 +256,16 @@
 
         .MuiFormControl-root {
           margin-right: 20px;
+          min-width: 120px;
+
+          .MuiSelect-select {
+            font-size: 12px !important;
+            padding: 5px 10px !important;
+          }
+
+          .MuiInputBase-root {
+            font-size: 12px !important;
+          }
         }
 
         .fieldLabel {
@@ -206,10 +292,9 @@
 .buttonContainer {
   display: flex;
   justify-content: center;
-  gap: 30px;
+  gap: 10px;
   width: 100%;
-  padding-top: 10px;
-  border-top: 1px solid #eee;
+  margin-top: 20px;
 
   button {
     padding: 5px 15px;
@@ -217,15 +302,23 @@
     border: none;
     border-radius: 5px;
     min-width: 80px;
+
+    &:hover {
+      transform: scale(1.05);
+      background-color: #666;
+    }
+
+    &:active {
+      transform: scale(0.95);
+      background-color: #444;
+    }
   }
 
-  // 등록 버튼 스타일
   .registerButton {
     background-color: #565656;
     color: white;
   }
 
-  // 취소 버튼 스타일
   .cancelButton {
     background-color: #999;
     color: white;

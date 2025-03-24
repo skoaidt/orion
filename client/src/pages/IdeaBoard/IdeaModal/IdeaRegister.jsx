@@ -9,14 +9,19 @@ import MenuItem from "@mui/material/MenuItem";
 import { useTheme } from "@mui/material/styles";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import CloseIcon from "@mui/icons-material/Close";
 
 const IdeaRegister = ({ onClose }) => {
+  // 각 Select 컴포넌트별로 독립적인 상태 생성
   const [businessField, setBusinessField] = React.useState("");
   const [jobField, setJobField] = React.useState("");
   const [usability, setUsability] = React.useState("");
   const [duplication, setDuplication] = React.useState("");
   const [tbohStatus, setTbohStatus] = React.useState("");
   const [personName, setPersonName] = React.useState([]);
+  const [usePeriod, setUsePeriod] = React.useState(""); // 활용기간
+  const [useScope, setUseScope] = React.useState(""); // 사용범위
+  const [platform, setPlatform] = React.useState(""); // 플랫폼
 
   // 각 에디터별 개별 상태값 생성
   const [background, setBackground] = useState("");
@@ -181,6 +186,18 @@ const IdeaRegister = ({ onClose }) => {
     console.log("폼이 제출되었습니다");
   };
 
+  const handleUsePeriodChange = (event) => {
+    setUsePeriod(event.target.value);
+  };
+
+  const handleUseScopeChange = (event) => {
+    setUseScope(event.target.value);
+  };
+
+  const handlePlatformChange = (event) => {
+    setPlatform(event.target.value);
+  };
+
   // 등록 버튼 핸들러
   const handleSubmit = () => {
     // 여기에 등록 로직 추가
@@ -195,6 +212,9 @@ const IdeaRegister = ({ onClose }) => {
       duplication,
       tbohStatus,
       personName,
+      usePeriod,
+      useScope,
+      platform,
     });
     // 등록 후 모달 닫기
     onClose();
@@ -203,7 +223,11 @@ const IdeaRegister = ({ onClose }) => {
   return (
     <div className="modalOverlay">
       <div className="modalContent">
-        <div className="headerTitleBox">IDEA 등록</div>
+        <div className="titleBox">
+          <h2>IDEA 등록</h2>
+          <CloseIcon className="closeIcon" onClick={onClose} />
+        </div>
+        <hr className="titleUnderline" />
         <div className="ideaRegister">
           <div className="left">
             <div className="titleWrap">
@@ -458,9 +482,9 @@ const IdeaRegister = ({ onClose }) => {
               <div className="fieldRow">
                 <FormControl variant="standard" sx={{ m: 0, minWidth: 120 }}>
                   <Select
-                    id="demo-simple-select-standard"
-                    value={businessField}
-                    onChange={handleBusinessFieldChange}
+                    id="use-period-select"
+                    value={usePeriod}
+                    onChange={handleUsePeriodChange}
                   >
                     <MenuItem value=""></MenuItem>
                     <MenuItem value="매일">매일</MenuItem>
@@ -473,9 +497,9 @@ const IdeaRegister = ({ onClose }) => {
                 <span className="fieldLabel">사용범위</span>
                 <FormControl variant="standard" sx={{ m: 0, minWidth: 120 }}>
                   <Select
-                    id="job-field-select"
-                    value={jobField}
-                    onChange={handleJobFieldChange}
+                    id="use-scope-select"
+                    value={useScope}
+                    onChange={handleUseScopeChange}
                   >
                     <MenuItem value=""></MenuItem>
                     <MenuItem value="필수사용">필수사용</MenuItem>
@@ -491,9 +515,9 @@ const IdeaRegister = ({ onClose }) => {
               <span className="fieldLabel">플랫폼</span>
               <FormControl variant="standard" sx={{ m: 0, minWidth: 120 }}>
                 <Select
-                  id="demo-simple-select-standard"
-                  value={businessField}
-                  onChange={handleBusinessFieldChange}
+                  id="platform-select"
+                  value={platform}
+                  onChange={handlePlatformChange}
                 >
                   <MenuItem value=""></MenuItem>
                   <MenuItem value="Web">Web</MenuItem>

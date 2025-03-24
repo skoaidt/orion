@@ -1,22 +1,15 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 import "./ideaVerify.scss";
 import CloseIcon from "@mui/icons-material/Close";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import Grid from "@mui/material/Grid";
-import Button from "@mui/material/Button";
 import FormGroup from "@mui/material/FormGroup";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Switch from "@mui/material/Switch";
-import axios from "axios";
 
 const IdeaVerify = ({ onClose }) => {
   return (
