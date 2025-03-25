@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import "./ideaDevReview.scss";
 import CloseIcon from "@mui/icons-material/Close";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 const TransferList = () => {
   const [leftItems, setLeftItems] = useState([
@@ -107,6 +110,22 @@ const IdeaDevReview = ({ onClose }) => {
     onClose(); // 모달 닫기
   };
 
+  // 시작일과 종료일 상태 관리
+  const [filters, setFilters] = useState({
+    startDate: null,
+    endDate: null,
+  });
+
+  // 시작일 변경 핸들러
+  const handleStartDateChange = (newValue) => {
+    setFilters((prevFilters) => ({ ...prevFilters, startDate: newValue }));
+  };
+
+  // 종료일 변경 핸들러
+  const handleEndDateChange = (newValue) => {
+    setFilters((prevFilters) => ({ ...prevFilters, endDate: newValue }));
+  };
+
   return (
     <div className="reviewModalOverlay">
       <div className="reviewModalContent">
@@ -126,6 +145,35 @@ const IdeaDevReview = ({ onClose }) => {
         {/* 개발일정 */}
         <div className="ScheduleRowContainer">
           <div className="fieldLabel">개발 일정</div>
+
+          {/* ✅ 시작 날짜 선택 */}
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="시작일"
+              value={filters.startDate}
+              onChange={handleStartDateChange}
+              slotProps={{ textField: { size: "small" } }}
+            />
+          </LocalizationProvider>
+
+          {/* ✅ 종료 날짜 선택 */}
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="종료일"
+              value={filters.endDate}
+              onChange={handleEndDateChange}
+              slotProps={{ textField: { size: "small" } }}
+              style={{ marginLeft: "16px" }} // 간격 추가
+            />
+          </LocalizationProvider>
+
+          {/* 선택된 날짜 표시 */}
+          {filters.startDate && filters.endDate && (
+            <p style={{ marginTop: "8px" }}>
+              선택된 기간: {dayjs(filters.startDate).format("YYYY-MM-DD")} ~{" "}
+              {dayjs(filters.endDate).format("YYYY-MM-DD")}
+            </p>
+          )}
         </div>
 
         {/* 우선순위 */}
