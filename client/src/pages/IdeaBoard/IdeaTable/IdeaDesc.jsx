@@ -484,7 +484,7 @@ const IdeaDesc = () => {
 
         {/* 모달 컴포넌트 렌더링 */}
         {openModal === "ideaSelected" && (
-          <IdeaSelected onClose={() => setOpenModal(null)} />
+          <IdeaSelected onClose={() => setOpenModal(null)} ideaId={1} />
         )}
         {openModal === "ideaPiloted" && (
           <IdeaPilot onClose={() => setOpenModal(null)} />

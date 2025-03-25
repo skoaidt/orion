@@ -10,6 +10,7 @@ import { useTheme } from "@mui/material/styles";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import CloseIcon from "@mui/icons-material/Close";
+import axios from "axios";
 
 const IdeaRegister = ({ onClose }) => {
   // 각 Select 컴포넌트별로 독립적인 상태 생성
@@ -199,25 +200,78 @@ const IdeaRegister = ({ onClose }) => {
   };
 
   // 등록 버튼 핸들러
-  const handleSubmit = () => {
-    // 여기에 등록 로직 추가
-    console.log({
-      background,
-      progress,
-      quantitativeEffect,
-      qualitativeEffect,
-      businessField,
-      jobField,
-      usability,
-      duplication,
-      tbohStatus,
-      personName,
-      usePeriod,
-      useScope,
-      platform,
-    });
-    // 등록 후 모달 닫기
-    onClose();
+  const handleSubmit = async () => {
+    try {
+      // 각 입력 필드의 값을 수집
+      const ideaData = {
+        title: document.querySelector(".titleInput").value,
+        background,
+        progress,
+        quantitative_effect: quantitativeEffect,
+        qualitative_effect: qualitativeEffect,
+        project_type:
+          document.querySelector(
+            'input[name="row-radio-buttons-group"]:checked'
+          )?.value || "",
+        target_user:
+          document.querySelector(
+            'input[name="row-radio-buttons-group2"]:checked'
+          )?.value || "",
+        business_field: businessField,
+        job_field: jobField,
+        usability: usability,
+        duplication: duplication,
+        tboh_status: tbohStatus,
+        use_period: usePeriod,
+        use_scope: useScope,
+        platform: platform,
+        usability_points: personName.join(","), // 배열을 문자열로 변환
+        improvement_points: personName.join(","), // 개선내역도 같은 state를 사용 중이므로 수정 필요
+      };
+
+      console.log("등록할 아이디어 데이터:", ideaData);
+
+      // API 호출하여 데이터베이스에 저장
+      const response = await axios.post("/api/ideas/register", ideaData);
+
+      console.log("아이디어 등록 성공:", response.data);
+      alert("아이디어가 성공적으로 등록되었습니다.");
+
+      // 등록 후 모달 닫기
+      onClose();
+    } catch (error) {
+      console.error("아이디어 등록 오류:", error);
+
+      // 서버에서 반환된 오류 메시지 표시 - 개선된 오류 처리
+      if (error.response) {
+        // 서버에서 응답이 왔지만 오류 상태 코드인 경우
+        if (
+          error.response.status === 400 &&
+          error.response.data.missingFields
+        ) {
+          // 필수 항목 누락 오류
+          const missingFields = error.response.data.missingFields.join(", ");
+          alert(
+            `필수 항목이 누락되었습니다. 다음 항목을 확인해주세요: ${missingFields}`
+          );
+        } else {
+          // 다른 종류의 서버 오류
+          alert(
+            `오류: ${
+              error.response.data.error ||
+              error.response.data.message ||
+              "알 수 없는 오류가 발생했습니다."
+            }`
+          );
+        }
+      } else if (error.request) {
+        // 요청은 보냈지만 응답이 없는 경우
+        alert("서버에서 응답이 없습니다. 네트워크 연결을 확인해주세요.");
+      } else {
+        // 요청 설정 중 오류 발생
+        alert(`요청 오류: ${error.message}`);
+      }
+    }
   };
 
   return (
@@ -344,7 +398,7 @@ const IdeaRegister = ({ onClose }) => {
             </div>
 
             <div className="projectCategory">
-              <span className="fieldLabel">개발 유형</span>
+              <span className="fieldLabel">사용 대상</span>
               <FormControl>
                 <RadioGroup row name="row-radio-buttons-group2">
                   <FormControlLabel

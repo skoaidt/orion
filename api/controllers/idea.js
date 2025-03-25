@@ -1,0 +1,426 @@
+import { db } from "../db.js";
+
+// 아이디어 등록하기
+export const registerIdea = (req, res) => {
+  console.log("아이디어 등록 요청 데이터:", req.body);
+
+  // 필드 이름 한글 매핑 (사용자에게 더 이해하기 쉬운 이름으로 표시)
+  const fieldNameMap = {
+    title: "제목",
+    background: "추진 배경",
+    progress: "추진 내역",
+    quantitative_effect: "정량적 효과",
+    qualitative_effect: "정성적 효과",
+    project_type: "과제 유형",
+    target_user: "사용 대상",
+    business_field: "사업분야",
+    job_field: "업무분야",
+    usability: "활용도",
+    duplication: "중복여부",
+    tboh_status: "TBOH 여부",
+    use_period: "활용기간",
+    use_scope: "사용범위",
+    platform: "플랫폼",
+    usability_points: "유용성",
+    improvement_points: "개선내역",
+  };
+
+  const {
+    title,
+    background,
+    progress,
+    quantitative_effect,
+    qualitative_effect,
+    project_type,
+    target_user,
+    business_field,
+    job_field,
+    usability,
+    duplication,
+    tboh_status,
+    use_period,
+    use_scope,
+    platform,
+    usability_points,
+    improvement_points,
+  } = req.body;
+
+  // 모든 필드가 입력되었는지 확인
+  const requiredFields = [
+    "title",
+    "background",
+    "progress",
+    "quantitative_effect",
+    "qualitative_effect",
+    "project_type",
+    "target_user",
+    "business_field",
+    "job_field",
+    "usability",
+    "duplication",
+    "tboh_status",
+    "use_period",
+    "use_scope",
+    "platform",
+    "usability_points",
+    "improvement_points",
+  ];
+
+  // 누락된 필드 검사 및 빈 문자열 체크
+  const missingFields = requiredFields.filter((field) => {
+    const value = req.body[field];
+    // undefined, null, 빈 문자열 또는 HTML 태그만 있는 경우("<p></p>" 등) 체크
+    return (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      (typeof value === "string" && value.replace(/<[^>]*>/g, "").trim() === "")
+    );
+  });
+
+  if (missingFields.length > 0) {
+    // 한글 필드명으로 변환하여 응답
+    const missingFieldsKorean = missingFields.map(
+      (field) => fieldNameMap[field] || field
+    );
+
+    console.log(`누락된 필드 발견: ${missingFieldsKorean.join(", ")}`);
+
+    return res.status(400).json({
+      error: "모든 필드를 입력해주세요",
+      missingFields: missingFieldsKorean,
+    });
+  }
+
+  const q = `
+    INSERT INTO special.ITAsset_ideas (
+      title, background, progress, 
+      quantitative_effect, qualitative_effect,
+      project_type, target_user, business_field, 
+      job_field, usability, duplication, 
+      tboh_status, use_period, use_scope, 
+      platform, usability_points, improvement_points
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+  `;
+
+  const values = [
+    title,
+    background,
+    progress,
+    quantitative_effect,
+    qualitative_effect,
+    project_type,
+    target_user,
+    business_field,
+    job_field,
+    usability,
+    duplication,
+    tboh_status,
+    use_period,
+    use_scope,
+    platform,
+    usability_points,
+    improvement_points,
+  ];
+
+  db.query(q, values, (err, data) => {
+    if (err) {
+      console.error("아이디어 등록 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    return res.status(200).json({
+      message: "아이디어가 성공적으로 등록되었습니다.",
+      ideaId: data.insertId,
+    });
+  });
+};
+
+// 아이디어 목록 가져오기
+export const getIdeas = (req, res) => {
+  const q = `SELECT * FROM special.ITAsset_ideas ORDER BY created_at DESC`;
+
+  db.query(q, (err, data) => {
+    if (err) {
+      console.error("아이디어 목록 조회 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+    return res.status(200).json(data);
+  });
+};
+
+// 아이디어 상세 정보 가져오기
+export const getIdeaById = (req, res) => {
+  const ideaId = req.params.id;
+  const q = `SELECT * FROM special.ITAsset_ideas WHERE id = ?`;
+
+  db.query(q, [ideaId], (err, data) => {
+    if (err) {
+      console.error("아이디어 상세 조회 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    if (data.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "해당 아이디어를 찾을 수 없습니다." });
+    }
+
+    return res.status(200).json(data[0]);
+  });
+};
+
+// 과제 선정 정보 등록
+export const registerSelectedIdea = (req, res) => {
+  console.log("과제 선정 요청 데이터:", req.body);
+
+  const {
+    idea_id, // 관련 아이디어 ID
+    duplication, // 과제중복
+    scope, // 사용범위
+    comment, // 의견작성
+    is_selected, // 선정여부
+    expected_personnel, // 예상 투입인력
+    expected_schedule, // 예상일정
+  } = req.body;
+
+  // 필드 이름 한글 매핑
+  const fieldNameMap = {
+    idea_id: "아이디어 ID",
+    duplication: "과제중복",
+    scope: "사용범위",
+    comment: "의견작성",
+    is_selected: "선정여부",
+    expected_personnel: "예상 투입인력",
+    expected_schedule: "예상일정",
+  };
+
+  // 필수 필드 검증
+  const requiredFields = [
+    "idea_id",
+    "duplication",
+    "scope",
+    "comment",
+    "is_selected",
+  ];
+
+  // 누락된 필드 검사
+  const missingFields = requiredFields.filter((field) => {
+    const value = req.body[field];
+    return (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      (typeof value === "string" && value.replace(/<[^>]*>/g, "").trim() === "")
+    );
+  });
+
+  if (missingFields.length > 0) {
+    // 한글 필드명으로 변환
+    const missingFieldsKorean = missingFields.map(
+      (field) => fieldNameMap[field] || field
+    );
+
+    console.log(`누락된 필드 발견: ${missingFieldsKorean.join(", ")}`);
+
+    return res.status(400).json({
+      error: "모든 필드를 입력해주세요",
+      missingFields: missingFieldsKorean,
+    });
+  }
+
+  // 데이터 삽입 쿼리
+  const insertQuery = `
+    INSERT INTO special.ITAsset_ideaSelected (
+      idea_id, duplication, scope, comment, is_selected, expected_personnel, expected_schedule
+    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    idea_id,
+    duplication,
+    scope,
+    comment,
+    is_selected === true || is_selected === "true" || is_selected === 1 ? 1 : 0,
+    expected_personnel || null,
+    expected_schedule || null,
+  ];
+
+  db.query(insertQuery, values, (err, data) => {
+    if (err) {
+      console.error("과제 선정 정보 등록 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    // 아이디어 상태 업데이트 (선정 여부에 따라)
+    const updateIdeaStatusQuery = `
+      UPDATE special.ITAsset_ideas 
+      SET status = ? 
+      WHERE id = ?
+    `;
+
+    const newStatus =
+      is_selected === true || is_selected === "true" || is_selected === 1
+        ? "selected"
+        : "dropped";
+
+    db.query(
+      updateIdeaStatusQuery,
+      [newStatus, idea_id],
+      (updateErr, updateData) => {
+        if (updateErr) {
+          console.error("아이디어 상태 업데이트 오류:", updateErr);
+          // 상태 업데이트 실패해도 선정 데이터는 저장되었으므로 성공 응답
+        }
+
+        return res.status(200).json({
+          message: "과제 선정 정보가 성공적으로 등록되었습니다.",
+          selectionId: data.insertId,
+          ideaId: idea_id,
+          status: newStatus,
+        });
+      }
+    );
+  });
+};
+
+// 과제 검증 정보 등록
+export const registerIdeaVerify = (req, res) => {
+  console.log("과제 검증 요청 데이터:", req.body);
+
+  const {
+    idea_id, // 관련 아이디어 ID
+    // 본사 선임부서 섹션
+    development_collaboration, // 개발 협업
+    target_user, // 사용대상
+    comment, // 의견작성
+    verification_status, // 검증여부
+    // 본사 AI/DT 섹션
+    ai_development_collaboration, // AI/DT 개발 협업
+    feasibility, // 가능여부
+    ai_comment, // AI/DT 의견작성
+    expected_personnel, // 예상 투입인력
+    expected_schedule, // 예상 일정
+    ai_verification_status, // AI/DT 검증여부
+  } = req.body;
+
+  // 필드 이름 한글 매핑
+  const fieldNameMap = {
+    idea_id: "아이디어 ID",
+    development_collaboration: "개발 협업",
+    target_user: "사용대상",
+    comment: "의견작성",
+    verification_status: "검증여부",
+    ai_development_collaboration: "AI/DT 개발 협업",
+    feasibility: "가능여부",
+    ai_comment: "AI/DT 의견작성",
+    expected_personnel: "예상 투입인력",
+    expected_schedule: "예상 일정",
+    ai_verification_status: "AI/DT 검증여부",
+  };
+
+  // 필수 필드 검증
+  const requiredFields = [
+    "idea_id",
+    "development_collaboration",
+    "target_user",
+    "comment",
+    "verification_status",
+    "ai_development_collaboration",
+    "feasibility",
+    "ai_comment",
+    "ai_verification_status",
+  ];
+
+  // 누락된 필드 검사
+  const missingFields = requiredFields.filter((field) => {
+    const value = req.body[field];
+    return (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      (typeof value === "string" && value.replace(/<[^>]*>/g, "").trim() === "")
+    );
+  });
+
+  if (missingFields.length > 0) {
+    // 한글 필드명으로 변환
+    const missingFieldsKorean = missingFields.map(
+      (field) => fieldNameMap[field] || field
+    );
+
+    console.log(`누락된 필드 발견: ${missingFieldsKorean.join(", ")}`);
+
+    return res.status(400).json({
+      error: "모든 필드를 입력해주세요",
+      missingFields: missingFieldsKorean,
+    });
+  }
+
+  // 데이터 삽입 쿼리
+  const insertQuery = `
+    INSERT INTO special.ITAsset_ideaVerify (
+      idea_id,
+      development_collaboration,
+      target_user,
+      comment,
+      verification_status,
+      ai_development_collaboration,
+      feasibility,
+      ai_comment,
+      expected_personnel,
+      expected_schedule,
+      ai_verification_status
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    idea_id,
+    development_collaboration,
+    target_user,
+    comment,
+    verification_status,
+    ai_development_collaboration,
+    feasibility,
+    ai_comment,
+    expected_personnel || null,
+    expected_schedule || null,
+    ai_verification_status,
+  ];
+
+  db.query(insertQuery, values, (err, data) => {
+    if (err) {
+      console.error("과제 검증 정보 등록 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    // 아이디어 상태 업데이트
+    const updateIdeaStatusQuery = `
+      UPDATE special.ITAsset_ideas 
+      SET status = ? 
+      WHERE id = ?
+    `;
+
+    // 검증 상태에 따라 아이디어 상태 업데이트
+    const newStatus =
+      verification_status && ai_verification_status ? "verified" : "rejected";
+
+    db.query(
+      updateIdeaStatusQuery,
+      [newStatus, idea_id],
+      (updateErr, updateData) => {
+        if (updateErr) {
+          console.error("아이디어 상태 업데이트 오류:", updateErr);
+          // 상태 업데이트 실패해도 검증 데이터는 저장되었으므로 성공 응답
+        }
+
+        return res.status(200).json({
+          message: "과제 검증 정보가 성공적으로 등록되었습니다.",
+          verificationId: data.insertId,
+          ideaId: idea_id,
+          status: newStatus,
+        });
+      }
+    );
+  });
+};

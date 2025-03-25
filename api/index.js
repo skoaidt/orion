@@ -13,6 +13,7 @@ import { fileURLToPath } from "url";
 import redis from "redis";
 import "dotenv/config";
 import fs from "fs";
+import ideaRoutes from "./routes/ideas.js";
 
 const app = express();
 app.use(express.json());
@@ -277,6 +278,7 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/developers", developerRoutes);
 app.use("/api/datatables", dataTableRoutes);
 app.use("/api/typings", typingRoutes);
+app.use("/api/ideas", ideaRoutes);
 
 // Completed 파일 업로드를 위한 저장소 설정
 const storage = multer.diskStorage({
