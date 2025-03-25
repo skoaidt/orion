@@ -159,16 +159,15 @@
     .ScheduleRowContainer {
       display: flex;
       align-items: center;
-      width: 100%; //700px;
-      height: 25px;
-      background-color: tomato;
-      gap: 10px;
+      width: 700px;
+      height: 220px;
+      background-color: white;
+      //gap: 10px;
 
       .fieldLabel {
         display: flex;
         align-items: center;
         justify-content: center;
-        //flex: 2;
         font-size: 14px;
         color: white;
         background: #565656;
@@ -177,6 +176,7 @@
         padding: 0px;
         border-radius: 5px;
         box-sizing: border-box;
+        flex: none;
       }
     }
 

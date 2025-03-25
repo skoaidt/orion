@@ -1,9 +1,6 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState } from "react";
 import "./ideaDevReview.scss";
 import CloseIcon from "@mui/icons-material/Close";
-import { TextField, Box } from "@mui/material";
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 const TransferList = () => {
   const [leftItems, setLeftItems] = useState([
@@ -18,7 +15,6 @@ const TransferList = () => {
   const [selectedLeft, setSelectedLeft] = useState([]);
   const [selectedRight, setSelectedRight] = useState([]);
 
-  // 항목 이동 핸들러
   const moveToRight = () => {
     setRightItems([...rightItems, ...selectedLeft]);
     setLeftItems(leftItems.filter((item) => !selectedLeft.includes(item)));
@@ -31,7 +27,6 @@ const TransferList = () => {
     setSelectedRight([]);
   };
 
-  // 항목 선택 핸들러
   const toggleSelection = (item, selectedItems, setSelectedItems) => {
     if (selectedItems.includes(item)) {
       setSelectedItems(selectedItems.filter((i) => i !== item));
@@ -40,7 +35,6 @@ const TransferList = () => {
     }
   };
 
-  // 표 렌더링 함수
   const renderTable = (items, selectedItems, setSelectedItems, className) => (
     <table className={`table ${className}`}>
       <thead>
@@ -107,60 +101,12 @@ const TransferList = () => {
   );
 };
 
-const ScheduleRowContainer = () => {
-  const [filters, setFilters] = useState({
-    startDate: null,
-    endDate: null,
-  });
-
-  // ✅ 날짜 변경 핸들러(useCallback으로 최적화)
-  const handleStartDateChange = useCallback((newValue) => {
-    setFilters((prev) => ({ ...prev, startDate: newValue }));
-  }, []);
-
-  const handleEndDateChange = useCallback((newValue) => {
-    setFilters((prev) => ({ ...prev, endDate: newValue }));
-  }, []);
-
-  // ✅ 개발 일정 메시지 생성 (useMemo로 최적화)
-  const scheduleMessage = useMemo(() => {
-    if (filters.startDate && filters.endDate) {
-      const startDateFormatted = filters.startDate.format("YYYY-MM-DD");
-      const endDateFormatted = filters.endDate.format("YYYY-MM-DD");
-      return `개발 일정: ${startDateFormatted} ~ ${endDateFormatted}`;
-    }
-    return "";
-  }, [filters.startDate, filters.endDate]);
-
-  return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {/* 시작 날짜 선택 */}
-        <DatePicker
-          label="시작 날짜"
-          value={filters.startDate}
-          onChange={handleStartDateChange}
-          renderInput={(params) => <TextField {...params} />}
-        />
-        {/* 종료 날짜 선택 */}
-        <DatePicker
-          label="종료 날짜"
-          value={filters.endDate}
-          onChange={handleEndDateChange}
-          renderInput={(params) => <TextField {...params} />}
-        />
-        {/* 출력 메시지 */}
-        {scheduleMessage && (
-          <Box sx={{ marginTop: 2, color: "green", fontWeight: "bold" }}>
-            {scheduleMessage}
-          </Box>
-        )}
-      </Box>
-    </LocalizationProvider>
-  );
-};
-
 const IdeaDevReview = ({ onClose }) => {
+  const handleRegister = () => {
+    alert("등록되었습니다!"); // 등록 완료 메시지
+    onClose(); // 모달 닫기
+  };
+
   return (
     <div className="reviewModalOverlay">
       <div className="reviewModalContent">
@@ -180,7 +126,6 @@ const IdeaDevReview = ({ onClose }) => {
         {/* 개발일정 */}
         <div className="ScheduleRowContainer">
           <div className="fieldLabel">개발 일정</div>
-          <ScheduleRowContainer />
         </div>
 
         {/* 우선순위 */}
@@ -193,7 +138,10 @@ const IdeaDevReview = ({ onClose }) => {
           <button className="cancelButton" onClick={onClose}>
             취소
           </button>
-          <button className="registerButton" onClick={onClose}>
+          <button
+            className="registerButton"
+            onClick={handleRegister} // 등록 버튼 클릭 시 처리
+          >
             등록
           </button>
         </div>
