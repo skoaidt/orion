@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import "./ideaDevReview.scss";
 import CloseIcon from "@mui/icons-material/Close";
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { StaticDatePicker } from "@mui/x-date-pickers/StaticDatePicker"; // StaticDatePicker 추가
 import dayjs from "dayjs";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
 
 const TransferList = () => {
   const [leftItems, setLeftItems] = useState([
@@ -104,27 +109,35 @@ const TransferList = () => {
   );
 };
 
+const DatePickerComponent = ({ label, value, onChange }) => {
+  return (
+    <div className="datePickerWrapper">
+      {/* 날짜 라벨 */}
+      <p>
+        {label}: {value ? dayjs(value).format("YYYY-MM-DD") : "미정"}
+      </p>
+
+      {/* Material-UI DatePicker */}
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <StaticDatePicker
+          displayStaticWrapperAs="desktop"
+          value={value}
+          onChange={onChange}
+        />
+      </LocalizationProvider>
+    </div>
+  );
+};
+
 const IdeaDevReview = ({ onClose }) => {
   const handleRegister = () => {
-    alert("등록되었습니다!"); // 등록 완료 메시지
-    onClose(); // 모달 닫기
+    alert("등록되었습니다!");
+    onClose();
   };
 
   // 시작일과 종료일 상태 관리
-  const [filters, setFilters] = useState({
-    startDate: null,
-    endDate: null,
-  });
-
-  // 시작일 변경 핸들러
-  const handleStartDateChange = (newValue) => {
-    setFilters((prevFilters) => ({ ...prevFilters, startDate: newValue }));
-  };
-
-  // 종료일 변경 핸들러
-  const handleEndDateChange = (newValue) => {
-    setFilters((prevFilters) => ({ ...prevFilters, endDate: newValue }));
-  };
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   return (
     <div className="reviewModalOverlay">
@@ -142,43 +155,51 @@ const IdeaDevReview = ({ onClose }) => {
           <TransferList />
         </div>
 
-        {/* 개발일정 */}
         <div className="ScheduleRowContainer">
           <div className="fieldLabel">개발 일정</div>
+          <div className="datePickerContainer">
+            {/* 시작일자 */}
+            <div className="dateLeft">
+              <DatePickerComponent
+                label="시작일자"
+                value={startDate}
+                onChange={(newValue) => setStartDate(newValue)}
+              />
+            </div>
 
-          {/* ✅ 시작 날짜 선택 */}
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="시작일"
-              value={filters.startDate}
-              onChange={handleStartDateChange}
-              slotProps={{ textField: { size: "small" } }}
-            />
-          </LocalizationProvider>
-
-          {/* ✅ 종료 날짜 선택 */}
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="종료일"
-              value={filters.endDate}
-              onChange={handleEndDateChange}
-              slotProps={{ textField: { size: "small" } }}
-              style={{ marginLeft: "16px" }} // 간격 추가
-            />
-          </LocalizationProvider>
-
-          {/* 선택된 날짜 표시 */}
-          {filters.startDate && filters.endDate && (
-            <p style={{ marginTop: "8px" }}>
-              선택된 기간: {dayjs(filters.startDate).format("YYYY-MM-DD")} ~{" "}
-              {dayjs(filters.endDate).format("YYYY-MM-DD")}
-            </p>
-          )}
+            {/* 종료일자 */}
+            <div className="dateRight">
+              <DatePickerComponent
+                label="종료일자"
+                value={endDate}
+                onChange={(newValue) => setEndDate(newValue)}
+              />
+            </div>
+          </div>
         </div>
 
         {/* 우선순위 */}
         <div className="priorityRowContainer">
           <div className="fieldLabel">우선 순위</div>
+          <FormControl className="formControl">
+            <RadioGroup row name="scope-group" className="radioGroup">
+              <FormControlLabel
+                value="1순위"
+                control={<Radio />}
+                label="1순위"
+              />
+              <FormControlLabel
+                value="2순위"
+                control={<Radio />}
+                label="2순위"
+              />
+              <FormControlLabel
+                value="3순위"
+                control={<Radio />}
+                label="3순위"
+              />
+            </RadioGroup>
+          </FormControl>
         </div>
 
         {/* 등록취소 */}

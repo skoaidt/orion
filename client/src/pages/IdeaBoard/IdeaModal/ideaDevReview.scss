@@ -18,8 +18,8 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
-    width: 700px;
-    height: 630px;
+    width: 750px;
+    height: 730px;
     border-radius: 5px;
     padding: 20px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -51,7 +51,7 @@
     .manRowContainer {
       display: flex;
       align-items: center;
-      width: 700px;
+      width: 750px;
       height: 220px;
       background-color: white;
       //gap: 10px;
@@ -159,10 +159,9 @@
     .ScheduleRowContainer {
       display: flex;
       align-items: center;
-      width: 700px;
-      height: 220px;
+      width: 750px; /* 컨테이너 너비 */
+      height: 360px;
       background-color: white;
-      //gap: 10px;
 
       .fieldLabel {
         display: flex;
@@ -170,13 +169,83 @@
         justify-content: center;
         font-size: 14px;
         color: white;
-        background: #565656;
-        width: 90px;
+        background-color: #565656;
+        width: 90px; /* fieldLabel 너비 */
         height: 100%;
         padding: 0px;
         border-radius: 5px;
         box-sizing: border-box;
-        flex: none;
+        flex-shrink: 0; /* 크기 축소 방지 */
+      }
+
+      .datePickerContainer {
+        display: flex;
+        justify-content: space-between; /* 두 달력을 양쪽으로 배치 */
+        gap: 0; /* 두 달력 사이의 간격 제거 */
+        flex-grow: 1; /* 남은 공간을 차지하도록 설정 */
+        overflow: hidden; /* 컨테이너 밖으로 삐져나가지 않도록 설정 */
+
+        .dateLeft,
+        .dateRight {
+          display: flex;
+          flex-direction: column; /* 세로 정렬 */
+          align-items: center; /* 가운데 정렬 */
+          justify-content: flex-start; /* 상단에 배치 */
+          width: calc(50%); /* 각 달력의 너비를 컨테이너 절반으로 설정 */
+          max-width: none; /* 최대 너비 제한 제거 */
+          height: auto; /* 높이는 내용에 맞게 자동 조정 */
+          box-sizing: border-box;
+
+          .datePickerWrapper {
+            display: flex;
+            flex-direction: column; /* 세로 정렬 */
+            align-items: center; /* 가운데 정렬 */
+            width: 100%; /* 부모 컨테이너 너비에 맞춤 */
+
+            p {
+              font-size: 14px !important; /* 폰트 크기 적용 */
+              font-weight: bold; /* 폰트 굵기 적용 */
+              color: #333333; /* 텍스트 색상 적용 */
+              margin-bottom: 5px; /* 아래 여백 추가 */
+              text-align: center; /* 텍스트 가운데 정렬 */
+            }
+
+            .MuiDateCalendar-root {
+              background-color: white; /* 캘린더 배경색 변경 */
+              border-radius: 0px; /* 캘린더 모서리 둥글게 설정 */
+
+              .MuiPickersDay-root {
+                font-size: 12px !important; /* 날짜 폰트 크기 조정 */
+                color: #333333 !important; /* 날짜 텍스트 색상 변경 */
+
+                &.Mui-selected {
+                  background-color: #493d9e !important; /* 선택된 날짜 배경색 변경 */
+                  color: white !important; /* 선택된 날짜 텍스트 색상 변경 */
+                }
+
+                &:hover {
+                  background-color: #989ef0 !important; /* Hover 시 배경색 변경 */
+                }
+              }
+
+              .MuiPickersCalendarHeader-root {
+                font-size: 12px !important; /* 헤더 텍스트 크기 조정 */
+                color: #333333 !important; /* 헤더 텍스트 색상 변경 */
+                background-color: #ffffff !important; /* 헤더 배경색 변경 */
+
+                .MuiPickersArrowSwitcher-root {
+                  button {
+                    color: #493d9e !important; /* 화살표 버튼 색상 변경 */
+
+                    &:hover {
+                      background-color: #e8f5e9 !important; /* 화살표 버튼 Hover 시 배경색 변경 */
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
 
@@ -185,14 +254,13 @@
       align-items: center;
       width: 100%; //700px;
       height: 25px;
-      background-color: tomato;
-      gap: 10px;
+      background-color: white;
+      gap: 20px; /* fieldLabel과 formControl 사이의 간격 추가 */
 
       .fieldLabel {
         display: flex;
         align-items: center;
         justify-content: center;
-        //flex: 2;
         font-size: 14px;
         color: white;
         background: #565656;
@@ -201,6 +269,44 @@
         padding: 0px;
         border-radius: 5px;
         box-sizing: border-box;
+      }
+
+      .formControl {
+        display: flex;
+        justify-content: flex-start; /* 좌측 정렬 */
+        align-items: center;
+
+        .radioGroup {
+          display: flex;
+          gap: 10px; /* 라디오 버튼 간격 */
+          margin-left: 10px; /* radioGroup과 fieldLabel 사이의 간격 추가 */
+
+          .MuiFormControlLabel-root {
+            font-size: 10px !important; /* 라벨 폰트 크기 */
+            color: #333333 !important; /* 텍스트 색상 */
+          }
+
+          .MuiTypography-root {
+            font-size: 14px; /* 텍스트 크기 변경 */
+            //padding: 5px; /* 내부 여백 추가 */
+          }
+
+          .MuiFormControlLabel-label {
+            font-size: 14px;
+          }
+
+          .MuiRadio-root {
+            color: #565656;
+            padding: 6px;
+
+            &.Mui-checked {
+              color: #493d9e;
+            }
+            svg {
+              font-size: 15px;
+            }
+          }
+        }
       }
     }
 
