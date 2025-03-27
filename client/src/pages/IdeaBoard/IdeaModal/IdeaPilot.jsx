@@ -26,7 +26,7 @@ const IdeaPilot = ({ onClose }) => {
       if (selectedFile) {
         const formData = new FormData();
         formData.append("file", selectedFile);
-        formData.append("path", "upload/pilot"); // 저장 경로 지정 (수정됨)
+        formData.append("path", "pilot"); // 저장 경로 지정
 
         // 서버에 파일 업로드 요청
         await axios.post("/api/upload", formData, {

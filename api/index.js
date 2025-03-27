@@ -16,13 +16,6 @@ import fs from "fs";
 import ideaRoutes from "./routes/ideas.js";
 
 const app = express();
-app.use(express.json());
-app.use(cookieParser());
-app.use(
-  cors({
-    origin: ["http://localhost:3000", "https://itasset.skons.co.kr"],
-  })
-);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -280,59 +273,15 @@ app.use("/api/datatables", dataTableRoutes);
 app.use("/api/typings", typingRoutes);
 app.use("/api/ideas", ideaRoutes);
 
-// Completed 파일 업로드를 위한 저장소 설정
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadPath = path.join(
-      __dirname,
-      "../client/public/upload",
-      req.body.path || "Completed"
-    );
-
-    // 디렉토리가 없으면 생성
-    fs.mkdirSync(uploadPath, { recursive: true });
-
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    // 파일명 중복 방지를 위해 타임스탬프 추가
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + "-" + file.originalname);
-  },
-});
-
-const upload = multer({ storage: storage });
-
-// 파일 업로드 라우트
-app.post("/api/upload", upload.single("file"), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ message: "업로드된 파일이 없습니다." });
-    }
-
-    // 파일 경로 반환
-    const relativePath = `/upload/${req.body.path || "Completed"}/${
-      req.file.filename
-    }`;
-    return res.status(200).json({
-      message: "파일 업로드 성공",
-      filePath: relativePath,
-    });
-  } catch (error) {
-    console.error("파일 업로드 오류:", error);
-    return res
-      .status(500)
-      .json({ message: "파일 업로드 중 오류가 발생했습니다." });
-  }
-});
-
 // 파일 업로드를 위한 저장소 설정
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadPath = path.join(
       __dirname,
       "../client/public/upload",
-      req.body.path || "Completed"
+      req.body.path && req.body.path.toLowerCase() === "pilot"
+        ? "pilot"
+        : "Completed"
     );
 
     // 디렉토리가 없으면 생성
@@ -347,6 +296,14 @@ const storage = multer.diskStorage({
   },
 });
 
+app.use(express.json());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "https://itasset.skons.co.kr"],
+  })
+);
+
 const upload = multer({ storage: storage });
 
 // 파일 업로드 라우트
@@ -357,9 +314,11 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
     }
 
     // 파일 경로 반환
-    const relativePath = `/upload/${req.body.path || "pilot"}/${
-      req.file.filename
-    }`;
+    const relativePath = `/upload/${
+      req.body.path && req.body.path.toLowerCase() === "pilot"
+        ? "Pilot"
+        : "Completed"
+    }/$${req.file.filename}`;
     return res.status(200).json({
       message: "파일 업로드 성공",
       filePath: relativePath,
