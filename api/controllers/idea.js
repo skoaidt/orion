@@ -757,3 +757,243 @@ export const registerAIVerify = (req, res) => {
     });
   });
 };
+
+// 파일럿 데이터 등록
+export const registerIdeaPilot = (req, res) => {
+  console.log("파일럿 데이터 등록 요청:", req.body);
+
+  const {
+    ideaID, // 아이디어 ID
+    productivity, // 생산성
+    cost, // 비용
+    quantitybasis, // 정량적 기대효과 근거
+  } = req.body;
+
+  // 필드 이름 한글 매핑
+  const fieldNameMap = {
+    ideaID: "아이디어 ID",
+    productivity: "생산성",
+    cost: "비용",
+    quantitybasis: "정량적 기대효과 근거",
+  };
+
+  // 필수 필드 검증
+  const requiredFields = ["ideaID", "productivity", "cost", "quantitybasis"];
+
+  // 누락된 필드 검사
+  const missingFields = requiredFields.filter((field) => {
+    const value = req.body[field];
+    return (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      (typeof value === "string" && value.replace(/<[^>]*>/g, "").trim() === "")
+    );
+  });
+
+  if (missingFields.length > 0) {
+    // 한글 필드명으로 변환
+    const missingFieldsKorean = missingFields.map(
+      (field) => fieldNameMap[field] || field
+    );
+
+    console.log(`누락된 필드 발견: ${missingFieldsKorean.join(", ")}`);
+
+    return res.status(400).json({
+      error: "모든 필드를 입력해주세요",
+      missingFields: missingFieldsKorean,
+    });
+  }
+
+  // 데이터 삽입 쿼리
+  const insertQuery = `
+    INSERT INTO special.ITAsset_pilot (
+      ideaID, productivity, cost, quantitybasis
+    ) VALUES (?, ?, ?, ?)
+  `;
+
+  const values = [
+    ideaID,
+    parseFloat(productivity) || 0,
+    parseFloat(cost) || 0,
+    quantitybasis,
+  ];
+
+  db.query(insertQuery, values, (err, data) => {
+    if (err) {
+      console.error("파일럿 데이터 등록 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    // 아이디어 상태 업데이트 (Pilot으로 변경)
+    const updateIdeaStatusQuery = `
+      UPDATE special.ITAsset_ideas 
+      SET status = 'pilot' 
+      WHERE id = ?
+    `;
+
+    db.query(updateIdeaStatusQuery, [ideaID], (updateErr, updateData) => {
+      if (updateErr) {
+        console.error("아이디어 상태 업데이트 오류:", updateErr);
+        // 상태 업데이트 실패해도 파일럿 데이터는 저장되었으므로 성공 응답
+      }
+
+      return res.status(200).json({
+        message: "파일럿 데이터가 성공적으로 등록되었습니다.",
+        pilotId: data.insertId,
+        ideaID: ideaID,
+      });
+    });
+  });
+};
+
+// 개발자 목록 조회
+export const getIdeaDevelopers = (req, res) => {
+  const q = `SELECT * FROM special.ITAsset_ideaDevelopers ORDER BY id ASC`;
+
+  db.query(q, (err, data) => {
+    if (err) {
+      console.error("개발자 목록 조회 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+    return res.status(200).json(data);
+  });
+};
+
+// 개발 심의 데이터 등록
+export const registerIdeaDevReview = (req, res) => {
+  console.log("개발 심의 데이터 등록 요청:", req.body);
+
+  const {
+    ideaID, // 아이디어 ID
+    developers, // 선택된 개발자 목록 (배열)
+    startDate, // 시작일자
+    endDate, // 종료일자
+    priority, // 우선순위
+  } = req.body;
+
+  // 필드 이름 한글 매핑
+  const fieldNameMap = {
+    ideaID: "아이디어 ID",
+    developers: "개발자 목록",
+    startDate: "시작일자",
+    endDate: "종료일자",
+    priority: "우선순위",
+  };
+
+  // 필수 필드 검증
+  const requiredFields = [
+    "ideaID",
+    "developers",
+    "startDate",
+    "endDate",
+    "priority",
+  ];
+
+  // 누락된 필드 검사
+  const missingFields = requiredFields.filter((field) => {
+    const value = req.body[field];
+    return (
+      value === undefined ||
+      value === null ||
+      (field === "developers" &&
+        (!Array.isArray(value) || value.length === 0)) ||
+      (field !== "developers" && value === "")
+    );
+  });
+
+  if (missingFields.length > 0) {
+    // 한글 필드명으로 변환
+    const missingFieldsKorean = missingFields.map(
+      (field) => fieldNameMap[field] || field
+    );
+
+    console.log(`누락된 필드 발견: ${missingFieldsKorean.join(", ")}`);
+
+    return res.status(400).json({
+      error: "모든 필드를 입력해주세요",
+      missingFields: missingFieldsKorean,
+    });
+  }
+
+  // 선택한 개발자 정보 조회
+  const developerIds = developers.map((id) => parseInt(id));
+
+  if (developerIds.length === 0) {
+    return res.status(400).json({
+      error: "개발자를 한 명 이상 선택해주세요.",
+    });
+  }
+
+  const fetchDeveloperQuery = `
+    SELECT * FROM special.ITAsset_ideaDevelopers 
+    WHERE id IN (${developerIds.join(",")})
+  `;
+
+  db.query(fetchDeveloperQuery, (err, developerData) => {
+    if (err) {
+      console.error("개발자 정보 조회 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    if (developerData.length === 0) {
+      return res.status(404).json({
+        error: "선택한 개발자 정보를 찾을 수 없습니다.",
+      });
+    }
+
+    // 모든 개발자를 개발 심의 테이블에 등록
+    const insertPromises = developerData.map((developer) => {
+      return new Promise((resolve, reject) => {
+        const insertReviewQuery = `
+          INSERT INTO special.ITAsset_ideaDevReview (
+            ideaID, 
+            developerId, 
+            name, 
+            team, 
+            projectCount, 
+            devScheduleStart, 
+            devScheduleEnd, 
+            priority,
+            ITAsset_ideaDevReviewcol
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const reviewValues = [
+          ideaID,
+          developer.developerId,
+          developer.name,
+          developer.team,
+          developer.projectCount,
+          startDate,
+          endDate,
+          priority,
+          "", // ITAsset_ideaDevReviewcol 필드에 빈 문자열 저장
+        ];
+
+        db.query(insertReviewQuery, reviewValues, (err, result) => {
+          if (err) {
+            console.error(`개발자 ${developer.name} 심의 정보 등록 오류:`, err);
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      });
+    });
+
+    // 모든 개발자 정보 등록 후
+    Promise.all(insertPromises)
+      .then((results) => {
+        return res.status(200).json({
+          message: "개발 심의 정보가 성공적으로 등록되었습니다.",
+          ideaID: ideaID,
+          developerCount: developerData.length,
+        });
+      })
+      .catch((err) => {
+        console.error("개발 심의 정보 등록 중 오류 발생:", err);
+        return res.status(500).json({ error: err.message });
+      });
+  });
+};
