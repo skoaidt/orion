@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./ideaDevReview.scss";
 import CloseIcon from "@mui/icons-material/Close";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -9,19 +9,53 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
+import axios from "axios";
 
-const TransferList = () => {
-  const [leftItems, setLeftItems] = useState([
-    { id: 1, no: "001", name: "최종언", dept: "AI/DT개발팀", project: "3" },
-    { id: 2, no: "002", name: "남정수", dept: "AI/DT기획팀", project: "4" },
-    { id: 4, no: "004", name: "손지호", dept: "AI/DT기획팀", project: "5" },
-  ]);
-  const [rightItems, setRightItems] = useState([
-    { id: 3, no: "003", name: "강병구", dept: "AI/DT기획팀", project: "4" },
-  ]);
+const TransferList = ({ onSelectedDevelopersChange }) => {
+  const [leftItems, setLeftItems] = useState([]);
+  const [rightItems, setRightItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [selectedLeft, setSelectedLeft] = useState([]);
   const [selectedRight, setSelectedRight] = useState([]);
+
+  // 개발자 목록 가져오기
+  useEffect(() => {
+    const fetchDevelopers = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get("/api/ideas/developers");
+
+        // 서버에서 받은 개발자 데이터를 형식에 맞게 변환
+        const developers = response.data.map((dev) => ({
+          id: dev.id,
+          no: dev.developerId,
+          name: dev.name,
+          dept: dev.team,
+          project: dev.projectCount,
+        }));
+
+        // 초기에는 모든 개발자를 왼쪽 리스트에 배치
+        setLeftItems(developers);
+        setRightItems([]); // 오른쪽 리스트는 초기에 비어있음
+        setError("");
+      } catch (error) {
+        console.error("개발자 목록 가져오기 오류:", error);
+        setError("개발자 목록을 불러오는데 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDevelopers();
+  }, []);
+
+  // rightItems가 변경될 때마다 부모 컴포넌트에게 전달
+  useEffect(() => {
+    const selectedDeveloperIds = rightItems.map((developer) => developer.id);
+    onSelectedDevelopersChange(selectedDeveloperIds);
+  }, [rightItems, onSelectedDevelopersChange]);
 
   const moveToRight = () => {
     setRightItems([...rightItems, ...selectedLeft]);
@@ -54,20 +88,40 @@ const TransferList = () => {
         </tr>
       </thead>
       <tbody>
-        {items.map((item) => (
-          <tr
-            key={item.id}
-            onClick={() =>
-              toggleSelection(item, selectedItems, setSelectedItems)
-            }
-            className={selectedItems.includes(item) ? "selected" : ""}
-          >
-            <td>{item.no}</td>
-            <td>{item.name}</td>
-            <td>{item.dept}</td>
-            <td>{item.project}</td>
+        {loading ? (
+          <tr>
+            <td colSpan="4" style={{ textAlign: "center" }}>
+              로딩 중...
+            </td>
           </tr>
-        ))}
+        ) : error ? (
+          <tr>
+            <td colSpan="4" style={{ textAlign: "center", color: "red" }}>
+              {error}
+            </td>
+          </tr>
+        ) : items.length === 0 ? (
+          <tr>
+            <td colSpan="4" style={{ textAlign: "center" }}>
+              데이터가 없습니다.
+            </td>
+          </tr>
+        ) : (
+          items.map((item) => (
+            <tr
+              key={item.id}
+              onClick={() =>
+                toggleSelection(item, selectedItems, setSelectedItems)
+              }
+              className={selectedItems.includes(item) ? "selected" : ""}
+            >
+              <td>{item.no}</td>
+              <td>{item.name}</td>
+              <td>{item.dept}</td>
+              <td>{item.project}</td>
+            </tr>
+          ))
+        )}
       </tbody>
     </table>
   );
@@ -129,15 +183,104 @@ const DatePickerComponent = ({ label, value, onChange }) => {
   );
 };
 
-const IdeaDevReview = ({ onClose }) => {
-  const handleRegister = () => {
-    alert("등록되었습니다!");
-    onClose();
+const IdeaDevReview = ({ onClose, ideaId }) => {
+  // 상태 변수 정의
+  const [selectedDevelopers, setSelectedDevelopers] = useState([]);
+  const [startDate, setStartDate] = useState(dayjs()); // 오늘 날짜로 초기화
+  const [endDate, setEndDate] = useState(dayjs().add(30, "day")); // 오늘로부터 30일 후로 초기화
+  const [priority, setPriority] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // 우선순위 변경 핸들러
+  const handlePriorityChange = (event) => {
+    setPriority(event.target.value);
   };
 
-  // 시작일과 종료일 상태 관리
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  // 날짜 변경 핸들러
+  const handleStartDateChange = (newValue) => {
+    if (newValue) {
+      setStartDate(newValue);
+
+      // 만약 시작일이 종료일보다 이후라면 종료일을 시작일 이후로 설정
+      if (newValue.isAfter(endDate)) {
+        setEndDate(newValue.add(7, "day"));
+      }
+    }
+  };
+
+  const handleEndDateChange = (newValue) => {
+    if (newValue) {
+      // 종료일이 시작일보다 이전이면 변경하지 않음
+      if (newValue.isBefore(startDate)) {
+        alert("종료일은 시작일 이후여야 합니다.");
+        return;
+      }
+      setEndDate(newValue);
+    }
+  };
+
+  const handleRegister = async () => {
+    // 필수 필드 검증
+    if (selectedDevelopers.length === 0) {
+      alert("개발자를 한 명 이상 선택해주세요.");
+      return;
+    }
+
+    if (!startDate) {
+      alert("시작일자를 선택해주세요.");
+      return;
+    }
+
+    if (!endDate) {
+      alert("종료일자를 선택해주세요.");
+      return;
+    }
+
+    if (!priority) {
+      alert("우선순위를 선택해주세요.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+
+      // 데이터 준비
+      const devReviewData = {
+        ideaID: ideaId || 1,
+        developers: selectedDevelopers,
+        startDate: startDate.format("YYYY-MM-DD"),
+        endDate: endDate.format("YYYY-MM-DD"),
+        priority: priority,
+      };
+
+      console.log("등록할 개발 심의 데이터:", devReviewData);
+
+      // API 호출
+      const response = await axios.post("/api/ideas/devreview", devReviewData);
+
+      console.log("개발 심의 등록 성공:", response.data);
+      alert("개발 심의 정보가 성공적으로 등록되었습니다.");
+
+      onClose();
+    } catch (error) {
+      console.error("개발 심의 등록 오류:", error);
+
+      // 서버에서 반환된 오류 메시지 표시
+      if (error.response) {
+        const errorMsg =
+          error.response.data.error || "알 수 없는 오류가 발생했습니다.";
+        setError(errorMsg);
+        alert(`오류: ${errorMsg}`);
+      } else {
+        setError("서버 연결에 실패했습니다.");
+        alert("서버 연결에 실패했습니다.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="reviewModalOverlay">
@@ -148,11 +291,12 @@ const IdeaDevReview = ({ onClose }) => {
           <CloseIcon className="closeIcon" onClick={onClose} />
         </div>
         <hr className="titleUnderline" />
+        {error && <div className="error-message">{error}</div>}
 
         {/* 인력편성 */}
         <div className="manRowContainer">
           <div className="fieldLabel">인력 편성</div>
-          <TransferList />
+          <TransferList onSelectedDevelopersChange={setSelectedDevelopers} />
         </div>
 
         <div className="ScheduleRowContainer">
@@ -163,7 +307,7 @@ const IdeaDevReview = ({ onClose }) => {
               <DatePickerComponent
                 label="시작일자"
                 value={startDate}
-                onChange={(newValue) => setStartDate(newValue)}
+                onChange={handleStartDateChange}
               />
             </div>
 
@@ -172,7 +316,7 @@ const IdeaDevReview = ({ onClose }) => {
               <DatePickerComponent
                 label="종료일자"
                 value={endDate}
-                onChange={(newValue) => setEndDate(newValue)}
+                onChange={handleEndDateChange}
               />
             </div>
           </div>
@@ -182,7 +326,13 @@ const IdeaDevReview = ({ onClose }) => {
         <div className="priorityRowContainer">
           <div className="fieldLabel">우선 순위</div>
           <FormControl className="formControl">
-            <RadioGroup row name="scope-group" className="radioGroup">
+            <RadioGroup
+              row
+              name="priority-group"
+              className="radioGroup"
+              value={priority}
+              onChange={handlePriorityChange}
+            >
               <FormControlLabel
                 value="1순위"
                 control={<Radio />}
@@ -204,14 +354,15 @@ const IdeaDevReview = ({ onClose }) => {
 
         {/* 등록취소 */}
         <div className="buttonContainer">
-          <button className="cancelButton" onClick={onClose}>
+          <button className="cancelButton" onClick={onClose} disabled={loading}>
             취소
           </button>
           <button
             className="registerButton"
-            onClick={handleRegister} // 등록 버튼 클릭 시 처리
+            onClick={handleRegister}
+            disabled={loading}
           >
-            등록
+            {loading ? "등록 중..." : "등록"}
           </button>
         </div>
       </div>
