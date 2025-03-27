@@ -27,4 +27,4 @@ router.get("/developers", getIdeaDevelopers);
 router.get("/", getIdeas);
 router.get("/:id", getIdeaById);
 
-export default router;
+export default router; //test
