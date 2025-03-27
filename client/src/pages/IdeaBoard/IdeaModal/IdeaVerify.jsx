@@ -1,12 +1,532 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./ideaVerify.scss";
+import CloseIcon from "@mui/icons-material/Close";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import TextField from "@mui/material/TextField";
+import FormGroup from "@mui/material/FormGroup";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Switch from "@mui/material/Switch";
+import axios from "axios";
 
-const IdeaVerify = ({ onClose }) => {
+const IdeaVerify = ({ onClose, ideaId }) => {
+  const [formData, setFormData] = useState({
+    // 본사 선임부서 섹션
+    development_collaboration: "",
+    target_user: "",
+    comment: "",
+    verification_status: true,
+    // 본사 AI/DT 섹션
+    ai_development_collaboration: "",
+    feasibility: "",
+    ai_comment: "",
+    expected_personnel: "",
+    expected_schedule: "",
+    ai_verification_status: true,
+  });
+
+  const [error, setError] = useState("");
+  const [leftLoading, setLeftLoading] = useState(false);
+  const [rightLoading, setRightLoading] = useState(false);
+  const [leftSubmitted, setLeftSubmitted] = useState(false);
+  const [rightSubmitted, setRightSubmitted] = useState(false);
+
+  // 기존 데이터 불러오기
+  useEffect(() => {
+    const fetchVerificationData = async () => {
+      try {
+        const response = await axios.get(`/api/ideas/verify/${ideaId}`);
+        if (response.data) {
+          setFormData(response.data);
+
+          // 왼쪽/오른쪽 제출 상태 확인
+          if (
+            response.data.development_collaboration &&
+            response.data.target_user &&
+            response.data.comment
+          ) {
+            setLeftSubmitted(true);
+          }
+
+          if (
+            response.data.ai_development_collaboration &&
+            response.data.feasibility &&
+            response.data.ai_comment
+          ) {
+            setRightSubmitted(true);
+          }
+        }
+      } catch (error) {
+        console.error("검증 데이터 불러오기 실패:", error);
+      }
+    };
+
+    if (ideaId) {
+      fetchVerificationData();
+    }
+  }, [ideaId]);
+
+  const handleChange = (field) => (event) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: event.target.value,
+    }));
+  };
+
+  const handleSwitchChange = (field) => (event) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
+  // 왼쪽(선임부서) 제출 핸들러
+  const handleLeftSubmit = async () => {
+    // 필수 입력 필드 확인
+    const requiredFields = [
+      "development_collaboration",
+      "target_user",
+      "comment",
+    ];
+
+    const missingFields = requiredFields.filter(
+      (field) => !formData[field] || formData[field].toString().trim() === ""
+    );
+
+    if (missingFields.length > 0) {
+      alert("선임부서 필수 항목을 모두 입력해주세요.");
+      return;
+    }
+
+    try {
+      setLeftLoading(true);
+      setError("");
+
+      // 데이터 준비 (왼쪽 부분만)
+      const verifyData = {
+        idea_id: ideaId || 1,
+        development_collaboration: formData.development_collaboration,
+        target_user: formData.target_user,
+        comment: formData.comment,
+        verification_status: formData.verification_status,
+      };
+
+      console.log("등록할 선임부서 검증 데이터:", verifyData);
+
+      // API 호출
+      const response = await axios.post(
+        "/api/ideas/verify/department",
+        verifyData
+      );
+
+      console.log("선임부서 검증 등록 성공:", response.data);
+      alert("선임부서 검증 정보가 성공적으로 등록되었습니다.");
+      setLeftSubmitted(true);
+
+      // 응답 데이터로 폼 업데이트
+      if (response.data) {
+        setFormData((prev) => ({
+          ...prev,
+          ...response.data,
+        }));
+      }
+    } catch (error) {
+      console.error("선임부서 검증 등록 오류:", error);
+      handleApiError(error);
+    } finally {
+      setLeftLoading(false);
+    }
+  };
+
+  // 오른쪽(AI/DT) 제출 핸들러
+  const handleRightSubmit = async () => {
+    // 필수 입력 필드 확인
+    const requiredFields = [
+      "ai_development_collaboration",
+      "feasibility",
+      "ai_comment",
+    ];
+
+    const missingFields = requiredFields.filter(
+      (field) => !formData[field] || formData[field].toString().trim() === ""
+    );
+
+    if (missingFields.length > 0) {
+      alert("AI/DT 필수 항목을 모두 입력해주세요.");
+      return;
+    }
+
+    try {
+      setRightLoading(true);
+      setError("");
+
+      // 데이터 준비 (오른쪽 부분만)
+      const verifyData = {
+        idea_id: ideaId || 1,
+        ai_development_collaboration: formData.ai_development_collaboration,
+        feasibility: formData.feasibility,
+        ai_comment: formData.ai_comment,
+        expected_personnel: formData.expected_personnel,
+        expected_schedule: formData.expected_schedule,
+        ai_verification_status: formData.ai_verification_status,
+      };
+
+      console.log("등록할 AI/DT 검증 데이터:", verifyData);
+
+      // API 호출
+      const response = await axios.post("/api/ideas/verify/ai", verifyData);
+
+      console.log("AI/DT 검증 등록 성공:", response.data);
+      alert("AI/DT 검증 정보가 성공적으로 등록되었습니다.");
+      setRightSubmitted(true);
+
+      // 응답 데이터로 폼 업데이트
+      if (response.data) {
+        setFormData((prev) => ({
+          ...prev,
+          ...response.data,
+        }));
+      }
+    } catch (error) {
+      console.error("AI/DT 검증 등록 오류:", error);
+      handleApiError(error);
+    } finally {
+      setRightLoading(false);
+    }
+  };
+
+  // 에러 처리 함수
+  const handleApiError = (error) => {
+    let errorMessage = "알 수 없는 오류가 발생했습니다.";
+
+    if (error.response) {
+      if (error.response.status === 400 && error.response.data.missingFields) {
+        // 필수 필드 누락 오류
+        const missingFields = error.response.data.missingFields.join(", ");
+        errorMessage = `필수 항목이 누락되었습니다: ${missingFields}`;
+      } else {
+        // 다른 종류의 서버 오류
+        errorMessage =
+          error.response.data.error ||
+          error.response.data.message ||
+          errorMessage;
+      }
+    } else {
+      errorMessage = "서버 연결에 실패했습니다.";
+    }
+
+    // 팝업으로만 에러 메시지 표시
+    alert(errorMessage);
+
+    // 콘솔에 에러 로깅 (선택사항)
+    console.error("API Error:", error);
+
+    // 필요한 경우 추가적인 에러 처리 로직을 여기에 작성할 수 있습니다.
+  };
+
   return (
-    <div className="modalOverlay">
-      <div className="modalContent">
-        <h2>아이디어 검증</h2>
-        <button onClick={onClose}>닫기</button>
+    <div className="verifyModalOverlay">
+      <div className="verifyModalContent">
+        <div className="titleBox">
+          <h2>선임부서 과제 검증</h2>
+          <CloseIcon className="closeIcon" onClick={onClose} />
+        </div>
+        <hr className="titleUnderline" />
+        {error && <div className="error-message">{error}</div>}
+
+        <div className="left">
+          <div className="titleWrap">
+            <div className="subTitle">
+              본사 선임부서
+              <span className="subTitleDesc">*선임부서 의견란</span>
+              {leftSubmitted && <span className="submittedTag">제출완료</span>}
+            </div>
+            <hr className="subTitleUnderline" />
+          </div>
+          {/* 개발 협업 */}
+          <div className="rowContainer">
+            <div className="fieldLabel">개발 협업</div>
+            <FormControl className="fromControl">
+              <RadioGroup
+                row
+                name="development_collaboration"
+                className="radioGroup"
+                value={formData.development_collaboration}
+                onChange={handleChange("development_collaboration")}
+                disabled={leftSubmitted}
+              >
+                <FormControlLabel
+                  value="전사"
+                  control={<Radio disabled={leftSubmitted} />}
+                  label="전사"
+                />
+                <FormControlLabel
+                  value="협업"
+                  control={<Radio disabled={leftSubmitted} />}
+                  label="협업"
+                />
+                <FormControlLabel
+                  value="자체"
+                  control={<Radio disabled={leftSubmitted} />}
+                  label="자체"
+                />
+              </RadioGroup>
+            </FormControl>
+          </div>
+
+          {/* 대상 */}
+          <div className="rowContainer">
+            <div className="fieldLabel">사용대상</div>
+            <FormControl className="fromControl">
+              <RadioGroup
+                row
+                name="target_user"
+                className="radioGroup"
+                value={formData.target_user}
+                onChange={handleChange("target_user")}
+                disabled={leftSubmitted}
+              >
+                <FormControlLabel
+                  value="본부"
+                  control={<Radio disabled={leftSubmitted} />}
+                  label="본부"
+                />
+                <FormControlLabel
+                  value="팀"
+                  control={<Radio disabled={leftSubmitted} />}
+                  label="팀"
+                />
+                <FormControlLabel
+                  value="담당자"
+                  control={<Radio disabled={leftSubmitted} />}
+                  label="담당자"
+                />
+                <FormControlLabel
+                  value="Vendor"
+                  control={<Radio disabled={leftSubmitted} />}
+                  label="Vendor"
+                />
+                <FormControlLabel
+                  value="대외기관"
+                  control={<Radio disabled={leftSubmitted} />}
+                  label="대외기관"
+                />
+              </RadioGroup>
+            </FormControl>
+          </div>
+
+          {/* 의견 작성 (comment) */}
+          <div className="rowContainerComment">
+            <div className="fieldLabel">의견작성</div>
+            <FormControl className="fromControl" fullWidth>
+              <TextField
+                className="commentTextfield"
+                variant="outlined"
+                placeholder="의견을 작성해주세요"
+                multiline
+                rows={6}
+                fullWidth
+                value={formData.comment}
+                onChange={handleChange("comment")}
+                disabled={leftSubmitted}
+              />
+            </FormControl>
+          </div>
+
+          {/* 검증 여부 (selection) */}
+          <div className="rowContainer">
+            <div className="fieldLabel">검증여부</div>
+            <FormGroup className="fromControl">
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                <Typography>Drop</Typography>
+                <Switch
+                  checked={!formData.verification_status}
+                  onChange={handleSwitchChange("verification_status")}
+                  inputProps={{ "aria-label": "verification status switch" }}
+                  disabled={leftSubmitted}
+                />
+                <Typography>검증</Typography>
+              </Stack>
+            </FormGroup>
+          </div>
+
+          {/* 왼쪽 등록 버튼 */}
+          {!leftSubmitted && (
+            <div className="buttonContainer leftButtonContainer">
+              <button
+                className="registerButton"
+                onClick={handleLeftSubmit}
+                disabled={leftLoading}
+              >
+                {leftLoading ? "등록 중..." : "선임부서 의견 등록"}
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="right">
+          <div className="titleWrap">
+            <div className="subTitle">
+              본사 AI/DT
+              <span className="subTitleDesc">*AI/DT 의견란</span>
+              {rightSubmitted && <span className="submittedTag">제출완료</span>}
+            </div>
+            <hr className="subTitleUnderline" />
+          </div>
+
+          {/* 검증 협업 */}
+          <div className="rowContainer">
+            <div className="fieldLabel">개발 협업</div>
+            <FormControl className="fromControl">
+              <RadioGroup
+                row
+                name="ai_development_collaboration"
+                className="radioGroup"
+                value={formData.ai_development_collaboration}
+                onChange={handleChange("ai_development_collaboration")}
+                disabled={rightSubmitted}
+              >
+                <FormControlLabel
+                  value="전사"
+                  control={<Radio disabled={rightSubmitted} />}
+                  label="전사"
+                />
+                <FormControlLabel
+                  value="협업"
+                  control={<Radio disabled={rightSubmitted} />}
+                  label="협업"
+                />
+                <FormControlLabel
+                  value="자체"
+                  control={<Radio disabled={rightSubmitted} />}
+                  label="자체"
+                />
+              </RadioGroup>
+            </FormControl>
+          </div>
+
+          {/* 가능여부 */}
+          <div className="rowContainer">
+            <div className="fieldLabel">가능여부</div>
+            <FormControl className="fromControl">
+              <RadioGroup
+                row
+                name="feasibility"
+                className="radioGroup"
+                value={formData.feasibility}
+                onChange={handleChange("feasibility")}
+                disabled={rightSubmitted}
+              >
+                <FormControlLabel
+                  value="가능"
+                  control={<Radio disabled={rightSubmitted} />}
+                  label="가능"
+                />
+                <FormControlLabel
+                  value="불가능"
+                  control={<Radio disabled={rightSubmitted} />}
+                  label="불가능"
+                />
+              </RadioGroup>
+            </FormControl>
+          </div>
+
+          {/* 의견 작성 (comment) */}
+          <div className="rowContainerComment">
+            <div className="fieldLabel">의견작성</div>
+            <FormControl className="fromControl" fullWidth>
+              <TextField
+                className="commentTextfield"
+                variant="outlined"
+                placeholder="의견을 작성해주세요"
+                multiline
+                rows={6}
+                fullWidth
+                value={formData.ai_comment}
+                onChange={handleChange("ai_comment")}
+                disabled={rightSubmitted}
+              />
+            </FormControl>
+          </div>
+
+          {/* 예상 투입인력 */}
+          <div className="rowContainer">
+            <div className="fieldLabel">예상 투입인력</div>
+            <FormControl className="fromControl" fullWidth>
+              <div className="inputWithUnit">
+                <TextField
+                  className="shortTextField"
+                  variant="outlined"
+                  placeholder="0"
+                  rows={1}
+                  value={formData.expected_personnel}
+                  onChange={handleChange("expected_personnel")}
+                  disabled={rightSubmitted}
+                />
+                <span className="inputUnit">명</span>
+              </div>
+            </FormControl>
+          </div>
+
+          {/* 예상 일정 */}
+          <div className="rowContainer">
+            <div className="fieldLabel">예상 일정</div>
+            <FormControl className="fromControl" fullWidth>
+              <div className="inputWithUnit">
+                <TextField
+                  className="shortTextField"
+                  variant="outlined"
+                  placeholder="0"
+                  rows={1}
+                  value={formData.expected_schedule}
+                  onChange={handleChange("expected_schedule")}
+                  disabled={rightSubmitted}
+                />
+                <span className="inputUnit">개월</span>
+              </div>
+            </FormControl>
+          </div>
+
+          {/* 선정 여부 (selection) */}
+          <div className="rowContainer">
+            <div className="fieldLabel">검증여부</div>
+            <FormGroup className="fromControl">
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                <Typography>Drop</Typography>
+                <Switch
+                  checked={!formData.ai_verification_status}
+                  onChange={handleSwitchChange("ai_verification_status")}
+                  inputProps={{ "aria-label": "ai verification status switch" }}
+                  disabled={rightSubmitted}
+                />
+                <Typography>검증</Typography>
+              </Stack>
+            </FormGroup>
+          </div>
+
+          {/* 오른쪽 등록 버튼 */}
+          {!rightSubmitted && (
+            <div className="buttonContainer rightButtonContainer">
+              <button
+                className="registerButton"
+                onClick={handleRightSubmit}
+                disabled={rightLoading}
+              >
+                {rightLoading ? "등록 중..." : "AI/DT 의견 등록"}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* 닫기 버튼 컨테이너 */}
+        <div className="buttonContainer closeButtonContainer">
+          <button className="cancelButton" onClick={onClose}>
+            닫기
+          </button>
+        </div>
       </div>
     </div>
   );

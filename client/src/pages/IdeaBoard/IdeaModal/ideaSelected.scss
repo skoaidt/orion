@@ -64,7 +64,7 @@
         font-size: 14px;
         color: white;
         background: #565656;
-        width: 90px;
+        width: 40px;
         height: 100%;
         padding: 0px;
         border-radius: 5px;
@@ -224,6 +224,30 @@
       .cancelButton {
         background-color: #999;
         color: white;
+      }
+    }
+
+    // 오류 메시지 스타일
+    .errorMessage {
+      color: #f44336;
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #ffebee;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    // 비활성화된 버튼 스타일
+    .registerButton,
+    .cancelButton {
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+
+        &:hover {
+          transform: none;
+          background-color: inherit;
+        }
       }
     }
   }

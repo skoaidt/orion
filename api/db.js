@@ -2,20 +2,20 @@ import mysql from "mysql2";
 import sql from "mssql";
 import "dotenv/config";
 
-// MySQL 설정
-export const db = mysql.createConnection({
-  host: process.env.LOCAL_DB_HOST,
-  user: process.env.LOCAL_DB_USER,
-  password: process.env.LOCAL_DB_PASSWORD,
-  database: process.env.LOCAL_DB_NAME,
-});
-
+// // MySQL 설정
 // export const db = mysql.createConnection({
-//   host: process.env.SPECIAL_HOST,
-//   user: process.env.SPECIAL_USER,
-//   password: process.env.SPECIAL_PASSWORD,
-//   database: process.env.SPECIAL_DB_NAME,
+//   host: process.env.LOCAL_DB_HOST,
+//   user: process.env.LOCAL_DB_USER,
+//   password: process.env.LOCAL_DB_PASSWORD,
+//   database: process.env.LOCAL_DB_NAME,
 // });
+
+export const db = mysql.createConnection({
+  host: process.env.SPECIAL_HOST,
+  user: process.env.SPECIAL_USER,
+  password: process.env.SPECIAL_PASSWORD,
+  database: process.env.SPECIAL_DB_NAME,
+});
 
 // MSSQL 설정
 const mssqlConfig = {
