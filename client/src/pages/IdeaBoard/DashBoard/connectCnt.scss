@@ -1,0 +1,62 @@
+@import "../../../style.scss";
+
+.connectCnt {
+  .header {
+    span {
+      color: $purpleIdea;
+    }
+    span:first-child {
+      font-size: 18px;
+      font-weight: 500;
+    }
+    span:last-child {
+      font-size: 12px;
+    }
+  }
+  .connectCntBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    p {
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    .totalCnt {
+      p {
+        color: $darkBuleIdea;
+        font-size: 42px;
+        font-weight: 800;
+        margin-bottom: 10px;
+      }
+    }
+  }
+  .connectCntBoxItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 10px;
+    .Week {
+      display: flex;
+      align-items: center;
+      justify-content: space-between; // 왼쪽과 오른쪽 정렬
+      width: 90%;
+      span {
+        margin-bottom: 5px;
+      }
+      span {
+        font-size: 18px;
+      }
+      .line {
+        flex-grow: 1; // 가운데 선을 그리기 위해 공간을 차지
+        height: 1px; // 선의 두께
+        background-color: $grayColor; // 선의 색상
+        margin: 0 10px; // 선 양쪽 여백
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+@import "../../../style.scss";
+
+.ideaCnt {
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid $purpleIdeaLight;
+    span {
+      &:first-child {
+        color: $purpleIdea;
+        font-size: 18px;
+        font-weight: 500;
+      }
+      &:last-child {
+        color: $purpleIdeaLight;
+        font-size: 12px;
+      }
+    }
+  }
+}
