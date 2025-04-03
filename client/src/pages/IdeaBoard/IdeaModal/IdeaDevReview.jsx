@@ -30,10 +30,9 @@ const TransferList = ({ onSelectedDevelopersChange }) => {
         // 서버에서 받은 개발자 데이터를 형식에 맞게 변환
         const developers = response.data.map((dev) => ({
           id: dev.id,
-          no: dev.developerId,
+          no: dev.n_id, // n_id 필드 사용
           name: dev.name,
           dept: dev.team,
-          project: dev.projectCount,
         }));
 
         // 초기에는 모든 개발자를 왼쪽 리스트에 배치
@@ -78,52 +77,53 @@ const TransferList = ({ onSelectedDevelopersChange }) => {
   };
 
   const renderTable = (items, selectedItems, setSelectedItems, className) => (
-    <table className={`table ${className}`}>
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>성명</th>
-          <th>소속</th>
-          <th>Project(건)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {loading ? (
+    <div className="tableContainer">
+      <h3 className="tableTitle">
+        {className === "left" ? "개발자 List" : "참여 개발자"}
+      </h3>
+      <table className={`table ${className}`}>
+        <thead>
           <tr>
-            <td colSpan="4" style={{ textAlign: "center" }}>
-              로딩 중...
-            </td>
+            <th>성명</th>
+            <th>소속</th>
           </tr>
-        ) : error ? (
-          <tr>
-            <td colSpan="4" style={{ textAlign: "center", color: "red" }}>
-              {error}
-            </td>
-          </tr>
-        ) : items.length === 0 ? (
-          <tr>
-            <td colSpan="4" style={{ textAlign: "center" }}>
-              데이터가 없습니다.
-            </td>
-          </tr>
-        ) : (
-          items.map((item) => (
-            <tr
-              key={item.id}
-              onClick={() =>
-                toggleSelection(item, selectedItems, setSelectedItems)
-              }
-              className={selectedItems.includes(item) ? "selected" : ""}
-            >
-              <td>{item.no}</td>
-              <td>{item.name}</td>
-              <td>{item.dept}</td>
-              <td>{item.project}</td>
+        </thead>
+        <tbody>
+          {loading ? (
+            <tr>
+              <td colSpan="2" className="status-cell loading">
+                로딩 중...
+              </td>
             </tr>
-          ))
-        )}
-      </tbody>
-    </table>
+          ) : error ? (
+            <tr>
+              <td colSpan="2" className="status-cell error">
+                {error}
+              </td>
+            </tr>
+          ) : items.length === 0 ? (
+            <tr>
+              <td colSpan="2" className="status-cell empty">
+                데이터가 없습니다.
+              </td>
+            </tr>
+          ) : (
+            items.map((item) => (
+              <tr
+                key={item.id}
+                onClick={() =>
+                  toggleSelection(item, selectedItems, setSelectedItems)
+                }
+                className={selectedItems.includes(item) ? "selected" : ""}
+              >
+                <td>{item.name}</td>
+                <td>{item.dept}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 
   return (

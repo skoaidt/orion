@@ -849,13 +849,21 @@ export const registerIdeaPilot = (req, res) => {
 
 // 개발자 목록 조회
 export const getIdeaDevelopers = (req, res) => {
-  const q = `SELECT * FROM special.ITAsset_ideaDevelopers ORDER BY id ASC`;
+  // 스키마 명시 제거하고 테이블 명만 사용
+  const q = `SELECT * FROM ITAsset_ideaDevelopers ORDER BY id ASC`;
 
   db.query(q, (err, data) => {
     if (err) {
       console.error("개발자 목록 조회 오류:", err);
       return res.status(500).json({ error: err.message });
     }
+
+    // 데이터가 없는 경우 빈 배열 반환
+    if (!data || data.length === 0) {
+      console.log("개발자 목록이 비어 있습니다.");
+      return res.status(200).json([]);
+    }
+
     return res.status(200).json(data);
   });
 };
