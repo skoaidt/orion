@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import DataTable from "../../../components/DataTable/DataTable";
 import FilterSelect from "./FilterSelect";
 import { TextField } from "@mui/material";
@@ -9,10 +9,11 @@ import isBetween from "dayjs/plugin/isBetween";
 import "./ideaTable.scss";
 import { useNavigate } from "react-router-dom";
 import IdeaRegister from "../IdeaModal/IdeaRegister";
+import axios from "axios";
 dayjs.extend(isBetween);
 
 const columns = [
-  { field: "id", headerName: "ID", width: 50 },
+  { field: "display_id", headerName: "ID", width: 50 }, // 화면에 표시되는 ID
   { field: "status", headerName: "Status", width: 80, editable: true },
   { field: "dev_category", headerName: "개발유형", width: 100, editable: true },
   { field: "biz_category", headerName: "사업분야", width: 100, editable: true },
@@ -34,245 +35,40 @@ const columns = [
 
 const filterOptions = {
   status: ["선택", "등록", "검증", "완료"],
-  dev_category: ["선택", "Access", "Infra"],
-  biz_category: ["선택", "Access", "Infra", "RM"],
-  workfl_category: ["선택", "품질", "RM"],
+  dev_category: ["선택", "Access", "Infra", "신규개발", "고도화"],
+  biz_category: [
+    "선택",
+    "Access",
+    "AOC",
+    "Biz",
+    "Infra설비",
+    "SO",
+    "기업문화",
+    "안전보건",
+    "자산",
+    "전송",
+  ],
+  workfl_category: [
+    "선택",
+    "품질",
+    "고장",
+    "RM",
+    "시설",
+    "CE",
+    "사무",
+    "Biz",
+    "기타",
+  ],
   searchType: ["제목", "작성자", "제안팀", "제안본부"],
 };
-
-const originalRows = [
-  {
-    id: 1,
-    status: "등록",
-    dev_category: "access",
-    biz_category: "infra",
-    workfl_category: "rm",
-    idea_title: "아이디어1",
-    headqt: "본부1",
-    team: "팀1",
-    name: "홍길동",
-    reg_date: "2025-02-01",
-    views: 100,
-    likes: 10,
-    Dday: "D-3",
-  },
-  {
-    id: 2,
-    status: "검증",
-    dev_category: "infra",
-    biz_category: "access",
-    workfl_category: "품질",
-    idea_title: "아이디어2",
-    headqt: "본부2",
-    team: "팀2",
-    name: "이순신",
-    reg_date: "2023-10-02",
-    views: 150,
-    likes: 20,
-    Dday: "D-2",
-  },
-  {
-    id: 3,
-    status: "검증",
-    dev_category: "infra",
-    biz_category: "access",
-    workfl_category: "품질",
-    idea_title: "아이디어2",
-    headqt: "본부2",
-    team: "팀2",
-    name: "이순신",
-    reg_date: "2025-10-02",
-    views: 150,
-    likes: 20,
-    Dday: "D-2",
-  },
-  {
-    id: 4,
-    status: "검증",
-    dev_category: "infra",
-    biz_category: "access",
-    workfl_category: "품질",
-    idea_title: "아이디어2",
-    headqt: "본부2",
-    team: "팀2",
-    name: "이순신",
-    reg_date: "2023-10-02",
-    views: 150,
-    likes: 20,
-    Dday: "D-2",
-  },
-  {
-    id: 5,
-    status: "검증",
-    dev_category: "infra",
-    biz_category: "access",
-    workfl_category: "품질",
-    idea_title: "아이디어2",
-    headqt: "본부2",
-    team: "팀2",
-    name: "이순신",
-    reg_date: "2023-10-02",
-    views: 150,
-    likes: 20,
-    Dday: "D-2",
-  },
-  {
-    id: 6,
-    status: "검증",
-    dev_category: "infra",
-    biz_category: "access",
-    workfl_category: "품질",
-    idea_title: "아이디어2",
-    headqt: "본부2",
-    team: "팀2",
-    name: "이순신",
-    reg_date: "2023-10-02",
-    views: 150,
-    likes: 20,
-    Dday: "D-2",
-  },
-  {
-    id: 7,
-    status: "검증",
-    dev_category: "infra",
-    biz_category: "access",
-    workfl_category: "품질",
-    idea_title: "아이디어2",
-    headqt: "본부2",
-    team: "팀2",
-    name: "이순신",
-    reg_date: "2023-10-02",
-    views: 150,
-    likes: 20,
-    Dday: "D-2",
-  },
-  {
-    id: 8,
-    status: "검증",
-    dev_category: "Access",
-    biz_category: "access",
-    workfl_category: "품질",
-    idea_title: "아이디어2",
-    headqt: "본부2",
-    team: "팀2",
-    name: "이순신",
-    reg_date: "2023-10-02",
-    views: 150,
-    likes: 20,
-    Dday: "D-2",
-  },
-  {
-    id: 9,
-    status: "검증",
-    dev_category: "infra",
-    biz_category: "access",
-    workfl_category: "품질",
-    idea_title: "아이디어2",
-    headqt: "본부2",
-    team: "팀2",
-    name: "이순신",
-    reg_date: "2023-10-02",
-    views: 150,
-    likes: 20,
-    Dday: "D-2",
-  },
-  {
-    id: 10,
-    status: "검증",
-    dev_category: "infra",
-    biz_category: "access",
-    workfl_category: "품질",
-    idea_title: "아이디어2",
-    headqt: "본부2",
-    team: "팀2",
-    name: "이순신",
-    reg_date: "2023-10-02",
-    views: 150,
-    likes: 20,
-    Dday: "D-2",
-  },
-  {
-    id: 11,
-    status: "검증",
-    dev_category: "infra",
-    biz_category: "access",
-    workfl_category: "품질",
-    idea_title: "아이디어2",
-    headqt: "본부2",
-    team: "팀2",
-    name: "이순신",
-    reg_date: "2023-10-02",
-    views: 150,
-    likes: 20,
-    Dday: "D-2",
-  },
-  {
-    id: 12,
-    status: "검증",
-    dev_category: "infra",
-    biz_category: "access",
-    workfl_category: "품질",
-    idea_title: "아이디어2",
-    headqt: "본부2",
-    team: "팀2",
-    name: "이순신",
-    reg_date: "2023-10-02",
-    views: 150,
-    likes: 20,
-    Dday: "D-2",
-  },
-  {
-    id: 13,
-    status: "검증",
-    dev_category: "infra",
-    biz_category: "access",
-    workfl_category: "품질",
-    idea_title: "아이디어2",
-    headqt: "본부2",
-    team: "팀2",
-    name: "이순신",
-    reg_date: "2023-10-02",
-    views: 150,
-    likes: 20,
-    Dday: "D-2",
-  },
-  {
-    id: 14,
-    status: "검증",
-    dev_category: "infra",
-    biz_category: "access",
-    workfl_category: "품질",
-    idea_title: "아이디어2",
-    headqt: "본부2",
-    team: "팀2",
-    name: "이순신",
-    reg_date: "2023-10-02",
-    views: 150,
-    likes: 20,
-    Dday: "D-2",
-  },
-  {
-    id: 15,
-    status: "완료",
-    dev_category: "infra",
-    biz_category: "access",
-    workfl_category: "품질",
-    idea_title: "아이디어2",
-    headqt: "본부2",
-    team: "팀2",
-    name: "이순신",
-    reg_date: "2023-10-02",
-    views: 150,
-    likes: 20,
-    Dday: "D-2",
-  },
-];
 
 const IdeaTable = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // ✅ 필터 상태를 객체로 관리 (startDate와 endDate 추가)
+  // 필터 상태를 객체로 관리
   const [filters, setFilters] = useState({
     status: "선택",
     dev_category: "선택",
@@ -284,7 +80,53 @@ const IdeaTable = () => {
     endDate: null,
   });
 
-  // ✅ 필터 값 변경 핸들러(useCallback으로 최적화)
+  // 데이터 가져오기
+  useEffect(() => {
+    const fetchIdeas = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get("/api/ideas");
+
+        // 백엔드 데이터를 프론트엔드 형식으로 변환
+        const formattedData = response.data.map((idea, index) => ({
+          id: idea.id, // 원래 DB의 id (내부 처리용)
+          display_id: index + 1, // 화면에 표시될 순차적 ID
+          idea_id: idea.id, // 원본 아이디어 ID 보존
+          status: idea.status || "등록", // 기본값 설정
+          dev_category: idea.project_type || "", // 과제 유형을 개발 유형으로 매핑
+          biz_category: idea.business_field || "",
+          workfl_category: idea.job_field || "",
+          idea_title: idea.title || "",
+          headqt: idea.prnt_dept_name || "",
+          team: idea.dept_name || "",
+          name: idea.name || "",
+          reg_date: formatDate(idea.created_at),
+          views: 0, // 기본값 설정 (백엔드에서 제공하지 않음)
+          likes: 0, // 기본값 설정 (백엔드에서 제공하지 않음)
+          Dday: "D-0", // 기본값 설정 (백엔드에서 제공하지 않음)
+        }));
+
+        setRows(formattedData);
+      } catch (error) {
+        console.error("아이디어 목록 가져오기 오류:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIdeas();
+  }, [isModalOpen]); // 모달이 닫힐 때마다 데이터 새로고침
+
+  // 날짜 포맷 함수
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+
+    return date.toISOString().split("T")[0]; // YYYY-MM-DD 형식
+  };
+
+  // 필터 값 변경 핸들러
   const handleFilterChange = useCallback(
     (key) => (e) => {
       setFilters((prev) => ({ ...prev, [key]: e.target.value }));
@@ -292,7 +134,7 @@ const IdeaTable = () => {
     []
   );
 
-  // ✅ 날짜 변경 핸들러(useCallback으로 최적화)
+  // 날짜 변경 핸들러
   const handleStartDateChange = useCallback((newValue) => {
     setFilters((prev) => ({ ...prev, startDate: newValue }));
   }, []);
@@ -301,9 +143,9 @@ const IdeaTable = () => {
     setFilters((prev) => ({ ...prev, endDate: newValue }));
   }, []);
 
-  // ✅ 필터링 로직(useMemo로 최적화)
+  // 필터링 로직
   const filteredRows = useMemo(() => {
-    return originalRows.filter((row) => {
+    return rows.filter((row) => {
       // 검색어 필터링
       if (filters.searchText) {
         const searchFieldMap = {
@@ -350,11 +192,12 @@ const IdeaTable = () => {
 
       return true;
     });
-  }, [filters]);
+  }, [filters, rows]);
 
+  // 행 클릭 핸들러 - 원본 idea_id로 상세 페이지 이동
   const handleRowClick = (row) => {
     console.log("Row clicked in IdeaTable:", row);
-    const url = `/ideaboard/detail/${row.id}`;
+    const url = `/ideaboard/detail/${row.idea_id}`; // idea_id를 사용하여 상세 페이지로 이동
     console.log("Navigating to:", url);
     navigate(url);
   };
@@ -377,7 +220,7 @@ const IdeaTable = () => {
         <h1>Idea Board</h1>
       </div>
 
-      {/* ✅ 필터 영역 */}
+      {/* 필터 영역 */}
       <div className="MenuBox">
         <FilterSelect
           label="Status"
@@ -407,7 +250,7 @@ const IdeaTable = () => {
           onChange={handleFilterChange("workfl_category")}
         />
 
-        {/* ✅ 시작 날짜 선택 */}
+        {/* 시작 날짜 선택 */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker
             label="시작일"
@@ -417,7 +260,7 @@ const IdeaTable = () => {
           />
         </LocalizationProvider>
 
-        {/* ✅ 종료 날짜 선택 */}
+        {/* 종료 날짜 선택 */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker
             label="종료일"
@@ -454,12 +297,16 @@ const IdeaTable = () => {
       </div>
 
       {/* 데이터 테이블 */}
-      <DataTable
-        slug="idea"
-        columns={columns}
-        rows={filteredRows}
-        onRowClick={handleRowClick}
-      />
+      {loading ? (
+        <div>데이터를 불러오는 중입니다...</div>
+      ) : (
+        <DataTable
+          slug="idea"
+          columns={columns}
+          rows={filteredRows}
+          onRowClick={handleRowClick}
+        />
+      )}
 
       {/* 모달 컴포넌트 */}
       {isModalOpen && <IdeaRegister onClose={handleCloseModal} />}

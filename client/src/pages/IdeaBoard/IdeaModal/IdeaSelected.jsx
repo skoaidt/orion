@@ -65,21 +65,36 @@ const IdeaSelected = ({ onClose, ideaId }) => {
 
       // 데이터 준비
       const selectionData = {
-        idea_id: ideaId || 1, // ideaId가 전달되지 않은 경우 테스트용으로 1 사용
         duplication,
         scope,
         comment,
         is_selected: isSelected,
       };
 
+      // ideaId 디버깅
+      console.log("아이디어 ID:", ideaId);
       console.log("등록할 과제 선정 데이터:", selectionData);
 
-      // API 호출
-      const response = await axios.post("/api/ideas/selection", selectionData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      // API 호출 - ideaId가 있으면 URL 파라미터로 전달, 없으면 기존 방식 사용
+      let response;
+      if (ideaId && ideaId !== "undefined" && ideaId !== "null") {
+        // URL 파라미터로 아이디어 ID 전달
+        response = await axios.post(
+          `/api/ideas/selection/${ideaId}`,
+          selectionData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      } else {
+        // 에러 처리 - 아이디어 ID가 필요함
+        alert("아이디어 ID가 필요합니다. 다시 시도해주세요.");
+        setError("아이디어 ID가 필요합니다");
+        setLoading(false);
+        return;
+      }
 
       console.log("과제 선정 등록 성공:", response.data);
       alert("과제 선정 정보가 성공적으로 등록되었습니다.");

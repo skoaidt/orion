@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import "./ideaRegister.scss";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
@@ -11,8 +11,10 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
+import { AuthContext } from "../../../context/authContext";
 
 const IdeaRegister = ({ onClose }) => {
+  const { currentUser } = useContext(AuthContext);
   // 각 Select 컴포넌트별로 독립적인 상태 생성
   const [businessField, setBusinessField] = React.useState("");
   const [jobField, setJobField] = React.useState("");
@@ -20,9 +22,9 @@ const IdeaRegister = ({ onClose }) => {
   const [duplication, setDuplication] = React.useState("");
   const [tbohStatus, setTbohStatus] = React.useState("");
   const [personName, setPersonName] = React.useState([]);
-  const [usePeriod, setUsePeriod] = React.useState(""); // 활용기간
-  const [useScope, setUseScope] = React.useState(""); // 사용범위
-  const [platform, setPlatform] = React.useState(""); // 플랫폼
+  const [usePeriod, setUsePeriod] = React.useState("");
+  const [useScope, setUseScope] = React.useState("");
+  const [platform, setPlatform] = React.useState("");
 
   // 각 에디터별 개별 상태값 생성
   const [background, setBackground] = useState("");
@@ -86,7 +88,8 @@ const IdeaRegister = ({ onClose }) => {
     "보안",
     "자동화",
     "연동및연계",
-    "Biz Process",
+    "Biz",
+    "Process",
   ];
 
   const enhanceList = [
@@ -227,6 +230,11 @@ const IdeaRegister = ({ onClose }) => {
         platform: platform,
         usability_points: personName.join(","), // 배열을 문자열로 변환
         improvement_points: personName.join(","), // 개선내역도 같은 state를 사용 중이므로 수정 필요
+        // 로그인한 사용자 정보 추가
+        user_id: currentUser?.userId || "", // 사번
+        name: currentUser?.name || "", // 이름
+        prnt_dept_name: currentUser?.prntDeptName || "", // 제안본부
+        dept_name: currentUser?.deptName || "", // 제안팀
       };
 
       console.log("등록할 아이디어 데이터:", ideaData);
@@ -380,7 +388,7 @@ const IdeaRegister = ({ onClose }) => {
 
           <div className="right">
             <div className="projectCategory">
-              <span className="fieldLabel">과제 유형</span>
+              <span className="fieldLabel">개발 유형</span>
               <FormControl>
                 <RadioGroup row name="row-radio-buttons-group">
                   <FormControlLabel
