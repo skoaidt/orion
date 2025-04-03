@@ -32,7 +32,8 @@ const TransferList = ({ onSelectedDevelopersChange }) => {
           id: dev.id,
           no: dev.n_id, // n_id 필드 사용
           name: dev.name,
-          dept: dev.team,
+          team: dev.team,
+          headqt: dev.headqt,
         }));
 
         // 초기에는 모든 개발자를 왼쪽 리스트에 배치
@@ -52,8 +53,8 @@ const TransferList = ({ onSelectedDevelopersChange }) => {
 
   // rightItems가 변경될 때마다 부모 컴포넌트에게 전달
   useEffect(() => {
-    const selectedDeveloperIds = rightItems.map((developer) => developer.id);
-    onSelectedDevelopersChange(selectedDeveloperIds);
+    // 개발자 ID만 전송하는 대신 선택된 개발자 객체 전체를 전송
+    onSelectedDevelopersChange(rightItems);
   }, [rightItems, onSelectedDevelopersChange]);
 
   const moveToRight = () => {
@@ -84,26 +85,27 @@ const TransferList = ({ onSelectedDevelopersChange }) => {
       <table className={`table ${className}`}>
         <thead>
           <tr>
-            <th>성명</th>
+            <th>본부</th>
             <th>소속</th>
+            <th>성명</th>
           </tr>
         </thead>
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan="2" className="status-cell loading">
+              <td colSpan="3" className="status-cell loading">
                 로딩 중...
               </td>
             </tr>
           ) : error ? (
             <tr>
-              <td colSpan="2" className="status-cell error">
+              <td colSpan="3" className="status-cell error">
                 {error}
               </td>
             </tr>
           ) : items.length === 0 ? (
             <tr>
-              <td colSpan="2" className="status-cell empty">
+              <td colSpan="3" className="status-cell empty">
                 데이터가 없습니다.
               </td>
             </tr>
@@ -116,8 +118,9 @@ const TransferList = ({ onSelectedDevelopersChange }) => {
                 }
                 className={selectedItems.includes(item) ? "selected" : ""}
               >
+                <td>{item.headqt || "-"}</td>
+                <td>{item.team}</td>
                 <td>{item.name}</td>
-                <td>{item.dept}</td>
               </tr>
             ))
           )}
@@ -246,7 +249,7 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
       setLoading(true);
       setError("");
 
-      // 데이터 준비
+      // 개발자 정보 전체를 전송 (id, n_id, name, team, headqt)
       const devReviewData = {
         ideaID: ideaId || 1,
         developers: selectedDevelopers,
