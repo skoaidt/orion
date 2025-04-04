@@ -11,10 +11,15 @@ const IdeaDrop = ({ onClose, ideaId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ideaId 디버깅
+  console.log("IdeaDrop 컴포넌트 - 현재 참조 중인 ideaId:", ideaId);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!ideaId) {
+        console.log("IdeaDrop - ideaId가 없음");
         setLoading(false);
+        setError("아이디어 ID가 필요합니다. 다시 시도해주세요.");
         return;
       }
 
@@ -22,19 +27,24 @@ const IdeaDrop = ({ onClose, ideaId }) => {
         setLoading(true);
         setError(null);
 
+        console.log(`IdeaDrop - API 호출 시작 (ideaId: ${ideaId})`);
+
         // 아이디어 기본 정보 가져오기
         const ideaResponse = await axios.get(`/api/ideas/${ideaId}`);
         setIdeaData(ideaResponse.data);
+        console.log("IdeaDrop - 아이디어 기본 정보 가져오기 성공");
 
         // 선정 정보 가져오기
         const selectionResponse = await axios.get(
           `/api/ideas/selection/${ideaId}`
         );
         setSelectionData(selectionResponse.data);
+        console.log("IdeaDrop - 선정 정보 가져오기 성공");
 
         // 검증 정보 가져오기
         const verifyResponse = await axios.get(`/api/ideas/verify/${ideaId}`);
         setVerifyData(verifyResponse.data);
+        console.log("IdeaDrop - 검증 정보 가져오기 성공");
       } catch (error) {
         console.error("데이터 로딩 오류:", error);
         setError("데이터를 불러오는 중 오류가 발생했습니다.");
@@ -48,20 +58,16 @@ const IdeaDrop = ({ onClose, ideaId }) => {
 
   // 목업 데이터 (API가 실패하거나 데이터가 없을 때 대체용)
   const mockSelectionData = {
-    comment:
-      "현재 요구사항과 맞지 않는 기능으로 판단되어 Drop 처리합니다. 추후 니즈 분석 후 재검토 가능합니다.",
+    comment: "현재 등록된 의견이 없습니다.",
     is_selected: false,
   };
 
   const mockVerifyData = {
-    comment:
-      "타부서 협의 필요성은 없으나, 개발 리소스가 부족하여 현재 진행이 어렵습니다.",
+    comment: "현재 등록된 의견이 없습니다.",
     verification_status: false,
-    department: "Access계획팀",
-    ai_comment:
-      "현재 기술로는 구현이 어렵습니다. 요구사항 재정의가 필요합니다.",
+    department: "등록된 선임부서가 없습니다.",
+    ai_comment: "현재 등록된 의견이 없습니다.",
     ai_verification_status: false,
-    ai_department: "AI/DT기획 PL",
   };
 
   // 각 데이터의 null 여부를 콘솔에 출력
@@ -73,6 +79,8 @@ const IdeaDrop = ({ onClose, ideaId }) => {
 
   console.log("verifyData:", verifyData);
   console.log("verifyData가 null인가?", verifyData === null);
+
+  console.log("현재 참조 중인 ideaId:", ideaId);
 
   // 온점(.) 기준으로 텍스트 줄바꿈 처리 함수
   const formatTextWithLineBreaks = (text) => {
@@ -177,12 +185,6 @@ const IdeaDrop = ({ onClose, ideaId }) => {
                     }
                   >
                     {verifyData?.ai_verification_status ? "검증완료" : "Drop"}
-                  </span>
-                </p>
-                <p>
-                  <strong>검증부서:</strong>
-                  <span className="departmentText">
-                    {verifyData?.ai_department || mockVerifyData.ai_department}
                   </span>
                 </p>
               </div>

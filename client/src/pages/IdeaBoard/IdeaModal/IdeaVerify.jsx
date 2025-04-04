@@ -101,13 +101,20 @@ const IdeaVerify = ({ onClose, ideaId }) => {
       return;
     }
 
+    // ideaId 확인
+    if (!ideaId) {
+      alert("아이디어 ID가 필요합니다. 다시 시도해주세요.");
+      setError("아이디어 ID가 필요합니다");
+      return;
+    }
+
     try {
       setLeftLoading(true);
       setError("");
 
       // 데이터 준비 (왼쪽 부분만)
       const verifyData = {
-        idea_id: ideaId || 1,
+        idea_id: ideaId,
         development_collaboration: formData.development_collaboration,
         target_user: formData.target_user,
         comment: formData.comment,
@@ -159,13 +166,20 @@ const IdeaVerify = ({ onClose, ideaId }) => {
       return;
     }
 
+    // ideaId 확인
+    if (!ideaId) {
+      alert("아이디어 ID가 필요합니다. 다시 시도해주세요.");
+      setError("아이디어 ID가 필요합니다");
+      return;
+    }
+
     try {
       setRightLoading(true);
       setError("");
 
       // 데이터 준비 (오른쪽 부분만)
       const verifyData = {
-        idea_id: ideaId || 1,
+        idea_id: ideaId,
         ai_development_collaboration: formData.ai_development_collaboration,
         feasibility: formData.feasibility,
         ai_comment: formData.ai_comment,

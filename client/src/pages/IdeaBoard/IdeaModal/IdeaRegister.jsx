@@ -12,6 +12,9 @@ import "react-quill/dist/quill.snow.css";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { AuthContext } from "../../../context/authContext";
+import { styled } from "@mui/system";
+import { Select as BaseSelect } from "@mui/base/Select";
+import { Option as BaseOption } from "@mui/base/Option";
 
 const IdeaRegister = ({ onClose }) => {
   const { currentUser } = useContext(AuthContext);
@@ -31,6 +34,9 @@ const IdeaRegister = ({ onClose }) => {
   const [progress, setProgress] = useState("");
   const [quantitativeEffect, setQuantitativeEffect] = useState("");
   const [qualitativeEffect, setQualitativeEffect] = useState("");
+
+  // 부서 검증을 위한 상태 추가
+  const [verifyDepartment, setVerifyDepartment] = useState(null);
 
   // 각 에디터별 개별 ref 생성
   const backgroundRef = useRef(null);
@@ -202,6 +208,84 @@ const IdeaRegister = ({ onClose }) => {
     setPlatform(event.target.value);
   };
 
+  // 조직도 데이터 구조
+  const organizationData = {
+    Access본부: {
+      담당들: {
+        Access계획담당: ["Access계획팀", "Access시스템팀", "계약팀"],
+        Access운용담당: ["Access운용1팀", "Access운용2팀", "Access품질팀"],
+      },
+      직속팀들: ["Access전략팀", "Access신기술팀", "Access지원팀"],
+    },
+    Network본부: {
+      담당들: {
+        Network계획담당: ["Network계획팀", "Network시스템팀", "Network구축팀"],
+        Network운용담당: ["Network운용1팀", "Network운용2팀", "Network품질팀"],
+      },
+      직속팀들: ["Network전략팀", "Network신기술팀", "Network지원팀"],
+    },
+    IT본부: {
+      담당들: {
+        IT기획담당: ["IT기획팀", "IT아키텍처팀", "IT보안팀"],
+        IT개발담당: ["IT개발1팀", "IT개발2팀", "데이터팀"],
+      },
+      직속팀들: ["IT전략팀", "IT품질팀", "IT지원팀"],
+    },
+    "AI/DT본부": {
+      담당들: {
+        AI기획담당: ["AI기획팀", "AI아키텍처팀", "AI솔루션팀"],
+        데이터담당: ["데이터분석팀", "AI개발팀", "빅데이터팀"],
+      },
+      직속팀들: ["AI전략팀", "데이터품질팀", "AI지원팀"],
+    },
+  };
+
+  // 부서 선택 관련 상태 및 핸들러
+  const [selectedHeadquarter, setSelectedHeadquarter] = React.useState("");
+  const [selectedDepartment, setSelectedDepartment] = React.useState("");
+  const [selectedTeam, setSelectedTeam] = React.useState("");
+  const [teams, setTeams] = React.useState([]);
+
+  // 본부 선택 시
+  const handleHeadquarterChange = (event, value) => {
+    setSelectedHeadquarter(value);
+    setSelectedDepartment(""); // 담당 초기화
+    setSelectedTeam(""); // 팀 초기화
+    setTeams([]); // 팀 목록 초기화
+  };
+
+  // 담당 선택 시
+  const handleDepartmentChange = (event, value) => {
+    setSelectedDepartment(value);
+    setSelectedTeam(""); // 팀 초기화
+
+    if (value === "선택없음") {
+      // 직속 팀 설정
+      setTeams(organizationData[selectedHeadquarter].직속팀들);
+    } else if (organizationData[selectedHeadquarter]?.담당들[value]) {
+      // 담당의 팀 설정
+      setTeams(organizationData[selectedHeadquarter].담당들[value]);
+    }
+  };
+
+  // 팀 선택 시
+  const handleTeamChange = (event, value) => {
+    setSelectedTeam(value);
+
+    // 선택된 부서 정보 상태 업데이트
+    const departmentInfo = {
+      headquarter: selectedHeadquarter,
+      department: selectedDepartment,
+      team: value,
+      // 표시용 전체 경로
+      fullPath:
+        selectedDepartment === "선택없음"
+          ? `${selectedHeadquarter} > ${value}`
+          : `${selectedHeadquarter} > ${selectedDepartment} > ${value}`,
+    };
+    setVerifyDepartment(departmentInfo);
+  };
+
   // 등록 버튼 핸들러
   const handleSubmit = async () => {
     try {
@@ -235,6 +319,10 @@ const IdeaRegister = ({ onClose }) => {
         name: currentUser?.name || "", // 이름
         prnt_dept_name: currentUser?.prntDeptName || "", // 제안본부
         dept_name: currentUser?.deptName || "", // 제안팀
+        // 검증 부서 정보 추가
+        verify_department: verifyDepartment
+          ? JSON.stringify(verifyDepartment)
+          : null,
       };
 
       console.log("등록할 아이디어 데이터:", ideaData);
@@ -281,6 +369,72 @@ const IdeaRegister = ({ onClose }) => {
       }
     }
   };
+
+  // VerifyDepartment 컴포넌트를 위한 스타일 컴포넌트들
+  const SelectCustomButton = styled("button")(({ theme }) => ({
+    border: "1px solid #ccc",
+    borderRadius: "4px",
+    padding: "8px 12px",
+    width: "100%",
+    textAlign: "left",
+    backgroundColor: "#fff",
+    fontSize: "14px",
+    cursor: "pointer",
+    "&:hover": {
+      borderColor: "#aaa",
+    },
+    "&:focus": {
+      outline: "none",
+      borderColor: "#2e7d32",
+      boxShadow: "0 0 0 2px rgba(46, 125, 50, 0.2)",
+    },
+  }));
+
+  const SelectOption = styled(BaseOption)(({ theme }) => ({
+    listStyle: "none",
+    padding: "8px",
+    borderRadius: "4px",
+    cursor: "pointer",
+    "&:hover": {
+      backgroundColor: "#f5f5f5",
+    },
+    "&.Mui-selected": {
+      backgroundColor: "#e0e0e0",
+      "&:hover": {
+        backgroundColor: "#d0d0d0",
+      },
+    },
+  }));
+
+  const SelectListbox = styled("ul")(({ theme }) => ({
+    margin: "8px 0",
+    padding: "8px",
+    borderRadius: "4px",
+    backgroundColor: "#fff",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+    maxHeight: "200px",
+    overflowY: "auto",
+  }));
+
+  const SelectPopup = styled("div")(({ theme }) => ({
+    zIndex: 1000,
+  }));
+
+  const SelectContainer = styled("div")({
+    marginBottom: "16px",
+  });
+
+  // 부서 선택 Select 컴포넌트
+  const DepartmentSelect = React.forwardRef(function Select(props, ref) {
+    const slots = {
+      root: SelectCustomButton,
+      listbox: SelectListbox,
+      popup: SelectPopup,
+      ...props.slots,
+    };
+
+    return <BaseSelect {...props} ref={ref} slots={slots} />;
+  });
 
   return (
     <div className="modalOverlay">
@@ -639,6 +793,67 @@ const IdeaRegister = ({ onClose }) => {
                   ))}
                 </Select>
               </FormControl>
+            </div>
+
+            {/* 검증 부서 컨테이너 추가 */}
+            <div className="projectCategory">
+              <span className="fieldLabel">검증 부서</span>
+              <div className="verifyDepartmentContainer">
+                <SelectContainer>
+                  <DepartmentSelect
+                    value={selectedHeadquarter}
+                    onChange={handleHeadquarterChange}
+                    placeholder="본부를 선택하세요"
+                  >
+                    {Object.keys(organizationData).map((headquarter) => (
+                      <SelectOption key={headquarter} value={headquarter}>
+                        {headquarter}
+                      </SelectOption>
+                    ))}
+                  </DepartmentSelect>
+                </SelectContainer>
+
+                {selectedHeadquarter && (
+                  <SelectContainer>
+                    <DepartmentSelect
+                      value={selectedDepartment}
+                      onChange={handleDepartmentChange}
+                      placeholder="담당을 선택하세요"
+                    >
+                      {Object.keys(
+                        organizationData[selectedHeadquarter].담당들
+                      ).map((department) => (
+                        <SelectOption key={department} value={department}>
+                          {department}
+                        </SelectOption>
+                      ))}
+                      <SelectOption value="선택없음">직속팀 선택</SelectOption>
+                    </DepartmentSelect>
+                  </SelectContainer>
+                )}
+
+                {selectedDepartment && teams.length > 0 && (
+                  <SelectContainer>
+                    <DepartmentSelect
+                      value={selectedTeam}
+                      onChange={handleTeamChange}
+                      placeholder="팀을 선택하세요"
+                    >
+                      {teams.map((team) => (
+                        <SelectOption key={team} value={team}>
+                          {team}
+                        </SelectOption>
+                      ))}
+                    </DepartmentSelect>
+                  </SelectContainer>
+                )}
+
+                {verifyDepartment && (
+                  <div className="selectedDepartmentInfo">
+                    <p>선택된 검증 부서: {verifyDepartment.fullPath}</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
