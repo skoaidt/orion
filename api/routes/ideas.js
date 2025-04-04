@@ -20,7 +20,7 @@ import {
 const router = express.Router();
 
 router.post("/register", registerIdea);
-router.post("/selection", registerSelectedIdea);
+router.post("/selection/:ideaId", registerSelectedIdea);
 router.post("/verify", registerIdeaVerify);
 router.post("/verify/department", registerDepartmentVerify);
 router.post("/verify/ai", registerAIVerify);

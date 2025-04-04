@@ -43,6 +43,10 @@ export const registerIdea = (req, res) => {
     platform,
     usability_points,
     improvement_points,
+    user_id,
+    name,
+    prnt_dept_name,
+    dept_name,
   } = req.body;
 
   // 모든 필드가 입력되었는지 확인
@@ -64,6 +68,10 @@ export const registerIdea = (req, res) => {
     "platform",
     "usability_points",
     "improvement_points",
+    "user_id",
+    "name",
+    "prnt_dept_name",
+    "dept_name",
   ];
 
   // 누락된 필드 검사 및 빈 문자열 체크
@@ -99,8 +107,9 @@ export const registerIdea = (req, res) => {
       project_type, target_user, business_field, 
       job_field, usability, duplication, 
       tboh_status, use_period, use_scope, 
-      platform, usability_points, improvement_points
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      platform, usability_points, improvement_points,
+      user_id, name, prnt_dept_name, dept_name
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
   `;
 
   const values = [
@@ -121,6 +130,10 @@ export const registerIdea = (req, res) => {
     platform,
     usability_points,
     improvement_points,
+    user_id,
+    name,
+    prnt_dept_name,
+    dept_name,
   ];
 
   db.query(q, values, (err, data) => {
@@ -170,91 +183,71 @@ export const getIdeaById = (req, res) => {
   });
 };
 
-// 테이블 구조 수정을 위한 함수 추가
-const modifyTableStructure = () => {
-  const alterQuery = `
-    ALTER TABLE special.ITAsset_ideaVerify 
-    MODIFY COLUMN ai_development_collaboration VARCHAR(255) NULL,
-    MODIFY COLUMN feasibility VARCHAR(255) NULL,
-    MODIFY COLUMN ai_comment TEXT NULL
-  `;
-
-  db.query(alterQuery, (err, result) => {
-    if (err) {
-      console.error("테이블 구조 수정 실패:", err);
-    } else {
-      console.log("테이블 구조 수정 성공:", result);
-    }
-  });
-};
-
-// 모듈 로드 시 테이블 구조 수정 실행
-modifyTableStructure();
-
 // 과제 선정 정보 등록
 export const registerSelectedIdea = (req, res) => {
   console.log("과제 선정 요청 데이터:", req.body);
 
   const {
-    idea_id, // 관련 아이디어 ID
     duplication, // 과제중복
     scope, // 사용범위
     comment, // 의견작성
     is_selected, // 선정여부
-    expected_personnel, // 예상 투입인력
-    expected_schedule, // 예상일정
   } = req.body;
 
-  // 필드 이름 한글 매핑
-  const fieldNameMap = {
-    idea_id: "아이디어 ID",
-    duplication: "과제중복",
-    scope: "사용범위",
-    comment: "의견작성",
-    is_selected: "선정여부",
-    expected_personnel: "예상 투입인력",
-    expected_schedule: "예상일정",
-  };
+  const idea_id = req.params.ideaId; // URL 파라미터에서 아이디어 ID 가져오기
 
-  // 필수 필드 검증
-  const requiredFields = [
-    "idea_id",
-    "duplication",
-    "scope",
-    "comment",
-    "is_selected",
-  ];
-
-  // 누락된 필드 검사
-  const missingFields = requiredFields.filter((field) => {
-    const value = req.body[field];
-    return (
-      value === undefined ||
-      value === null ||
-      value === "" ||
-      (typeof value === "string" && value.replace(/<[^>]*>/g, "").trim() === "")
-    );
-  });
-
-  if (missingFields.length > 0) {
-    // 한글 필드명으로 변환
-    const missingFieldsKorean = missingFields.map(
-      (field) => fieldNameMap[field] || field
-    );
-
-    console.log(`누락된 필드 발견: ${missingFieldsKorean.join(", ")}`);
-
-    return res.status(400).json({
-      error: "모든 필드를 입력해주세요",
-      missingFields: missingFieldsKorean,
-    });
+  if (!idea_id) {
+    return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
   }
+
+  // // 필드 이름 한글 매핑
+  // const fieldNameMap = {
+  //   idea_id: "아이디어 ID",
+  //   duplication: "과제중복",
+  //   scope: "사용범위",
+  //   comment: "의견작성",
+  //   is_selected: "선정여부",
+  // };
+
+  // // 필수 필드 검증
+  // const requiredFields = [
+  //   "idea_id",
+  //   "duplication",
+  //   "scope",
+  //   "comment",
+  //   "is_selected",
+  // ];
+
+  // // 누락된 필드 검사
+  // const missingFields = requiredFields.filter((field) => {
+  //   const value = req.body[field];
+  //   return (
+  //     value === undefined ||
+  //     value === null ||
+  //     value === "" ||
+  //     (typeof value === "string" && value.replace(/<[^>]*>/g, "").trim() === "")
+  //   );
+  // });
+
+  // if (missingFields.length > 0) {
+  //   // 한글 필드명으로 변환
+  //   const missingFieldsKorean = missingFields.map(
+  //     (field) => fieldNameMap[field] || field
+  //   );
+
+  //   console.log(`누락된 필드 발견: ${missingFieldsKorean.join(", ")}`);
+
+  //   return res.status(400).json({
+  //     error: "모든 필드를 입력해주세요",
+  //     missingFields: missingFieldsKorean,
+  //   });
+  // }
 
   // 데이터 삽입 쿼리
   const insertQuery = `
     INSERT INTO special.ITAsset_ideaSelected (
-      idea_id, duplication, scope, comment, is_selected, expected_personnel, expected_schedule
-    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      idea_id, duplication, scope, comment, is_selected
+    ) VALUES (?, ?, ?, ?, ?)
   `;
 
   const values = [
@@ -263,8 +256,6 @@ export const registerSelectedIdea = (req, res) => {
     scope,
     comment,
     is_selected === true || is_selected === "true" || is_selected === 1 ? 1 : 0,
-    expected_personnel || null,
-    expected_schedule || null,
   ];
 
   db.query(insertQuery, values, (err, data) => {
