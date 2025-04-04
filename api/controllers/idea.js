@@ -798,8 +798,8 @@ export const registerIdeaPilot = (req, res) => {
 
   // 데이터 삽입 쿼리
   const insertQuery = `
-    INSERT INTO special.ITAsset_pilot (
-      ideaID, productivity, cost, quantitybasis
+    INSERT INTO special.ITAsset_ideaPilot (
+      idea_id, productivity, cost, quantitybasis
     ) VALUES (?, ?, ?, ?)
   `;
 
