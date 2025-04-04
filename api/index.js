@@ -17,6 +17,15 @@ import ideaRoutes from "./routes/ideas.js";
 
 const app = express();
 
+// 미들웨어 설정 - 모든 라우트 정의 전에 배치
+app.use(express.json());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "https://itasset.skons.co.kr"],
+  })
+);
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

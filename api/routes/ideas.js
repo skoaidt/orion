@@ -9,9 +9,13 @@ import {
   registerDepartmentVerify,
   registerAIVerify,
   registerIdeaPilot,
+} from "../controllers/idea.js";
+
+import {
   getIdeaDevelopers,
   registerIdeaDevReview,
-} from "../controllers/idea.js";
+  debugMssqlConnection,
+} from "../controllers/ideaDevelopers.js";
 
 const router = express.Router();
 
@@ -24,6 +28,7 @@ router.post("/pilot", registerIdeaPilot);
 router.post("/devreview", registerIdeaDevReview);
 router.get("/verify/:id", getIdeaVerifyById);
 router.get("/developers", getIdeaDevelopers);
+router.get("/debug-mssql", debugMssqlConnection);
 router.get("/", getIdeas);
 router.get("/:id", getIdeaById);
 
