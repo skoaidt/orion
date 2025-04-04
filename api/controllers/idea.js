@@ -170,6 +170,27 @@ export const getIdeaById = (req, res) => {
   });
 };
 
+// 테이블 구조 수정을 위한 함수 추가
+const modifyTableStructure = () => {
+  const alterQuery = `
+    ALTER TABLE special.ITAsset_ideaVerify 
+    MODIFY COLUMN ai_development_collaboration VARCHAR(255) NULL,
+    MODIFY COLUMN feasibility VARCHAR(255) NULL,
+    MODIFY COLUMN ai_comment TEXT NULL
+  `;
+
+  db.query(alterQuery, (err, result) => {
+    if (err) {
+      console.error("테이블 구조 수정 실패:", err);
+    } else {
+      console.log("테이블 구조 수정 성공:", result);
+    }
+  });
+};
+
+// 모듈 로드 시 테이블 구조 수정 실행
+modifyTableStructure();
+
 // 과제 선정 정보 등록
 export const registerSelectedIdea = (req, res) => {
   console.log("과제 선정 요청 데이터:", req.body);
@@ -422,5 +443,406 @@ export const registerIdeaVerify = (req, res) => {
         });
       }
     );
+  });
+};
+
+// 과제 검증 정보 조회
+export const getIdeaVerifyById = (req, res) => {
+  const ideaId = req.params.id;
+  const q = `SELECT * FROM special.ITAsset_ideaVerify WHERE idea_id = ? ORDER BY created_at DESC LIMIT 1`;
+
+  db.query(q, [ideaId], (err, data) => {
+    if (err) {
+      console.error("과제 검증 정보 조회 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    if (data.length === 0) {
+      return res.status(404).json({ message: "검증 정보를 찾을 수 없습니다." });
+    }
+
+    return res.status(200).json(data[0]);
+  });
+};
+
+// 선임부서 과제 검증 정보 등록
+export const registerDepartmentVerify = (req, res) => {
+  console.log("선임부서 과제 검증 요청 데이터:", req.body);
+
+  const {
+    idea_id, // 관련 아이디어 ID
+    development_collaboration, // 개발 협업
+    target_user, // 사용대상
+    comment, // 의견작성
+    verification_status, // 검증여부
+  } = req.body;
+
+  // 필드 이름 한글 매핑
+  const fieldNameMap = {
+    idea_id: "아이디어 ID",
+    development_collaboration: "개발 협업",
+    target_user: "사용대상",
+    comment: "의견작성",
+    verification_status: "검증여부",
+  };
+
+  // 필수 필드 검증
+  const requiredFields = [
+    "idea_id",
+    "development_collaboration",
+    "target_user",
+    "comment",
+  ];
+
+  // 누락된 필드 검사
+  const missingFields = requiredFields.filter((field) => {
+    const value = req.body[field];
+    return (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      (typeof value === "string" && value.replace(/<[^>]*>/g, "").trim() === "")
+    );
+  });
+
+  if (missingFields.length > 0) {
+    // 한글 필드명으로 변환
+    const missingFieldsKorean = missingFields.map(
+      (field) => fieldNameMap[field] || field
+    );
+
+    console.log(`누락된 필드 발견: ${missingFieldsKorean.join(", ")}`);
+
+    return res.status(400).json({
+      error: "모든 필드를 입력해주세요",
+      missingFields: missingFieldsKorean,
+    });
+  }
+
+  // 기존 데이터 조회
+  const selectQuery = `SELECT * FROM special.ITAsset_ideaVerify WHERE idea_id = ? ORDER BY created_at DESC LIMIT 1`;
+
+  db.query(selectQuery, [idea_id], (selectErr, selectData) => {
+    if (selectErr) {
+      console.error("과제 검증 정보 조회 오류:", selectErr);
+      return res.status(500).json({ error: selectErr.message });
+    }
+
+    let query;
+    let values;
+
+    if (selectData.length > 0) {
+      // 기존 데이터가 있으면 업데이트
+      query = `
+        UPDATE special.ITAsset_ideaVerify 
+        SET development_collaboration = ?, target_user = ?, comment = ?, verification_status = ?, updated_at = NOW()
+        WHERE idea_id = ? AND id = ?
+      `;
+      values = [
+        development_collaboration,
+        target_user,
+        comment,
+        verification_status === true || verification_status === "true" ? 1 : 0,
+        idea_id,
+        selectData[0].id,
+      ];
+    } else {
+      // 기존 데이터가 없으면 새로 삽입
+      // ai_comment와 같은 필수 필드에 NULL 값 제공
+      query = `
+        INSERT INTO special.ITAsset_ideaVerify (
+          idea_id, development_collaboration, target_user, comment, verification_status
+        ) VALUES (?, ?, ?, ?, ?)
+      `;
+      values = [
+        idea_id,
+        development_collaboration,
+        target_user,
+        comment,
+        verification_status === true || verification_status === "true" ? 1 : 0,
+      ];
+    }
+
+    db.query(query, values, (err, data) => {
+      if (err) {
+        console.error("선임부서 검증 정보 등록 오류:", err);
+        return res.status(500).json({ error: err.message });
+      }
+
+      return res.status(200).json({
+        message: "선임부서 검증 정보가 성공적으로 등록되었습니다.",
+        idea_id,
+        development_collaboration,
+        target_user,
+        comment,
+        verification_status:
+          verification_status === true || verification_status === "true"
+            ? true
+            : false,
+      });
+    });
+  });
+};
+
+// AI/DT 과제 검증 정보 등록
+export const registerAIVerify = (req, res) => {
+  console.log("AI/DT 과제 검증 요청 데이터:", req.body);
+
+  const {
+    idea_id, // 관련 아이디어 ID
+    ai_development_collaboration, // AI/DT 개발 협업
+    feasibility, // 가능여부
+    ai_comment, // AI/DT 의견작성
+    expected_personnel, // 예상 투입인력
+    expected_schedule, // 예상 일정
+    ai_verification_status, // AI/DT 검증여부
+  } = req.body;
+
+  // 필드 이름 한글 매핑
+  const fieldNameMap = {
+    idea_id: "아이디어 ID",
+    ai_development_collaboration: "AI/DT 개발 협업",
+    feasibility: "가능여부",
+    ai_comment: "AI/DT 의견작성",
+    expected_personnel: "예상 투입인력",
+    expected_schedule: "예상 일정",
+    ai_verification_status: "AI/DT 검증여부",
+  };
+
+  // 필수 필드 검증
+  const requiredFields = [
+    "idea_id",
+    "ai_development_collaboration",
+    "feasibility",
+    "ai_comment",
+  ];
+
+  // 누락된 필드 검사
+  const missingFields = requiredFields.filter((field) => {
+    const value = req.body[field];
+    return (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      (typeof value === "string" && value.replace(/<[^>]*>/g, "").trim() === "")
+    );
+  });
+
+  if (missingFields.length > 0) {
+    // 한글 필드명으로 변환
+    const missingFieldsKorean = missingFields.map(
+      (field) => fieldNameMap[field] || field
+    );
+
+    console.log(`누락된 필드 발견: ${missingFieldsKorean.join(", ")}`);
+
+    return res.status(400).json({
+      error: "모든 필드를 입력해주세요",
+      missingFields: missingFieldsKorean,
+    });
+  }
+
+  // 기존 데이터 조회
+  const selectQuery = `SELECT * FROM special.ITAsset_ideaVerify WHERE idea_id = ? ORDER BY created_at DESC LIMIT 1`;
+
+  db.query(selectQuery, [idea_id], (selectErr, selectData) => {
+    if (selectErr) {
+      console.error("과제 검증 정보 조회 오류:", selectErr);
+      return res.status(500).json({ error: selectErr.message });
+    }
+
+    let query;
+    let values;
+
+    if (selectData.length > 0) {
+      // 기존 데이터가 있으면 업데이트
+      query = `
+        UPDATE special.ITAsset_ideaVerify 
+        SET ai_development_collaboration = ?, feasibility = ?, ai_comment = ?, 
+            expected_personnel = ?, expected_schedule = ?, ai_verification_status = ?, updated_at = NOW()
+        WHERE idea_id = ? AND id = ?
+      `;
+      values = [
+        ai_development_collaboration,
+        feasibility,
+        ai_comment,
+        expected_personnel || null,
+        expected_schedule || null,
+        ai_verification_status === true || ai_verification_status === "true"
+          ? 1
+          : 0,
+        idea_id,
+        selectData[0].id,
+      ];
+
+      // 아이디어 상태 업데이트 준비
+      const shouldUpdateStatus =
+        selectData[0].development_collaboration &&
+        selectData[0].target_user &&
+        selectData[0].comment;
+    } else {
+      // 기존 데이터가 없으면 새로 삽입
+      query = `
+        INSERT INTO special.ITAsset_ideaVerify (
+          idea_id, ai_development_collaboration, feasibility, ai_comment, expected_personnel, expected_schedule, ai_verification_status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      `;
+      values = [
+        idea_id,
+        ai_development_collaboration,
+        feasibility,
+        ai_comment,
+        expected_personnel || null,
+        expected_schedule || null,
+        ai_verification_status === true || ai_verification_status === "true"
+          ? 1
+          : 0,
+      ];
+    }
+
+    db.query(query, values, (err, data) => {
+      if (err) {
+        console.error("AI/DT 검증 정보 등록 오류:", err);
+        return res.status(500).json({ error: err.message });
+      }
+
+      // 두 검증 모두 완료된 경우 아이디어 상태 업데이트
+      if (
+        selectData.length > 0 &&
+        selectData[0].development_collaboration &&
+        selectData[0].target_user &&
+        selectData[0].comment
+      ) {
+        const verificationStatus = selectData[0].verification_status;
+        const aiVerificationStatus =
+          ai_verification_status === true || ai_verification_status === "true"
+            ? true
+            : false;
+
+        // 검증 상태에 따라 아이디어 상태 업데이트
+        const newStatus =
+          verificationStatus && aiVerificationStatus ? "verified" : "rejected";
+
+        const updateIdeaStatusQuery = `
+          UPDATE special.ITAsset_ideas 
+          SET status = ? 
+          WHERE id = ?
+        `;
+
+        db.query(
+          updateIdeaStatusQuery,
+          [newStatus, idea_id],
+          (updateErr, updateData) => {
+            if (updateErr) {
+              console.error("아이디어 상태 업데이트 오류:", updateErr);
+              // 상태 업데이트 실패해도 검증 데이터는 저장되었으므로 성공 응답
+            }
+          }
+        );
+      }
+
+      return res.status(200).json({
+        message: "AI/DT 검증 정보가 성공적으로 등록되었습니다.",
+        idea_id,
+        ai_development_collaboration,
+        feasibility,
+        ai_comment,
+        expected_personnel: expected_personnel || null,
+        expected_schedule: expected_schedule || null,
+        ai_verification_status:
+          ai_verification_status === true || ai_verification_status === "true"
+            ? true
+            : false,
+      });
+    });
+  });
+};
+
+// 파일럿 데이터 등록
+export const registerIdeaPilot = (req, res) => {
+  console.log("파일럿 데이터 등록 요청:", req.body);
+
+  const {
+    ideaID, // 아이디어 ID
+    productivity, // 생산성
+    cost, // 비용
+    quantitybasis, // 정량적 기대효과 근거
+  } = req.body;
+
+  // 필드 이름 한글 매핑
+  const fieldNameMap = {
+    ideaID: "아이디어 ID",
+    productivity: "생산성",
+    cost: "비용",
+    quantitybasis: "정량적 기대효과 근거",
+  };
+
+  // 필수 필드 검증
+  const requiredFields = ["ideaID", "productivity", "cost", "quantitybasis"];
+
+  // 누락된 필드 검사
+  const missingFields = requiredFields.filter((field) => {
+    const value = req.body[field];
+    return (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      (typeof value === "string" && value.replace(/<[^>]*>/g, "").trim() === "")
+    );
+  });
+
+  if (missingFields.length > 0) {
+    // 한글 필드명으로 변환
+    const missingFieldsKorean = missingFields.map(
+      (field) => fieldNameMap[field] || field
+    );
+
+    console.log(`누락된 필드 발견: ${missingFieldsKorean.join(", ")}`);
+
+    return res.status(400).json({
+      error: "모든 필드를 입력해주세요",
+      missingFields: missingFieldsKorean,
+    });
+  }
+
+  // 데이터 삽입 쿼리
+  const insertQuery = `
+    INSERT INTO special.ITAsset_pilot (
+      ideaID, productivity, cost, quantitybasis
+    ) VALUES (?, ?, ?, ?)
+  `;
+
+  const values = [
+    ideaID,
+    parseFloat(productivity) || 0,
+    parseFloat(cost) || 0,
+    quantitybasis,
+  ];
+
+  db.query(insertQuery, values, (err, data) => {
+    if (err) {
+      console.error("파일럿 데이터 등록 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    // 아이디어 상태 업데이트 (Pilot으로 변경)
+    const updateIdeaStatusQuery = `
+      UPDATE special.ITAsset_ideas 
+      SET status = 'pilot' 
+      WHERE id = ?
+    `;
+
+    db.query(updateIdeaStatusQuery, [ideaID], (updateErr, updateData) => {
+      if (updateErr) {
+        console.error("아이디어 상태 업데이트 오류:", updateErr);
+        // 상태 업데이트 실패해도 파일럿 데이터는 저장되었으므로 성공 응답
+      }
+
+      return res.status(200).json({
+        message: "파일럿 데이터가 성공적으로 등록되었습니다.",
+        pilotId: data.insertId,
+        ideaID: ideaID,
+      });
+    });
   });
 };

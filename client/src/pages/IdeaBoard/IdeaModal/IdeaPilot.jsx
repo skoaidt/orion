@@ -4,9 +4,13 @@ import CloseIcon from "@mui/icons-material/Close";
 import TextField from "@mui/material/TextField";
 import axios from "axios";
 
-const IdeaPilot = ({ onClose }) => {
+const IdeaPilot = ({ onClose, ideaId }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileName, setFileName] = useState("");
+  const [productivity, setProductivity] = useState("");
+  const [cost, setCost] = useState("");
+  const [quantitybasis, setQuantitybasis] = useState("○ 생산성\n○ 비용");
+  const [loading, setLoading] = useState(false);
 
   // 파일 선택 핸들러
   const handleFileChange = (event) => {
@@ -20,32 +24,88 @@ const IdeaPilot = ({ onClose }) => {
     }
   };
 
-  // 등록 버튼 클릭 핸들러 (수정된 부분)
+  // 입력 필드 핸들러
+  const handleProductivityChange = (event) => {
+    setProductivity(event.target.value);
+  };
+
+  const handleCostChange = (event) => {
+    setCost(event.target.value);
+  };
+
+  const handleQuantitybasisChange = (event) => {
+    setQuantitybasis(event.target.value);
+  };
+
+  // 등록 버튼 클릭 핸들러
   const handleRegister = async () => {
     try {
+      setLoading(true);
+
+      // 필수 필드 검증
+      if (!productivity.trim()) {
+        alert("생산성을 입력해주세요.");
+        setLoading(false);
+        return;
+      }
+
+      if (!cost.trim()) {
+        alert("비용을 입력해주세요.");
+        setLoading(false);
+        return;
+      }
+
+      if (!quantitybasis.trim()) {
+        alert("정량적 기대효과 근거를 입력해주세요.");
+        setLoading(false);
+        return;
+      }
+
+      // 파일 업로드
+      let filePath = "";
       if (selectedFile) {
         const formData = new FormData();
         formData.append("file", selectedFile);
-        formData.append("path", "pilot"); // 저장 경로 지정
+        formData.append("path", "pilot");
 
         // 서버에 파일 업로드 요청
-        await axios.post("/api/upload", formData, {
+        const fileUploadResponse = await axios.post("/api/upload", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
 
-        console.log("파일 업로드 성공:", selectedFile.name);
-        alert("파일이 성공적으로 업로드되었습니다.");
+        console.log("파일 업로드 성공:", fileUploadResponse.data);
+        filePath = fileUploadResponse.data.filePath;
       }
 
-      // 여기에 다른 데이터 처리 로직 추가 가능
+      // 파일럿 데이터 등록
+      const pilotData = {
+        ideaID: ideaId || 1, // ideaId가 전달되지 않은 경우 테스트용으로 1 사용
+        productivity: productivity,
+        cost: cost,
+        quantitybasis: quantitybasis,
+        filePath: filePath, // 파일 경로 포함
+      };
+
+      console.log("등록할 파일럿 데이터:", pilotData);
+
+      // API 호출
+      const response = await axios.post("/api/ideas/pilot", pilotData);
+
+      console.log("파일럿 데이터 등록 성공:", response.data);
+      alert("파일럿 결과가 성공적으로 등록되었습니다.");
 
       // 등록 완료 후 모달 닫기
       onClose();
     } catch (error) {
-      console.error("파일 업로드 오류:", error);
-      alert("파일 업로드 중 오류가 발생했습니다.");
+      console.error("파일럿 데이터 등록 오류:", error);
+      alert(
+        "데이터 등록 중 오류가 발생했습니다: " +
+          (error.response?.data?.error || error.message)
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,13 +121,23 @@ const IdeaPilot = ({ onClose }) => {
           {/* 생산성 */}
           <div className="rowContainerSmall">
             <div className="fieldLabel">생산성</div>
-            <TextField className="Textfield" variant="outlined" />
+            <TextField
+              className="Textfield"
+              variant="outlined"
+              value={productivity}
+              onChange={handleProductivityChange}
+            />
             <div className="fieldText">M/M</div>
           </div>
           {/* 비용 */}
           <div className="rowContainerSmall">
             <div className="fieldLabel">비용</div>
-            <TextField className="Textfield" variant="outlined" />
+            <TextField
+              className="Textfield"
+              variant="outlined"
+              value={cost}
+              onChange={handleCostChange}
+            />
             <div className="fieldText">억 원</div>
           </div>
         </div>
@@ -85,7 +155,8 @@ const IdeaPilot = ({ onClose }) => {
             multiline
             rows={12}
             fullWidth
-            defaultValue={`○ 생산성\n○ 비용`}
+            value={quantitybasis}
+            onChange={handleQuantitybasisChange}
           />
         </div>
         <div className="rowContainerResult">
@@ -122,12 +193,15 @@ const IdeaPilot = ({ onClose }) => {
         </div>
         {/* 버튼 컨테이너 */}
         <div className="buttonContainer">
-          <button className="cancelButton" onClick={onClose}>
+          <button className="cancelButton" onClick={onClose} disabled={loading}>
             취소
           </button>
-          {/* 등록 버튼 - 수정된 핸들러 연결 */}
-          <button className="registerButton" onClick={handleRegister}>
-            등록
+          <button
+            className="registerButton"
+            onClick={handleRegister}
+            disabled={loading}
+          >
+            {loading ? "등록 중..." : "등록"}
           </button>
         </div>
       </div>

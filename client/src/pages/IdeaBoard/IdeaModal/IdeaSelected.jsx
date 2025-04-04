@@ -75,7 +75,11 @@ const IdeaSelected = ({ onClose, ideaId }) => {
       console.log("등록할 과제 선정 데이터:", selectionData);
 
       // API 호출
-      const response = await axios.post("/api/ideas/selection", selectionData);
+      const response = await axios.post("/api/ideas/selection", selectionData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       console.log("과제 선정 등록 성공:", response.data);
       alert("과제 선정 정보가 성공적으로 등록되었습니다.");
