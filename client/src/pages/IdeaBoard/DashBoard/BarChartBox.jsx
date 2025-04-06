@@ -61,7 +61,7 @@ const BarChartBox = () => {
               bottom: 60,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid stroke="none" />
             <XAxis
               dataKey="headqt"
               angle={-90}
@@ -69,7 +69,7 @@ const BarChartBox = () => {
               textAnchor="end"
               tickMargin={5}
             />
-            <YAxis />
+            <YAxis hide={true} />
             <Tooltip
               formatter={(value, name) => {
                 const labels = {
