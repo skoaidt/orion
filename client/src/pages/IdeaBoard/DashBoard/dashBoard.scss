@@ -4,15 +4,6 @@
   color: $grayColor;
   padding: 20px;
 
-  h1 {
-    font-size: 20px;
-    font-weight: 400;
-    color: $grayColor;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
-  }
   .boxContainer {
     display: grid;
     gap: 20px;

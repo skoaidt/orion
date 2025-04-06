@@ -115,3 +115,114 @@ export const ideaCnt = {
   developing: 122,
   completed: 21,
 };
+
+export const barChartData = [
+  {
+    headqt: "강남",
+    regCnt: 150,
+    devCnt: 200,
+    compCnt: 300,
+  },
+  {
+    headqt: "강북",
+    regCnt: 180,
+    devCnt: 220,
+    compCnt: 350,
+  },
+  {
+    headqt: "인천",
+    regCnt: 170,
+    devCnt: 190,
+    compCnt: 280,
+  },
+  {
+    headqt: "경기",
+    regCnt: 200,
+    devCnt: 250,
+    compCnt: 400,
+  },
+  {
+    headqt: "전남",
+    regCnt: 160,
+    devCnt: 210,
+    compCnt: 300,
+  },
+  {
+    headqt: "전북",
+    regCnt: 140,
+    devCnt: 180,
+    compCnt: 270,
+  },
+  {
+    headqt: "경남",
+    regCnt: 130,
+    devCnt: 160,
+    compCnt: 240,
+  },
+  {
+    headqt: "경북",
+    regCnt: 190,
+    devCnt: 230,
+    compCnt: 360,
+  },
+  {
+    headqt: "충남",
+    regCnt: 120,
+    devCnt: 150,
+    compCnt: 250,
+  },
+  {
+    headqt: "충북",
+    regCnt: 110,
+    devCnt: 140,
+    compCnt: 230,
+  },
+  {
+    headqt: "강원",
+    regCnt: 160,
+    devCnt: 200,
+    compCnt: 310,
+  },
+  {
+    headqt: "Infra설비",
+    regCnt: 170,
+    devCnt: 210,
+    compCnt: 320,
+  },
+  {
+    headqt: "전송",
+    regCnt: 180,
+    devCnt: 220,
+    compCnt: 330,
+  },
+  {
+    headqt: "AOC",
+    regCnt: 190,
+    devCnt: 240,
+    compCnt: 340,
+  },
+  {
+    headqt: "SO",
+    regCnt: 150,
+    devCnt: 180,
+    compCnt: 290,
+  },
+  {
+    headqt: "자산",
+    regCnt: 160,
+    devCnt: 200,
+    compCnt: 310,
+  },
+  {
+    headqt: "경영",
+    regCnt: 140,
+    devCnt: 170,
+    compCnt: 260,
+  },
+  {
+    headqt: "기타",
+    regCnt: 130,
+    devCnt: 160,
+    compCnt: 240,
+  },
+];
