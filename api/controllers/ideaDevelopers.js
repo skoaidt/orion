@@ -235,10 +235,25 @@ export const registerIdeaDevReview = (req, res) => {
     // 모든 개발자 정보 등록 후
     Promise.all(insertPromises)
       .then((results) => {
-        return res.status(200).json({
-          message: "개발 심의 정보가 성공적으로 등록되었습니다.",
-          ideaID: ideaID,
-          developerCount: developers.length,
+        // 아이디어 상태 업데이트 (개발심의 완료 상태로 변경)
+        const updateIdeaStatusQuery = `
+          UPDATE special.ITAsset_ideas 
+          SET status = 'devReviewed' 
+          WHERE id = ?
+        `;
+
+        db.query(updateIdeaStatusQuery, [ideaID], (updateErr, updateData) => {
+          if (updateErr) {
+            console.error("아이디어 상태 업데이트 오류:", updateErr);
+            // 상태 업데이트 실패해도 개발심의 데이터는 저장되었으므로 성공 응답
+          }
+
+          return res.status(200).json({
+            message: "개발 심의 정보가 성공적으로 등록되었습니다.",
+            ideaID: ideaID,
+            developerCount: developers.length,
+            status: "devReviewed", // 상태도 함께 반환
+          });
         });
       })
       .catch((err) => {

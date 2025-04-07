@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./ideaSelected.scss";
 import CloseIcon from "@mui/icons-material/Close";
 import Radio from "@mui/material/Radio";
@@ -12,7 +12,7 @@ import Typography from "@mui/material/Typography";
 import Switch from "@mui/material/Switch";
 import axios from "axios";
 
-const IdeaSelected = ({ onClose, ideaId }) => {
+const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
   // 상태 변수 정의
   const [duplication, setDuplication] = useState("");
   const [scope, setScope] = useState("");
@@ -20,6 +20,45 @@ const IdeaSelected = ({ onClose, ideaId }) => {
   const [isSelected, setIsSelected] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [viewData, setViewData] = useState(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  // 이미 완료된 단계인 경우 데이터 조회
+  useEffect(() => {
+    const fetchSelectionData = async () => {
+      if (!ideaId) return;
+
+      try {
+        setLoading(true);
+        const response = await axios.get(`/api/ideas/selection/${ideaId}`);
+        console.log("선정 데이터 조회 결과:", response.data);
+
+        // 데이터가 있으면 상태 업데이트
+        if (response.data) {
+          setViewData(response.data);
+          // 폼에도 데이터 설정
+          setDuplication(response.data.duplication || "");
+          setScope(response.data.scope || "");
+          setComment(response.data.comment || "");
+          setIsSelected(
+            response.data.is_selected !== undefined
+              ? response.data.is_selected
+              : true
+          );
+        }
+      } catch (error) {
+        console.error("선정 데이터 조회 오류:", error);
+        if (isViewMode) {
+          setError("저장된 선정 데이터를 불러올 수 없습니다.");
+        }
+      } finally {
+        setLoading(false);
+        setDataLoaded(true);
+      }
+    };
+
+    fetchSelectionData();
+  }, [ideaId, isViewMode]);
 
   // 과제중복 라디오 버튼 변경 핸들러
   const handleDuplicationChange = (event) => {
@@ -97,6 +136,9 @@ const IdeaSelected = ({ onClose, ideaId }) => {
       }
 
       console.log("과제 선정 등록 성공:", response.data);
+      // 결과에서 idea_id 확인 (기존에는 selectionId를 확인했을 수 있음)
+      console.log("결과 - 아이디어 ID:", response.data.idea_id);
+
       alert("과제 선정 정보가 성공적으로 등록되었습니다.");
 
       // 성공 후 모달 닫기
@@ -142,112 +184,159 @@ const IdeaSelected = ({ onClose, ideaId }) => {
     <div className="selectedModalOverlay">
       <div className="selectedModalContent">
         <div className="titleBox">
-          <h2>과제 선정</h2>
+          <h2>{isViewMode ? "과제 선정 정보" : "과제 선정"}</h2>
           <CloseIcon className="closeIcon" onClick={onClose} />
         </div>
         <hr className="titleUnderline" />
 
+        {/* 로딩 메시지 표시 */}
+        {loading && (
+          <div className="loadingMessage">데이터를 불러오는 중입니다...</div>
+        )}
+
         {/* 오류 메시지 표시 */}
         {error && <div className="errorMessage">{error}</div>}
 
-        {/* 중복 (duplication) */}
-        <div className="rowContainer">
-          <div className="fieldLabel">과제중복</div>
-          <FormControl className="fromControl">
-            <RadioGroup
-              row
-              name="duplication-group"
-              className="radioGroup"
-              value={duplication}
-              onChange={handleDuplicationChange}
-            >
-              <FormControlLabel value="신규" control={<Radio />} label="신규" />
-              <FormControlLabel
-                value="기존 시스템 고도화"
-                control={<Radio />}
-                label="기존 시스템 고도화"
-              />
-              <FormControlLabel
-                value="기존 시스템 기능추가"
-                control={<Radio />}
-                label="기존 시스템 기능추가"
-              />
-              <FormControlLabel
-                value="타 시스템 중복"
-                control={<Radio />}
-                label="타 시스템 중복"
-              />
-            </RadioGroup>
-          </FormControl>
-        </div>
+        {/* 데이터가 없는 경우 메시지 표시 (읽기 모드일 때만) */}
+        {isViewMode && dataLoaded && !viewData && !loading && (
+          <div className="noDataMessage">저장된 선정 데이터가 없습니다.</div>
+        )}
 
-        {/* 사용 범위 (scope) */}
-        <div className="rowContainer">
-          <div className="fieldLabel">사용범위</div>
-          <FormControl className="fromControl">
-            <RadioGroup
-              row
-              name="scope-group"
-              className="radioGroup"
-              value={scope}
-              onChange={handleScopeChange}
-            >
-              <FormControlLabel value="TBOH" control={<Radio />} label="TBOH" />
-              <FormControlLabel value="TO" control={<Radio />} label="TO" />
-              <FormControlLabel value="OBH" control={<Radio />} label="OBH" />
-              <FormControlLabel
-                value="자체사용"
-                control={<Radio />}
-                label="자체사용"
+        {(!isViewMode || (isViewMode && dataLoaded && viewData)) && (
+          <>
+            {/* 중복 (duplication) */}
+            <div className="rowContainer">
+              <div className="fieldLabel">과제중복</div>
+              <FormControl className="fromControl">
+                <RadioGroup
+                  row
+                  name="duplication-group"
+                  className="radioGroup"
+                  value={duplication}
+                  onChange={handleDuplicationChange}
+                  disabled={isViewMode}
+                >
+                  <FormControlLabel
+                    value="신규"
+                    control={<Radio disabled={isViewMode} />}
+                    label="신규"
+                  />
+                  <FormControlLabel
+                    value="기존 시스템 고도화"
+                    control={<Radio disabled={isViewMode} />}
+                    label="기존 시스템 고도화"
+                  />
+                  <FormControlLabel
+                    value="기존 시스템 기능추가"
+                    control={<Radio disabled={isViewMode} />}
+                    label="기존 시스템 기능추가"
+                  />
+                  <FormControlLabel
+                    value="타 시스템 중복"
+                    control={<Radio disabled={isViewMode} />}
+                    label="타 시스템 중복"
+                  />
+                </RadioGroup>
+              </FormControl>
+            </div>
+
+            {/* 사용 범위 (scope) */}
+            <div className="rowContainer">
+              <div className="fieldLabel">사용범위</div>
+              <FormControl className="fromControl">
+                <RadioGroup
+                  row
+                  name="scope-group"
+                  className="radioGroup"
+                  value={scope}
+                  onChange={handleScopeChange}
+                  disabled={isViewMode}
+                >
+                  <FormControlLabel
+                    value="TBOH"
+                    control={<Radio disabled={isViewMode} />}
+                    label="TBOH"
+                  />
+                  <FormControlLabel
+                    value="TO"
+                    control={<Radio disabled={isViewMode} />}
+                    label="TO"
+                  />
+                  <FormControlLabel
+                    value="OBH"
+                    control={<Radio disabled={isViewMode} />}
+                    label="OBH"
+                  />
+                  <FormControlLabel
+                    value="자체사용"
+                    control={<Radio disabled={isViewMode} />}
+                    label="자체사용"
+                  />
+                </RadioGroup>
+              </FormControl>
+            </div>
+
+            {/* 의견 작성 (comment) */}
+            <div className="rowContainerComment">
+              <div className="fieldLabel">의견작성</div>
+              <TextField
+                className="commentTextfield"
+                variant="outlined"
+                placeholder="의견을 작성해주세요"
+                multiline
+                rows={6}
+                fullWidth
+                value={comment}
+                onChange={handleCommentChange}
+                disabled={isViewMode}
+                InputProps={{
+                  readOnly: isViewMode,
+                }}
               />
-            </RadioGroup>
-          </FormControl>
-        </div>
+            </div>
 
-        {/* 의견 작성 (comment) */}
-        <div className="rowContainerComment">
-          <div className="fieldLabel">의견작성</div>
-          <TextField
-            className="commentTextfield"
-            variant="outlined"
-            placeholder="의견을 작성해주세요"
-            multiline
-            rows={6}
-            fullWidth
-            value={comment}
-            onChange={handleCommentChange}
-          />
-        </div>
+            {/* 선정 여부 (selection) */}
+            <div className="rowContainer">
+              <div className="fieldLabel">선정여부</div>
+              <FormGroup className="fromControl">
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{ alignItems: "center" }}
+                >
+                  <Typography>Drop</Typography>
+                  <Switch
+                    checked={isSelected}
+                    onChange={handleSelectionChange}
+                    inputProps={{ "aria-label": "selection switch" }}
+                    disabled={isViewMode}
+                  />
+                  <Typography>선정</Typography>
+                </Stack>
+              </FormGroup>
+            </div>
 
-        {/* 선정 여부 (selection) */}
-        <div className="rowContainer">
-          <div className="fieldLabel">선정여부</div>
-          <FormGroup className="fromControl">
-            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-              <Typography>Drop</Typography>
-              <Switch
-                checked={isSelected}
-                onChange={handleSelectionChange}
-                inputProps={{ "aria-label": "selection switch" }}
-              />
-              <Typography>선정</Typography>
-            </Stack>
-          </FormGroup>
-        </div>
-
-        {/* 버튼 컨테이너 */}
-        <div className="buttonContainer">
-          <button className="cancelButton" onClick={onClose} disabled={loading}>
-            취소
-          </button>
-          <button
-            className="registerButton"
-            onClick={handleSubmit}
-            disabled={loading}
-          >
-            {loading ? "처리 중..." : "등록"}
-          </button>
-        </div>
+            {/* 버튼 컨테이너 - 읽기 모드에서는 취소(닫기) 버튼만 표시 */}
+            <div className="buttonContainer">
+              <button
+                className="cancelButton"
+                onClick={onClose}
+                disabled={loading}
+              >
+                {isViewMode ? "닫기" : "취소"}
+              </button>
+              {!isViewMode && (
+                <button
+                  className="registerButton"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                >
+                  등록
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
