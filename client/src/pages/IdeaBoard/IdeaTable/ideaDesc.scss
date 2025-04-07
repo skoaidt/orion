@@ -365,6 +365,19 @@
           border: 1px solid $whitegrayColor;
           border-radius: 5px;
           box-shadow: 0 0 5px 0 rgba(31, 31, 31, 0.1);
+          transition: all 0.3s ease;
+
+          &.disabled {
+            background-color: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+          }
+
+          &.completed {
+            background-color: $purpleIdea;
+            color: white;
+            border: 1px solid white;
+          }
         }
         .lineBox {
           position: relative;
@@ -380,6 +393,7 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
+            transition: all 0.3s ease;
           }
           .circle {
             display: flex;
@@ -395,6 +409,7 @@
             top: calc(50% - 10px);
             transform: translateX(-50%);
             z-index: 10;
+            transition: all 0.3s ease;
             .icons {
               font-size: 14px;
             }
@@ -412,6 +427,20 @@
           border-radius: 5px;
           box-shadow: 0 0 5px 0 rgba(31, 31, 31, 0.1);
           background-color: #ffffff;
+          transition: all 0.3s ease;
+
+          &.disabled {
+            background-color: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+          }
+
+          // &.completed {
+          //   background-color: $purpleIdea;
+          //   color: white;
+          //   border: 1px solid white;
+          // }
+
           .itemContentWrap {
             display: flex;
             justify-content: space-between;
@@ -441,7 +470,7 @@
           }
         }
         .active {
-          background-color: $purpleIdea;
+          background-color: $purpleIdeaLight;
           color: white;
           border: 1px solid white;
         }

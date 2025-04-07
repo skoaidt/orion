@@ -10,6 +10,7 @@ import {
   registerDepartmentVerify,
   registerAIVerify,
   registerIdeaPilot,
+  getPilotDataById,
 } from "../controllers/idea.js";
 
 import {
@@ -21,13 +22,14 @@ import {
 const router = express.Router();
 
 router.post("/register", registerIdea);
-router.post("/selection/:ideaId", registerSelectedIdea);
-router.get("/selection/:ideaId", getSelectedIdea);
+router.post("/selection/:idea_id", registerSelectedIdea);
 router.post("/verify", registerIdeaVerify);
 router.post("/verify/department", registerDepartmentVerify);
 router.post("/verify/ai", registerAIVerify);
-router.post("/pilot", registerIdeaPilot);
+router.post("/pilot/:idea_id", registerIdeaPilot);
 router.post("/devreview", registerIdeaDevReview);
+router.get("/pilot/:id", getPilotDataById);
+router.get("/selection/:idea_id", getSelectedIdea);
 router.get("/verify/:id", getIdeaVerifyById);
 router.get("/developers", getIdeaDevelopers);
 router.get("/debug-mssql", debugMssqlConnection);

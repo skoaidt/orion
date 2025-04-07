@@ -130,8 +130,6 @@ const IdeaVerify = ({ onClose, ideaId }) => {
       );
 
       console.log("선임부서 검증 등록 성공:", response.data);
-      alert("선임부서 검증 정보가 성공적으로 등록되었습니다.");
-      setLeftSubmitted(true);
 
       // 응답 데이터로 폼 업데이트
       if (response.data) {
@@ -139,6 +137,49 @@ const IdeaVerify = ({ onClose, ideaId }) => {
           ...prev,
           ...response.data,
         }));
+      }
+
+      setLeftSubmitted(true);
+
+      // 선임부서와 AI/DT 모두 등록되었는지 확인
+      const bothSubmitted = true && rightSubmitted; // 현재 함수는 왼쪽(선임부서) 제출 핸들러이므로 성공 시 leftSubmitted는 true
+
+      // 결과 메시지
+      let statusMessage = "";
+      if (response.data.status) {
+        statusMessage = `상태가 '${response.data.status}'(으)로 변경되었습니다.`;
+      }
+
+      if (bothSubmitted) {
+        // 두 부서 모두 검증 완료
+        let finalStatus = "";
+
+        // 두 부서의 검증 상태를 확인하여 최종 상태 결정
+        if (formData.verification_status && formData.ai_verification_status) {
+          finalStatus = "검증 완료";
+        } else if (
+          !formData.verification_status &&
+          !formData.ai_verification_status
+        ) {
+          finalStatus = "양쪽 모두 Drop 처리";
+        } else if (!formData.verification_status) {
+          finalStatus = "선임부서에서 Drop 처리";
+        } else {
+          finalStatus = "AI/DT 부서에서 Drop 처리";
+        }
+
+        alert(
+          `선임부서 검증 정보가 성공적으로 등록되었습니다.\n양쪽 모두 검증이 완료되어 ${finalStatus}되었습니다. ${statusMessage}`
+        );
+
+        // 잠시 대기 후 모달 닫기
+        setTimeout(() => onClose(), 500);
+      } else {
+        // 선임부서만 검증 완료
+        const selectionStatus = formData.verification_status ? "검증" : "Drop";
+        alert(
+          `선임부서 검증 정보가 성공적으로 등록되었습니다.\n선임부서에서 "${selectionStatus}" 상태로 처리되었습니다.\n아직 AI/DT 검증이 완료되지 않았습니다. ${statusMessage}`
+        );
       }
     } catch (error) {
       console.error("선임부서 검증 등록 오류:", error);
@@ -194,8 +235,6 @@ const IdeaVerify = ({ onClose, ideaId }) => {
       const response = await axios.post("/api/ideas/verify/ai", verifyData);
 
       console.log("AI/DT 검증 등록 성공:", response.data);
-      alert("AI/DT 검증 정보가 성공적으로 등록되었습니다.");
-      setRightSubmitted(true);
 
       // 응답 데이터로 폼 업데이트
       if (response.data) {
@@ -203,6 +242,51 @@ const IdeaVerify = ({ onClose, ideaId }) => {
           ...prev,
           ...response.data,
         }));
+      }
+
+      setRightSubmitted(true);
+
+      // 선임부서와 AI/DT 모두 등록되었는지 확인
+      const bothSubmitted = leftSubmitted && true; // 현재 함수는 오른쪽(AI/DT) 제출 핸들러이므로 성공 시 rightSubmitted는 true
+
+      // 결과 메시지
+      let statusMessage = "";
+      if (response.data.status) {
+        statusMessage = `상태가 '${response.data.status}'(으)로 변경되었습니다.`;
+      }
+
+      if (bothSubmitted) {
+        // 두 부서 모두 검증 완료
+        let finalStatus = "";
+
+        // 두 부서의 검증 상태를 확인하여 최종 상태 결정
+        if (formData.verification_status && formData.ai_verification_status) {
+          finalStatus = "검증 완료";
+        } else if (
+          !formData.verification_status &&
+          !formData.ai_verification_status
+        ) {
+          finalStatus = "양쪽 모두 Drop 처리";
+        } else if (!formData.verification_status) {
+          finalStatus = "선임부서에서 Drop 처리";
+        } else {
+          finalStatus = "AI/DT 부서에서 Drop 처리";
+        }
+
+        alert(
+          `AI/DT 검증 정보가 성공적으로 등록되었습니다.\n양쪽 모두 검증이 완료되어 ${finalStatus}되었습니다. ${statusMessage}`
+        );
+
+        // 잠시 대기 후 모달 닫기
+        setTimeout(() => onClose(), 500);
+      } else {
+        // AI/DT만 검증 완료
+        const selectionStatus = formData.ai_verification_status
+          ? "검증"
+          : "Drop";
+        alert(
+          `AI/DT 검증 정보가 성공적으로 등록되었습니다.\nAI/DT 부서에서 "${selectionStatus}" 상태로 처리되었습니다.\n아직 선임부서 검증이 완료되지 않았습니다. ${statusMessage}`
+        );
       }
     } catch (error) {
       console.error("AI/DT 검증 등록 오류:", error);
@@ -357,7 +441,7 @@ const IdeaVerify = ({ onClose, ideaId }) => {
               <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                 <Typography>Drop</Typography>
                 <Switch
-                  checked={!formData.verification_status}
+                  checked={formData.verification_status}
                   onChange={handleSwitchChange("verification_status")}
                   inputProps={{ "aria-label": "verification status switch" }}
                   disabled={leftSubmitted}
@@ -511,7 +595,7 @@ const IdeaVerify = ({ onClose, ideaId }) => {
               <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                 <Typography>Drop</Typography>
                 <Switch
-                  checked={!formData.ai_verification_status}
+                  checked={formData.ai_verification_status}
                   onChange={handleSwitchChange("ai_verification_status")}
                   inputProps={{ "aria-label": "ai verification status switch" }}
                   disabled={rightSubmitted}

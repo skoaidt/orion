@@ -199,77 +199,112 @@ export const registerSelectedIdea = (req, res) => {
     is_selected, // 선정여부
   } = req.body;
 
-  const idea_id = req.params.ideaId; // URL 파라미터에서 아이디어 ID 가져오기
+  const idea_id = req.params.idea_id; // URL 파라미터에서 아이디어 ID 가져오기
 
   if (!idea_id) {
     return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
   }
 
-  // 데이터 삽입 쿼리
-  const insertQuery = `
-    INSERT INTO special.ITAsset_ideaSelected (
-      idea_id, duplication, scope, comment, is_selected
-    ) VALUES (?, ?, ?, ?, ?)
-  `;
+  // 먼저 기존 데이터가 있는지 확인
+  const checkQuery = `SELECT * FROM special.ITAsset_ideaSelected WHERE idea_id = ? LIMIT 1`;
 
-  const values = [
-    idea_id,
-    duplication,
-    scope,
-    comment,
-    is_selected === true || is_selected === "true" || is_selected === 1 ? 1 : 0,
-  ];
-
-  db.query(insertQuery, values, (err, data) => {
-    if (err) {
-      console.error("과제 선정 정보 등록 오류:", err);
-      return res.status(500).json({ error: err.message });
+  db.query(checkQuery, [idea_id], (checkErr, checkData) => {
+    if (checkErr) {
+      console.error("기존 선정 데이터 확인 오류:", checkErr);
+      return res.status(500).json({ error: checkErr.message });
     }
 
-    // 아이디어 상태 업데이트 (선정 여부에 따라)
-    const updateIdeaStatusQuery = `
-      UPDATE special.ITAsset_ideas 
-      SET status = ? 
-      WHERE id = ?
-    `;
+    let query;
+    let values;
 
-    const newStatus =
-      is_selected === true || is_selected === "true" || is_selected === 1
-        ? "selected"
-        : "dropped";
+    if (checkData && checkData.length > 0) {
+      // 기존 데이터가 있으면 UPDATE
+      query = `
+        UPDATE special.ITAsset_ideaSelected 
+        SET duplication = ?, 
+            scope = ?, 
+            comment = ?, 
+            is_selected = ?,
+            updated_at = NOW()
+        WHERE idea_id = ?
+      `;
+      values = [
+        duplication,
+        scope,
+        comment,
+        is_selected === true || is_selected === "true" || is_selected === 1
+          ? 1
+          : 0,
+        idea_id,
+      ];
+    } else {
+      // 기존 데이터가 없으면 INSERT
+      query = `
+        INSERT INTO special.ITAsset_ideaSelected (
+          idea_id, duplication, scope, comment, is_selected
+        ) VALUES (?, ?, ?, ?, ?)
+      `;
+      values = [
+        idea_id,
+        duplication,
+        scope,
+        comment,
+        is_selected === true || is_selected === "true" || is_selected === 1
+          ? 1
+          : 0,
+      ];
+    }
 
-    db.query(
-      updateIdeaStatusQuery,
-      [newStatus, idea_id],
-      (updateErr, updateData) => {
-        if (updateErr) {
-          console.error("아이디어 상태 업데이트 오류:", updateErr);
-          // 상태 업데이트 실패해도 선정 데이터는 저장되었으므로 성공 응답
-        }
-
-        return res.status(200).json({
-          message: "과제 선정 정보가 성공적으로 등록되었습니다.",
-          selectionId: data.insertId,
-          ideaId: idea_id,
-          status: newStatus,
-        });
+    db.query(query, values, (err, data) => {
+      if (err) {
+        console.error("과제 선정 정보 등록 오류:", err);
+        return res.status(500).json({ error: err.message });
       }
-    );
+
+      // 아이디어 상태 업데이트 (선정 여부에 따라)
+      const updateIdeaStatusQuery = `
+        UPDATE special.ITAsset_ideas 
+        SET status = ? 
+        WHERE id = ?
+      `;
+
+      const newStatus =
+        is_selected === true || is_selected === "true" || is_selected === 1
+          ? "선정"
+          : "drop";
+
+      db.query(
+        updateIdeaStatusQuery,
+        [newStatus, idea_id],
+        (updateErr, updateData) => {
+          if (updateErr) {
+            console.error("아이디어 상태 업데이트 오류:", updateErr);
+            // 상태 업데이트 실패해도 선정 데이터는 저장되었으므로 성공 응답
+          }
+
+          return res.status(200).json({
+            message: "과제 선정 정보가 성공적으로 등록되었습니다.",
+            idea_id: idea_id,
+            status: newStatus,
+          });
+        }
+      );
+    });
   });
 };
 
 // 과제 선정 정보 가져오기
 export const getSelectedIdea = (req, res) => {
-  const ideaId = req.params.ideaId;
-  console.log("과제 선정 정보 조회 요청 (ideaId):", ideaId);
+  const idea_id = req.params.idea_id;
+  console.log("과제 선정 정보 조회 요청 (idea_id):", idea_id);
 
-  if (!ideaId) {
+  if (!idea_id) {
     return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
   }
 
   const q = `SELECT * FROM special.ITAsset_ideaSelected WHERE idea_id = ? ORDER BY created_at DESC LIMIT 1`;
 
-  db.query(q, [ideaId], (err, data) => {
+  db.query(q, [idea_id], (err, data) => {
     if (err) {
       console.error("과제 선정 정보 조회 오류:", err);
       return res.status(500).json({ error: err.message });
@@ -358,80 +393,143 @@ export const registerIdeaVerify = (req, res) => {
     });
   }
 
-  // 데이터 삽입 쿼리
-  const insertQuery = `
-    INSERT INTO special.ITAsset_ideaVerify (
-      idea_id,
-      development_collaboration,
-      target_user,
-      comment,
-      verification_status,
-      ai_development_collaboration,
-      feasibility,
-      ai_comment,
-      expected_personnel,
-      expected_schedule,
-      ai_verification_status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+  // 기존 데이터 확인 쿼리
+  const checkExistingQuery = `SELECT * FROM special.ITAsset_ideaVerify WHERE idea_id = ? ORDER BY created_at DESC LIMIT 1`;
 
-  const values = [
-    idea_id,
-    development_collaboration,
-    target_user,
-    comment,
-    verification_status,
-    ai_development_collaboration,
-    feasibility,
-    ai_comment,
-    expected_personnel || null,
-    expected_schedule || null,
-    ai_verification_status,
-  ];
-
-  db.query(insertQuery, values, (err, data) => {
-    if (err) {
-      console.error("과제 검증 정보 등록 오류:", err);
-      return res.status(500).json({ error: err.message });
+  db.query(checkExistingQuery, [idea_id], (checkErr, checkData) => {
+    if (checkErr) {
+      console.error("기존 데이터 확인 오류:", checkErr);
+      return res.status(500).json({ error: checkErr.message });
     }
 
-    // 아이디어 상태 업데이트
-    const updateIdeaStatusQuery = `
-      UPDATE special.ITAsset_ideas 
-      SET status = ? 
-      WHERE id = ?
-    `;
+    let query;
+    let values;
 
-    // 검증 상태에 따라 아이디어 상태 업데이트
-    const newStatus =
-      verification_status && ai_verification_status ? "verified" : "rejected";
+    if (checkData.length > 0) {
+      // 기존 데이터가 있으면 업데이트
+      query = `
+        UPDATE special.ITAsset_ideaVerify 
+        SET development_collaboration = ?, 
+            target_user = ?, 
+            comment = ?, 
+            verification_status = ?,
+            ai_development_collaboration = ?, 
+            feasibility = ?, 
+            ai_comment = ?, 
+            expected_personnel = ?, 
+            expected_schedule = ?, 
+            ai_verification_status = ?, 
+            updated_at = NOW()
+        WHERE idea_id = ?
+      `;
+      values = [
+        development_collaboration,
+        target_user,
+        comment,
+        verification_status,
+        ai_development_collaboration,
+        feasibility,
+        ai_comment,
+        expected_personnel || null,
+        expected_schedule || null,
+        ai_verification_status,
+        idea_id,
+      ];
+    } else {
+      // 데이터 삽입 쿼리
+      query = `
+        INSERT INTO special.ITAsset_ideaVerify (
+          idea_id,
+          development_collaboration,
+          target_user,
+          comment,
+          verification_status,
+          ai_development_collaboration,
+          feasibility,
+          ai_comment,
+          expected_personnel,
+          expected_schedule,
+          ai_verification_status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
 
-    db.query(
-      updateIdeaStatusQuery,
-      [newStatus, idea_id],
-      (updateErr, updateData) => {
-        if (updateErr) {
-          console.error("아이디어 상태 업데이트 오류:", updateErr);
-          // 상태 업데이트 실패해도 검증 데이터는 저장되었으므로 성공 응답
-        }
+      values = [
+        idea_id,
+        development_collaboration,
+        target_user,
+        comment,
+        verification_status,
+        ai_development_collaboration,
+        feasibility,
+        ai_comment,
+        expected_personnel || null,
+        expected_schedule || null,
+        ai_verification_status,
+      ];
+    }
 
-        return res.status(200).json({
-          message: "과제 검증 정보가 성공적으로 등록되었습니다.",
-          verificationId: data.insertId,
-          ideaId: idea_id,
-          status: newStatus,
+    db.query(query, values, (err, data) => {
+      if (err) {
+        console.error("과제 검증 정보 등록 오류:", err);
+        return res.status(500).json({ error: err.message });
+      }
+
+      // 아이디어 상태 업데이트
+      const updateIdeaStatusQuery = `
+        UPDATE special.ITAsset_ideas 
+        SET status = ? 
+        WHERE id = ?
+      `;
+
+      // 검증 상태에 따라 아이디어 상태 업데이트
+      // 검증 상태가 두 부서 모두 true일 때만 verified, 하나라도 false이면 rejected
+      let newStatus = "verified";
+
+      // verification_status가 false이거나 ai_verification_status가 false일 때만 rejected로 설정
+      if (
+        verification_status === false ||
+        verification_status === "false" ||
+        ai_verification_status === false ||
+        ai_verification_status === "false"
+      ) {
+        newStatus = "rejected";
+        console.log("검증 단계에서 Drop 처리됨:", {
+          선임부서_검증상태: verification_status,
+          AI부서_검증상태: ai_verification_status,
+        });
+      } else {
+        console.log("검증 단계 완료:", {
+          선임부서_검증상태: verification_status,
+          AI부서_검증상태: ai_verification_status,
         });
       }
-    );
+
+      db.query(
+        updateIdeaStatusQuery,
+        [newStatus, idea_id],
+        (updateErr, updateData) => {
+          if (updateErr) {
+            console.error("아이디어 상태 업데이트 오류:", updateErr);
+            // 상태 업데이트 실패해도 검증 데이터는 저장되었으므로 성공 응답
+          }
+
+          return res.status(200).json({
+            message: "과제 검증 정보가 성공적으로 등록되었습니다.",
+            idea_id: idea_id,
+            status: newStatus,
+          });
+        }
+      );
+    });
   });
 };
 
 // 과제 검증 정보 조회
 export const getIdeaVerifyById = (req, res) => {
-  const ideaId = req.params.id;
+  const idea_id = req.params.id;
   const q = `SELECT * FROM special.ITAsset_ideaVerify WHERE idea_id = ? ORDER BY created_at DESC LIMIT 1`;
 
-  db.query(q, [ideaId], (err, data) => {
+  db.query(q, [idea_id], (err, data) => {
     if (err) {
       console.error("과제 검증 정보 조회 오류:", err);
       return res.status(500).json({ error: err.message });
@@ -513,10 +611,15 @@ export const registerDepartmentVerify = (req, res) => {
 
     if (selectData.length > 0) {
       // 기존 데이터가 있으면 업데이트
+      // idea_id만으로 업데이트하고 id 컬럼은 사용하지 않습니다
       query = `
         UPDATE special.ITAsset_ideaVerify 
-        SET development_collaboration = ?, target_user = ?, comment = ?, verification_status = ?, updated_at = NOW()
-        WHERE idea_id = ? AND id = ?
+        SET development_collaboration = ?, 
+            target_user = ?, 
+            comment = ?, 
+            verification_status = ?, 
+            updated_at = NOW()
+        WHERE idea_id = ?
       `;
       values = [
         development_collaboration,
@@ -524,7 +627,6 @@ export const registerDepartmentVerify = (req, res) => {
         comment,
         verification_status === true || verification_status === "true" ? 1 : 0,
         idea_id,
-        selectData[0].id,
       ];
     } else {
       // 기존 데이터가 없으면 새로 삽입
@@ -636,11 +738,17 @@ export const registerAIVerify = (req, res) => {
 
     if (selectData.length > 0) {
       // 기존 데이터가 있으면 업데이트
+      // idea_id만으로 업데이트하고 id 컬럼은 사용하지 않습니다
       query = `
         UPDATE special.ITAsset_ideaVerify 
-        SET ai_development_collaboration = ?, feasibility = ?, ai_comment = ?, 
-            expected_personnel = ?, expected_schedule = ?, ai_verification_status = ?, updated_at = NOW()
-        WHERE idea_id = ? AND id = ?
+        SET ai_development_collaboration = ?, 
+            feasibility = ?, 
+            ai_comment = ?, 
+            expected_personnel = ?, 
+            expected_schedule = ?, 
+            ai_verification_status = ?, 
+            updated_at = NOW()
+        WHERE idea_id = ?
       `;
       values = [
         ai_development_collaboration,
@@ -652,7 +760,6 @@ export const registerAIVerify = (req, res) => {
           ? 1
           : 0,
         idea_id,
-        selectData[0].id,
       ];
 
       // 아이디어 상태 업데이트 준비
@@ -689,19 +796,33 @@ export const registerAIVerify = (req, res) => {
       // 두 검증 모두 완료된 경우 아이디어 상태 업데이트
       if (
         selectData.length > 0 &&
-        selectData[0].development_collaboration &&
+        selectData[0].verification_status !== null &&
         selectData[0].target_user &&
         selectData[0].comment
       ) {
-        const verificationStatus = selectData[0].verification_status;
+        const verificationStatus = selectData[0].verification_status === 1;
         const aiVerificationStatus =
           ai_verification_status === true || ai_verification_status === "true"
             ? true
             : false;
 
         // 검증 상태에 따라 아이디어 상태 업데이트
-        const newStatus =
-          verificationStatus && aiVerificationStatus ? "verified" : "rejected";
+        // 두 부서 중 하나라도 false면 rejected, 둘 다 true면 verified
+        let newStatus = "verified";
+
+        // 선임부서 또는 AI/DT 부서 중 하나라도 명시적으로 false인 경우에만 rejected
+        if (verificationStatus === false || aiVerificationStatus === false) {
+          newStatus = "rejected";
+          console.log("AI/DT 검증 단계에서 Drop 처리됨:", {
+            선임부서_검증상태: verificationStatus,
+            AI부서_검증상태: aiVerificationStatus,
+          });
+        } else {
+          console.log("AI/DT 검증 단계 완료:", {
+            선임부서_검증상태: verificationStatus,
+            AI부서_검증상태: aiVerificationStatus,
+          });
+        }
 
         const updateIdeaStatusQuery = `
           UPDATE special.ITAsset_ideas 
@@ -743,22 +864,22 @@ export const registerIdeaPilot = (req, res) => {
   console.log("파일럿 데이터 등록 요청:", req.body);
 
   const {
-    ideaID, // 아이디어 ID
     productivity, // 생산성
     cost, // 비용
     quantitybasis, // 정량적 기대효과 근거
   } = req.body;
 
+  const idea_id = req.params.idea_id; // URL 파라미터에서 아이디어 ID 가져오기
+
   // 필드 이름 한글 매핑
   const fieldNameMap = {
-    ideaID: "아이디어 ID",
     productivity: "생산성",
     cost: "비용",
     quantitybasis: "정량적 기대효과 근거",
   };
 
   // 필수 필드 검증
-  const requiredFields = ["ideaID", "productivity", "cost", "quantitybasis"];
+  const requiredFields = ["productivity", "cost", "quantitybasis"];
 
   // 누락된 필드 검사
   const missingFields = requiredFields.filter((field) => {
@@ -770,6 +891,10 @@ export const registerIdeaPilot = (req, res) => {
       (typeof value === "string" && value.replace(/<[^>]*>/g, "").trim() === "")
     );
   });
+
+  if (!idea_id) {
+    return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
+  }
 
   if (missingFields.length > 0) {
     // 한글 필드명으로 변환
@@ -793,7 +918,7 @@ export const registerIdeaPilot = (req, res) => {
   `;
 
   const values = [
-    ideaID,
+    idea_id,
     parseFloat(productivity) || 0,
     parseFloat(cost) || 0,
     quantitybasis,
@@ -801,28 +926,70 @@ export const registerIdeaPilot = (req, res) => {
 
   db.query(insertQuery, values, (err, data) => {
     if (err) {
-      console.error("파일럿 데이터 등록 오류:", err);
+      console.error("Pilot 데이터 등록 오류:", err);
       return res.status(500).json({ error: err.message });
     }
 
     // 아이디어 상태 업데이트 (Pilot으로 변경)
     const updateIdeaStatusQuery = `
       UPDATE special.ITAsset_ideas 
-      SET status = 'pilot' 
+      SET status = 'piloted' 
       WHERE id = ?
     `;
 
-    db.query(updateIdeaStatusQuery, [ideaID], (updateErr, updateData) => {
+    db.query(updateIdeaStatusQuery, [idea_id], (updateErr, updateData) => {
       if (updateErr) {
         console.error("아이디어 상태 업데이트 오류:", updateErr);
         // 상태 업데이트 실패해도 파일럿 데이터는 저장되었으므로 성공 응답
       }
 
       return res.status(200).json({
-        message: "파일럿 데이터가 성공적으로 등록되었습니다.",
-        pilotId: data.insertId,
-        ideaID: ideaID,
+        message: "Pilot 데이터가 성공적으로 등록되었습니다.",
+        idea_id: idea_id, // pilotId 대신 idea_id만 반환
+        status: "piloted", // 상태도 함께 반환
       });
     });
   });
+};
+
+// 파일럿 데이터 조회
+export const getPilotDataById = (req, res) => {
+  const idea_id = req.params.id;
+  console.log("파일럿 데이터 조회 요청 (idea_id):", idea_id);
+
+  if (!idea_id) {
+    return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
+  }
+
+  // 쿼리 로깅 추가
+  // created_at 컬럼이 없으므로 ORDER BY 절 제거
+  const q = `SELECT * FROM special.ITAsset_ideaPilot WHERE idea_id = ? LIMIT 1`;
+  console.log("실행 쿼리:", q);
+  console.log("쿼리 파라미터:", idea_id);
+
+  try {
+    db.query(q, [idea_id], (err, data) => {
+      if (err) {
+        console.error("파일럿 데이터 조회 오류:", err);
+        return res.status(500).json({
+          error: err.message,
+          sqlMessage: err.sqlMessage,
+          code: err.code,
+        });
+      }
+
+      if (!data || data.length === 0) {
+        console.log("데이터가 없음: idea_id =", idea_id);
+        return res
+          .status(404)
+          .json({ message: "파일럿 데이터를 찾을 수 없습니다." });
+      }
+
+      console.log("파일럿 데이터 조회 성공:", data[0]);
+      return res.status(200).json(data[0]);
+    });
+  } catch (error) {
+    console.error("예상치 못한 에러:", error);
+    return res.status(500).json({ error: "서버 내부 오류가 발생했습니다." });
+  }
 };
