@@ -226,22 +226,24 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
   const handleRegister = async () => {
     // 필수 필드 검증
     if (selectedDevelopers.length === 0) {
-      alert("개발자를 한 명 이상 선택해주세요.");
-      return;
-    }
-
-    if (!startDate) {
-      alert("시작일자를 선택해주세요.");
-      return;
-    }
-
-    if (!endDate) {
-      alert("종료일자를 선택해주세요.");
+      setError("개발자를 한 명 이상 선택해주세요.");
       return;
     }
 
     if (!priority) {
-      alert("우선순위를 선택해주세요.");
+      setError("우선순위를 선택해주세요.");
+      return;
+    }
+
+    // 시작일과 종료일이 유효한지 확인
+    if (!startDate || !endDate) {
+      setError("시작일자와 종료일자를 모두 선택해주세요.");
+      return;
+    }
+
+    // 종료일이 시작일보다 이전인지 확인
+    if (endDate.isBefore(startDate)) {
+      setError("종료일은 시작일 이후여야 합니다.");
       return;
     }
 
@@ -264,8 +266,9 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
       const response = await axios.post("/api/ideas/devreview", devReviewData);
 
       console.log("개발 심의 등록 성공:", response.data);
-      alert("개발 심의 정보가 성공적으로 등록되었습니다.");
 
+      // 성공 메시지 표시 후 모달 닫기
+      alert("개발 심의 정보가 성공적으로 등록되었습니다.");
       onClose();
     } catch (error) {
       console.error("개발 심의 등록 오류:", error);
@@ -275,10 +278,12 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
         const errorMsg =
           error.response.data.error || "알 수 없는 오류가 발생했습니다.";
         setError(errorMsg);
-        alert(`오류: ${errorMsg}`);
+      } else if (error.request) {
+        // 요청은 전송되었지만 응답을 받지 못한 경우
+        setError("서버로부터 응답이 없습니다. 네트워크 연결을 확인해주세요.");
       } else {
-        setError("서버 연결에 실패했습니다.");
-        alert("서버 연결에 실패했습니다.");
+        // 요청 설정 중 오류 발생
+        setError("요청 중 오류가 발생했습니다: " + error.message);
       }
     } finally {
       setLoading(false);
@@ -294,7 +299,25 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
           <CloseIcon className="closeIcon" onClick={onClose} />
         </div>
         <hr className="titleUnderline" />
-        {error && <div className="error-message">{error}</div>}
+        {error && (
+          <div
+            className="error-message"
+            style={{
+              color: "#d32f2f",
+              backgroundColor: "#ffebee",
+              padding: "8px 16px",
+              borderRadius: "4px",
+              margin: "10px 0",
+              fontSize: "14px",
+              textAlign: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <span style={{ marginRight: "8px" }}>⚠️</span> {error}
+          </div>
+        )}
 
         {/* 인력편성 */}
         <div className="manRowContainer">
@@ -364,8 +387,51 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
             className="registerButton"
             onClick={handleRegister}
             disabled={loading}
+            style={{
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.7 : 1,
+              position: "relative",
+            }}
           >
-            {loading ? "등록 중..." : "등록"}
+            {loading ? (
+              <>
+                <span style={{ visibility: "hidden" }}>등록</span>
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "16px",
+                      height: "16px",
+                      border: "2px solid #fff",
+                      borderTopColor: "transparent",
+                      borderRadius: "50%",
+                      animation: "spin 1s linear infinite",
+                      marginRight: "8px",
+                    }}
+                  ></span>
+                  등록 중...
+                </span>
+                <style>
+                  {`
+                    @keyframes spin {
+                      0% { transform: rotate(0deg); }
+                      100% { transform: rotate(360deg); }
+                    }
+                  `}
+                </style>
+              </>
+            ) : (
+              "등록"
+            )}
           </button>
         </div>
       </div>

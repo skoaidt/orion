@@ -200,49 +200,6 @@ export const registerSelectedIdea = (req, res) => {
     return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
   }
 
-  // // 필드 이름 한글 매핑
-  // const fieldNameMap = {
-  //   idea_id: "아이디어 ID",
-  //   duplication: "과제중복",
-  //   scope: "사용범위",
-  //   comment: "의견작성",
-  //   is_selected: "선정여부",
-  // };
-
-  // // 필수 필드 검증
-  // const requiredFields = [
-  //   "idea_id",
-  //   "duplication",
-  //   "scope",
-  //   "comment",
-  //   "is_selected",
-  // ];
-
-  // // 누락된 필드 검사
-  // const missingFields = requiredFields.filter((field) => {
-  //   const value = req.body[field];
-  //   return (
-  //     value === undefined ||
-  //     value === null ||
-  //     value === "" ||
-  //     (typeof value === "string" && value.replace(/<[^>]*>/g, "").trim() === "")
-  //   );
-  // });
-
-  // if (missingFields.length > 0) {
-  //   // 한글 필드명으로 변환
-  //   const missingFieldsKorean = missingFields.map(
-  //     (field) => fieldNameMap[field] || field
-  //   );
-
-  //   console.log(`누락된 필드 발견: ${missingFieldsKorean.join(", ")}`);
-
-  //   return res.status(400).json({
-  //     error: "모든 필드를 입력해주세요",
-  //     missingFields: missingFieldsKorean,
-  //   });
-  // }
-
   // 데이터 삽입 쿼리
   const insertQuery = `
     INSERT INTO special.ITAsset_ideaSelected (
@@ -293,6 +250,33 @@ export const registerSelectedIdea = (req, res) => {
         });
       }
     );
+  });
+};
+
+// 과제 선정 정보 가져오기
+export const getSelectedIdea = (req, res) => {
+  const ideaId = req.params.ideaId;
+  console.log("과제 선정 정보 조회 요청 (ideaId):", ideaId);
+
+  if (!ideaId) {
+    return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
+  }
+
+  const q = `SELECT * FROM special.ITAsset_ideaSelected WHERE idea_id = ? ORDER BY created_at DESC LIMIT 1`;
+
+  db.query(q, [ideaId], (err, data) => {
+    if (err) {
+      console.error("과제 선정 정보 조회 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    if (data.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "해당 아이디어의 선정 정보를 찾을 수 없습니다." });
+    }
+
+    return res.status(200).json(data[0]);
   });
 };
 
@@ -798,8 +782,8 @@ export const registerIdeaPilot = (req, res) => {
 
   // 데이터 삽입 쿼리
   const insertQuery = `
-    INSERT INTO special.ITAsset_pilot (
-      ideaID, productivity, cost, quantitybasis
+    INSERT INTO special.ITAsset_ideaPilot (
+      idea_id, productivity, cost, quantitybasis
     ) VALUES (?, ?, ?, ?)
   `;
 

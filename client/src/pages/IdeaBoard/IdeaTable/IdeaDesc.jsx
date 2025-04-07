@@ -526,22 +526,22 @@ const IdeaDesc = () => {
           <IdeaSelected onClose={() => setOpenModal(null)} ideaId={id} />
         )}
         {openModal === "ideaPiloted" && (
-          <IdeaPilot onClose={() => setOpenModal(null)} />
+          <IdeaPilot onClose={() => setOpenModal(null)} ideaId={id} />
         )}
         {openModal === "ideaVerify" && (
-          <IdeaVerify onClose={() => setOpenModal(null)} />
+          <IdeaVerify onClose={() => setOpenModal(null)} ideaId={id} />
         )}
         {openModal === "ideaDevReview" && (
-          <IdeaDevReview onClose={() => setOpenModal(null)} />
+          <IdeaDevReview onClose={() => setOpenModal(null)} ideaId={id} />
         )}
         {openModal === "ideaDeveloping" && (
-          <IdeaDeveloping onClose={() => setOpenModal(null)} />
+          <IdeaDeveloping onClose={() => setOpenModal(null)} ideaId={id} />
         )}
         {openModal === "ideaCompleted" && (
-          <IdeaCompleted onClose={() => setOpenModal(null)} />
+          <IdeaCompleted onClose={() => setOpenModal(null)} ideaId={id} />
         )}
         {openModal === "ideaDrop" && (
-          <IdeaDrop onClose={() => setOpenModal(null)} />
+          <IdeaDrop onClose={() => setOpenModal(null)} ideaId={id} />
         )}
       </div>
     </div>

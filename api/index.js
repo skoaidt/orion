@@ -29,15 +29,6 @@ app.use(
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Express 미들웨어 설정
-app.use(express.json());
-app.use(cookieParser());
-app.use(
-  cors({
-    origin: ["http://localhost:3000", "https://itasset.skons.co.kr"],
-  })
-);
-
 ////////////////////////
 // 이미지 파일 업로드 로직
 // Solution 저장 로직
