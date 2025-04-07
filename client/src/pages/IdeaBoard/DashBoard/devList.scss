@@ -16,6 +16,15 @@
   .list {
     width: auto; // 자동 너비로 설정하여 내용에 맞게 조정
     overflow: hidden; // 넘치는 내용 숨기기
+    p {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 50px;
+      font-size: 14px;
+      font-weight: 500;
+      color: $purpleIdea;
+    }
   }
   .MuiDataGrid-root {
     width: auto; // DataTable의 너비를 자동으로 설정

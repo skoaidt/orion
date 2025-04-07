@@ -7,7 +7,7 @@
     color: $purpleIdea;
     font-size: 18px;
     font-weight: 500;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
   }
   .processBox {
     .boxwrap {
@@ -35,12 +35,24 @@
     }
     .regBox {
       background-color: $grayColor;
+
+      &:hover {
+        background-color: #303030;
+      }
     }
     .devBox {
       background-color: $purpleIdeaLight;
+
+      &:hover {
+        background-color: #737ae0;
+      }
     }
     .compBox {
       background-color: $purpleIdea;
+
+      &:hover {
+        background-color: #271898;
+      }
     }
   }
 }

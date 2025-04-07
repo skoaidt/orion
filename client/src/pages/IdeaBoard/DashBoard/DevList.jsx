@@ -43,12 +43,16 @@ const DevList = () => {
         <p>개발진행 과제</p>
       </div>
       <div className="list">
-        <DataTable
-          slug="idea"
-          columns={columns}
-          rows={sortedRows} // 복사하여 정렬된 배열 사용
-          pagination={false}
-        />
+        {sortedRows.length === 0 ? (
+          <p>현재 개발이 진행되는 과제가 없습니다.</p> // 데이터가 없을 경우 메시지 표시
+        ) : (
+          <DataTable
+            slug="idea"
+            columns={columns}
+            rows={sortedRows} // 복사하여 정렬된 배열 사용
+            pagination={false}
+          />
+        )}
       </div>
     </div>
   );
