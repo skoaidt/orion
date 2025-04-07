@@ -103,6 +103,7 @@ const AdminMgmt = () => {
               variant="contained"
               color="primary"
               onClick={handleOpenModal}
+              style={{ backgroundColor: "#565656", width: "120px" }}
             >
               Admin 등록
             </Button>

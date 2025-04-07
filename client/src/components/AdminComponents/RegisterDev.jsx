@@ -1,21 +1,27 @@
 import "./admin.scss";
 import {
-  Button, Container, Dialog, DialogActions,
-  DialogContent, DialogTitle, Grid, TextField, Typography
-} from '@mui/material';
-import React, { useEffect, useState } from 'react'
-import ListAltIcon from '@mui/icons-material/ListAlt';
-import axios from 'axios';
-import UserSearch from './UserSearch';
+  Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  TextField,
+  Typography,
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import axios from "axios";
+import UserSearch from "./UserSearch";
 import DataTable from "../DataTable/DataTable";
 
 export const RegisterDev = () => {
-
   const [getDevelopers, setGetDevelopers] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [developerInfo, setDeveloperInfo] = useState({
-    n_id: '',
-    introduction: '',
+    n_id: "",
+    introduction: "",
   });
   const [file, setFile] = useState(null);
   const maxChars = 300; // 개발자 소개글 최대 문자 수
@@ -34,15 +40,12 @@ export const RegisterDev = () => {
     fetchDevelopers();
   }, []);
 
-
-
   const handleInputChange = (e) => {
     setDeveloperInfo({ ...developerInfo, [e.target.name]: e.target.value });
   };
   // const handleFileChange = (e) => {
   //   setFile(e.target.files[0]);
   // };
-
 
   // Handle modal open/close
   const handleOpenModal = () => setOpenModal(true);
@@ -62,8 +65,8 @@ export const RegisterDev = () => {
       }
       const res = await axios.post("/api/upload/developers", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data' // 필요한 경우 명시적으로 세팅
-        }
+          "Content-Type": "multipart/form-data", // 필요한 경우 명시적으로 세팅
+        },
       });
       console.log("업로드 성공: ", res.data); // 응답 로그
       return res.data;
@@ -95,7 +98,6 @@ export const RegisterDev = () => {
     }
   };
 
-
   // DataTable columns
   const columns = [
     { field: "n_id", headerName: "사번", width: 150 },
@@ -126,7 +128,6 @@ export const RegisterDev = () => {
   //   ...developer,
   //   id: index, // 또는 developer의 고유 필드
   // }));
-
 
   // const handleAddDeveloper = async (e) => {
   //   e.preventDefault();
@@ -165,20 +166,29 @@ export const RegisterDev = () => {
   //   })
   // };
 
-
   return (
     <div className="registerDev">
       <div className="gap-40"></div>
 
       <Container maxWidth="xl">
-        <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
+        <Grid
+          container
+          alignItems="center"
+          justifyContent="space-between"
+          spacing={2}
+        >
           <Grid item xs>
             <Typography component="h1" variant="h5" className="title">
               <ListAltIcon /> 개발자 등록 List
             </Typography>
           </Grid>
           <Grid item>
-            <Button variant="contained" color="primary" onClick={handleOpenModal}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleOpenModal}
+              style={{ backgroundColor: "#565656", width: "120px" }}
+            >
               개발자 등록
             </Button>
           </Grid>
@@ -222,7 +232,7 @@ export const RegisterDev = () => {
               onChange={handleFileChange}
               style={{ marginTop: "16px" }}
             /> */}
-            <hr style={{ marginTop: '30px', marginBottom: '30px' }} />
+            <hr style={{ marginTop: "30px", marginBottom: "30px" }} />
 
             <UserSearch
               onUserSelect={(user) => {
@@ -230,13 +240,16 @@ export const RegisterDev = () => {
                 alert(`${user.name} (${user.n_id}) 구성원이 선택되었습니다.`);
               }}
             />
-
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseModal} color="secondary">
               취소
             </Button>
-            <Button onClick={handleRegisterDeveloper} variant="contained" color="primary">
+            <Button
+              onClick={handleRegisterDeveloper}
+              variant="contained"
+              color="primary"
+            >
               등록
             </Button>
           </DialogActions>
@@ -350,7 +363,7 @@ export const RegisterDev = () => {
       <div className="gap-100"></div>
       <div className="gap-100"></div> */}
     </div>
-  )
-}
+  );
+};
 
 export default RegisterDev;

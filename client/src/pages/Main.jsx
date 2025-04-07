@@ -30,6 +30,7 @@ export const Main = () => {
   const isAdminPage = location.pathname.startsWith("/controlpanel");
   const isPortfolioPage = location.pathname.startsWith("/portfolio");
   const isTypingPage = location.pathname.startsWith("/typing");
+  const isIdeaBoardPage = location.pathname.startsWith("/ideaboard");
 
   ////////////////////////
   // 개발자 목록 가져오기
@@ -47,9 +48,9 @@ export const Main = () => {
 
   useEffect(() => {
     const handleScroll = (event) => {
-      if (window.scrollY < 10) {
-        window.scrollTo(0, 10);
-      }
+      // if (window.scrollY < 10) {
+      //   window.scrollTo(0, 10);
+      // }
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -63,7 +64,9 @@ export const Main = () => {
   return (
     <>
       <div className="main">
-        {!isPortfolioPage && !isTypingPage && <MainNavBar />}
+        {!isPortfolioPage && !isTypingPage && !isIdeaBoardPage && (
+          <MainNavBar />
+        )}
         <Routes>
           <Route path="/typingMain" element={<TypingMain />}></Route>
           <Route path="/typingHome" element={<TypingHome />}></Route>
@@ -84,13 +87,17 @@ export const Main = () => {
             />
           )}
           {/* <Route path="/fileupload" element={<FileUpload />} /> */}
-          <Route path="/idearegister" element={<IdeaBorad />} />
+          <Route path="/ideaboard" element={<IdeaBorad />} />
+          <Route path="/ideaboard/detail/:id" element={<IdeaBorad />} />
+          <Route path="/ideaboard/gantt/:id" element={<IdeaBorad />} />
           <Route path="/solmgmt" element={<SolMgmt />} />
           <Route path="/dashboard" element={<DashBoard />} />
         </Routes>
         {!isPortfolioPage && <ScrollToTop />}
       </div>
-      {!(isAdminPage || isPortfolioPage || isTypingPage) && <Footer />}
+      {!(isAdminPage || isPortfolioPage || isTypingPage || isIdeaBoardPage) && (
+        <Footer />
+      )}
     </>
   );
 };

@@ -89,23 +89,19 @@ export const getDeveloper = (req, res) => {
 // 구성원 목록 가져오기
 export const getUser = async (req, res) => {
   const q = `
-        SELECT 
-            A.EmpNo AS n_id, 
-            A.Name AS name, 
-            B1.DeptName AS headquarters,
-            B2.DeptName AS team
-        FROM 
-            Common.dbo.TB_ZZ_User AS A
-        LEFT JOIN 
-            Common.dbo.TB_FM_DeptCode AS B1
-        ON 
-            A.PrntDeptCode = B1.DeptCode AND B1.DeptLevel = 1 
-        LEFT JOIN 
-            Common.dbo.TB_FM_DeptCode AS B2
-        ON 
-            A.DeptCode = B2.DeptCode AND B2.DeptLevel = 2  
-        WHERE 
-            A.DeptCode IS NOT NULL;
+SELECT
+	A.EmpNo,
+	A.Name,
+	B1.DeptName AS headqt,
+	B2.DeptName AS team,
+	A.UseYN
+FROM Common.dbo.TB_ZZ_User AS A
+LEFT JOIN Common.dbo.TB_FM_DeptCode AS B1
+ON A.PrntDeptCode = B1.DeptCode AND B1.DeptLevel = 1
+LEFT JOIN Common.dbo.TB_FM_DeptCode AS B2
+ON A.DeptCode = B2.DeptCode AND B2.DeptLevel = 2
+WHERE A.DeptCode IS NOT NULL and A.EmpNo LIKE 'N11%'
+and A.UseYN LIKE 'Y'
   `;
 
   try {
