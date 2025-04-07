@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import IdeaSelected from "../IdeaModal/IdeaSelected";
@@ -8,6 +8,7 @@ import IdeaDevReview from "../IdeaModal/IdeaDevReview";
 import IdeaDeveloping from "../IdeaModal/IdeaDeveloping";
 import IdeaCompleted from "../IdeaModal/IdeaCompleted";
 import IdeaDrop from "../IdeaModal/IdeaDrop";
+import IdeaRegister from "../IdeaModal/IdeaRegister";
 import "./ideaDesc.scss";
 import { Button } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -22,6 +23,7 @@ import RateReviewIcon from "@mui/icons-material/RateReview";
 import DeveloperModeIcon from "@mui/icons-material/DeveloperMode";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import CancelIcon from "@mui/icons-material/Cancel";
+import { AuthContext } from "../../../context/authContext";
 import axios from "axios";
 
 // 상태값 상수 정의
@@ -49,9 +51,11 @@ const STAGE_ORDER = {
 };
 
 const IdeaDesc = () => {
+  const { currentUser } = useContext(AuthContext);
   const { id } = useParams();
   const navigate = useNavigate();
   const [openModal, setOpenModal] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [ideaData, setIdeaData] = useState({
     id: "",
     project_type: "",
@@ -71,26 +75,146 @@ const IdeaDesc = () => {
     status: "",
   });
   const [loading, setLoading] = useState(true);
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [viewCount, setViewCount] = useState(0);
+  // 아이디어 데이터 가져오기 함수 - 외부에서도 호출할 수 있도록 수정
+  const fetchIdeaData = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`/api/ideas/${id}`);
+      setIdeaData(response.data);
+    } catch (error) {
+      console.error("아이디어 상세 정보 가져오기 오류:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // 아이디어 데이터 가져오기
-  useEffect(() => {
-    const fetchIdeaData = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`/api/ideas/${id}`);
-        setIdeaData(response.data);
-        console.log("아이디어 상태:", response.data.status); // 상태 로깅
-      } catch (error) {
-        console.error("아이디어 상세 정보 가져오기 오류:", error);
-      } finally {
-        setLoading(false);
+  // 조회 로그 기록 함수 추가
+  const logIdeaView = async () => {
+    if (!currentUser) return;
+    // 로그인하지 않은 사용자는 기록하지 않음
+
+    try {
+      // 동일 아이디어에 대한 중복 조회 로그 방지 (1분 제한)
+      const viewLogKey = `viewed_idea_${id}_${currentUser.userId}`;
+      const lastViewTime = sessionStorage.getItem(viewLogKey);
+
+      if (lastViewTime) {
+        const now = new Date().getTime();
+        const lastTime = parseInt(lastViewTime);
+        const ONE_MINUTE = 60 * 1000; // 1분(밀리초)
+
+        // 마지막 조회 시간이 1분 이내인 경우 로그 기록 중단
+        if (now - lastTime < ONE_MINUTE) {
+          console.log("1분 이내 중복 조회 - 로그 기록 건너뜀");
+          return;
+        }
       }
-    };
 
+      // 현재 정확한 시간을 사용하기 위해 클라이언트에서 직접 시간 정보를 보내지 않음
+      await axios.post("/api/ideas/log-view", {
+        idea_id: id,
+        n_id: currentUser.userId || "unknown",
+        name: currentUser.name || "사용자",
+        team: currentUser.deptName || "팀 정보 없음",
+      });
+
+      // 현재 시간을 세션 스토리지에 기록
+      sessionStorage.setItem(viewLogKey, new Date().getTime().toString());
+    } catch (error) {
+      console.error("조회 로그 기록 오류:", error);
+      // 로그 기록 실패해도 사용자 경험에 영향을 주지 않도록 조용히 처리
+    }
+  };
+
+  // 댓글 목록 조회 함수 추가
+  const fetchComments = async () => {
+    try {
+      setLoadingComments(true);
+      const response = await axios.get(`/api/ideas/comments/${id}`);
+      setComments(response.data);
+    } catch (error) {
+      console.error("댓글 조회 오류:", error);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  // 댓글 등록 함수 추가
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!commentText.trim()) {
+      alert("댓글 내용을 입력해주세요.");
+      return;
+    }
+
+    if (!currentUser) {
+      alert("로그인이 필요한 기능입니다.");
+      return;
+    }
+
+    try {
+      const commentData = {
+        idea_id: id,
+        n_id: currentUser.userId || "unknown",
+        name: currentUser.name || "사용자",
+        team: currentUser.deptName || "팀 정보 없음",
+        comment: commentText,
+      };
+
+      await axios.post("/api/ideas/comments", commentData);
+      setCommentText(""); // 입력창 초기화
+      fetchComments(); // 댓글 목록 다시 불러오기
+    } catch (error) {
+      console.error("댓글 등록 오류:", error);
+      alert("댓글을 등록하는 중 오류가 발생했습니다.");
+    }
+  };
+
+  // 댓글 삭제 함수 추가
+  const handleDeleteComment = async (commentId) => {
+    if (window.confirm("정말 이 댓글을 삭제하시겠습니까?")) {
+      try {
+        await axios.delete(`/api/ideas/comments/${commentId}`);
+        fetchComments(); // 댓글 목록 다시 불러오기
+      } catch (error) {
+        console.error("댓글 삭제 오류:", error);
+        alert("댓글을 삭제하는 중 오류가 발생했습니다.");
+      }
+    }
+  };
+
+  // 조회수 가져오기 함수 추가
+  const fetchViewCount = async () => {
+    try {
+      const response = await axios.get(`/api/ideas/viewcount/${id}`);
+      setViewCount(response.data.viewcount);
+    } catch (error) {
+      console.error("조회수 가져오기 오류:", error);
+      // 오류 발생시 기존 조회수 유지
+    }
+  };
+
+  // 컴포넌트 마운트 및 id 변경 시 데이터 로드
+  useEffect(() => {
     if (id) {
       fetchIdeaData();
+      fetchComments(); // 댓글도 함께 로드
+      fetchViewCount(); // 조회수도 함께 로드
     }
-  }, [id, openModal]); // openModal 종료 시에도 데이터 새로고침
+  }, [id, openModal]);
+
+  // 로그 기록은 별도 useEffect로 분리하여 한 번만 실행되도록 함
+  useEffect(() => {
+    if (id && currentUser) {
+      // 컴포넌트가 마운트된 후에만 로그 기록
+      logIdeaView();
+    }
+  }, [id, currentUser]); // id와 currentUser가 변경될 때만 실행
 
   // 날짜 포맷 함수
   const formatDate = (dateString) => {
@@ -98,6 +222,17 @@ const IdeaDesc = () => {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
 
+    return date.toISOString().split("T")[0]; // YYYY-MM-DD 형식
+  };
+
+  // 댓글 날짜 포맷 함수 - 하루를 더해서 표시
+  const formatCommentDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+
+    // 날짜에 하루 추가
+    date.setDate(date.getDate() + 1);
     return date.toISOString().split("T")[0]; // YYYY-MM-DD 형식
   };
 
@@ -336,6 +471,38 @@ const IdeaDesc = () => {
     navigate(`/ideaboard/gantt/${id}`);
   };
 
+  const handleEditClick = () => {
+    setShowEditModal(true);
+  };
+
+  // 삭제 버튼 클릭 핸들러 추가
+  const handleDeleteClick = async () => {
+    // 삭제 확인
+    if (window.confirm("정말 이 아이디어를 삭제하시겠습니까?")) {
+      try {
+        const response = await axios.delete(`/api/ideas/${id}`);
+        console.log("아이디어 삭제 성공:", response.data);
+        alert("아이디어가 성공적으로 삭제되었습니다.");
+        // 아이디어 목록 페이지로 이동
+        navigate("/ideaboard");
+      } catch (error) {
+        console.error("아이디어 삭제 오류:", error);
+        alert(
+          `삭제 중 오류가 발생했습니다: ${
+            error.response?.data?.error || error.message
+          }`
+        );
+      }
+    }
+  };
+
+  // 모달 닫기 및 데이터 새로고침 처리
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    // 수정 모달이 닫힐 때 데이터 다시 불러오기
+    fetchIdeaData();
+  };
+
   // 단계별 스타일 클래스 결정 함수
   const getStageClass = (stage) => {
     console.log("현재 아이디어 상태:", ideaData.status, "요청 단계:", stage);
@@ -440,8 +607,8 @@ const IdeaDesc = () => {
       <div className="ideaDescWrap">
         <div className="ideaDescBtn">
           <div className="left">
-            <button>수정</button>
-            <button>삭제</button>
+            <button onClick={handleEditClick}>수정</button>
+            <button onClick={handleDeleteClick}>삭제</button>
           </div>
           <div className="right">
             <Link to="/ideaboard">
@@ -534,33 +701,41 @@ const IdeaDesc = () => {
           <div className="Box">
             <StreetviewIcon style={{ fontSize: "16px" }} />
             <div className="hits">조회수</div>
-            <div className="hitsCount">{ideaData.views || 0}</div>
+            <div className="hitsCount">{viewCount}</div>
           </div>
           <div className="Box">
             <ChatIcon style={{ fontSize: "16px" }} />
             <div className="comments">댓글</div>
-            <div className="commentsCount">
-              {ideaData.comments?.length || 0}
-            </div>
+            <div className="commentsCount">{comments.length || 0}</div>
           </div>
         </div>
         <div className="gap-20"></div>
         <div className="commentsContent">
-          {ideaData.comments && ideaData.comments.length > 0 ? (
-            ideaData.comments.map((comment, index) => (
-              <div className="commentItem" key={index}>
+          {loadingComments ? (
+            <div className="commentItem">
+              <div className="commentText">댓글을 불러오는 중입니다...</div>
+            </div>
+          ) : comments.length > 0 ? (
+            comments.map((comment) => (
+              <div className="commentItem" key={comment.comment_id}>
                 <div className="commentAuthor">
+                  <div className="commentAuthorTeam">{comment.team}</div>
                   <div className="commentAuthorNm">{comment.name}</div>
-                  <div className="commentAuthorTeam">{comment.dept_name}</div>
                 </div>
-                <div className="commentText">{comment.content}</div>
+                <div className="commentText">{comment.comment}</div>
                 <div className="commentDownWrap">
                   <div className="commentDate">
-                    {formatDate(comment.created_at)}
+                    {formatCommentDate(comment.date)}
                   </div>
-                  <Button startIcon={<DeleteIcon />} sx={{ color: "tomato" }}>
-                    삭제
-                  </Button>
+                  {currentUser?.userId === comment.n_id && (
+                    <Button
+                      startIcon={<DeleteIcon />}
+                      sx={{ color: "tomato" }}
+                      onClick={() => handleDeleteComment(comment.comment_id)}
+                    >
+                      삭제
+                    </Button>
+                  )}
                 </div>
               </div>
             ))
@@ -570,9 +745,14 @@ const IdeaDesc = () => {
             </div>
           )}
           <div className="addWrap">
-            <div className="commentNm">사용자</div>
+            <div className="commentNm">
+              {currentUser?.deptName || "팀"} {currentUser?.name || "사용자"}
+            </div>
             <div className="addComment">
-              <form style={{ width: "100%", margin: "5px 10px" }}>
+              <form
+                style={{ width: "100%", margin: "5px 10px" }}
+                onSubmit={handleCommentSubmit}
+              >
                 <textarea
                   placeholder="댓글을 남겨보세요"
                   rows="4"
@@ -581,9 +761,17 @@ const IdeaDesc = () => {
                     border: "none",
                     boxSizing: "border-box",
                   }}
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
                 />
                 <div className="btnGroup">
-                  <Button startIcon={<SendIcon />}>등록</Button>
+                  <Button
+                    startIcon={<SendIcon />}
+                    type="submit"
+                    disabled={!commentText.trim()}
+                  >
+                    등록
+                  </Button>
                 </div>
               </form>
             </div>
@@ -593,8 +781,8 @@ const IdeaDesc = () => {
         <div className="gap-20"></div>
         <div className="ideaDescBtn">
           <div className="left">
-            <button>수정</button>
-            <button>삭제</button>
+            <button onClick={handleEditClick}>수정</button>
+            <button onClick={handleDeleteClick}>삭제</button>
           </div>
           <div className="right">
             <Link to="/ideaboard">
@@ -662,9 +850,13 @@ const IdeaDesc = () => {
                   <div className="userInfo">
                     <div
                       className="processItemContentTitle"
-                      style={{ fontSize: "13px", fontWeight: "300" }}
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: "300",
+                        marginBottom: "3px",
+                      }}
                     >
-                      {ideaData.business_field}기술팀 검증 필요
+                      {`${ideaData.VerifyDepartment} 검증 필요`}
                     </div>
                   </div>
                 </div>
@@ -727,12 +919,24 @@ const IdeaDesc = () => {
             <div className={`processItemContent ${getStageClass("verified")}`}>
               <div className="itemcontentWrap">
                 <div className="left">
-                  <div className="userInfo">
+                  <div
+                    className="userInfo"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
                     <div
                       className="processItemContentTitle"
-                      style={{ fontSize: "13px", fontWeight: "300" }}
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: "300",
+                        marginBottom: "0",
+                        display: "block",
+                        width: "100%",
+                      }}
                     >
-                      Access기술팀 검증 필요
+                      {`${ideaData.VerifyDepartment} 검증 필요`}
                     </div>
                   </div>
                 </div>
@@ -930,6 +1134,16 @@ const IdeaDesc = () => {
             onClose={() => setOpenModal(null)}
             ideaId={id}
             ideaData={ideaData}
+          />
+        )}
+
+        {/* 수정 모달 추가 */}
+        {showEditModal && (
+          <IdeaRegister
+            onClose={handleCloseEditModal}
+            editMode={true}
+            ideaData={ideaData}
+            onUpdate={fetchIdeaData}
           />
         )}
       </div>
