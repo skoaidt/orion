@@ -1,4 +1,5 @@
 import { db } from "../db.js";
+import { mssql } from "../db.js";
 
 // 아이디어 등록하기
 export const registerIdea = (req, res) => {
@@ -824,5 +825,54 @@ export const registerIdeaPilot = (req, res) => {
         ideaID: ideaID,
       });
     });
+  });
+};
+
+// 본부와 팀 정보 가져오기
+export const getTeam = (req, res) => {
+  // special 스키마의 ITAsset_ideaDepartment 테이블에서 부서 정보 조회 (대소문자 구분 없이)
+  const query = `
+    SELECT 
+      headqt COLLATE utf8mb4_general_ci AS headqt, 
+      team COLLATE utf8mb4_general_ci AS team 
+    FROM special.ITAsset_ideaDepartment 
+    ORDER BY headqt, team
+  `;
+
+  db.query(query, (err, data) => {
+    if (err) {
+      console.error("부서 정보 조회 오류:", err.message);
+      return res.status(500).json({
+        message: "부서 정보를 가져오는 중 오류가 발생했습니다.",
+        error: err.message,
+      });
+    }
+
+    if (data.length === 0) {
+      return res.status(404).json({
+        message: "검색 결과가 없습니다.",
+      });
+    }
+
+    // 본부별로 팀 정보 그룹화 (대소문자 구분 없이)
+    const teamsByHeadqt = {};
+
+    data.forEach((item) => {
+      // 항상 일관된 케이스 형식 사용
+      const headqt = item.headqt ? item.headqt.trim() : "";
+      const team = item.team ? item.team.trim() : "";
+
+      if (!headqt) return; // 빈 값 무시
+
+      if (!teamsByHeadqt[headqt]) {
+        teamsByHeadqt[headqt] = [];
+      }
+
+      if (team && !teamsByHeadqt[headqt].includes(team)) {
+        teamsByHeadqt[headqt].push(team);
+      }
+    });
+
+    return res.status(200).json(teamsByHeadqt);
   });
 };

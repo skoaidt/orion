@@ -12,9 +12,8 @@ import "react-quill/dist/quill.snow.css";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { AuthContext } from "../../../context/authContext";
-import { styled } from "@mui/system";
-import { Select as BaseSelect } from "@mui/base/Select";
-import { Option as BaseOption } from "@mui/base/Option";
+import { useSelect, SelectProvider } from "@mui/base/useSelect";
+import { useOption } from "@mui/base/useOption";
 
 const IdeaRegister = ({ onClose }) => {
   const { currentUser } = useContext(AuthContext);
@@ -208,82 +207,73 @@ const IdeaRegister = ({ onClose }) => {
     setPlatform(event.target.value);
   };
 
-  // 조직도 데이터 구조
-  const organizationData = {
-    Access본부: {
-      담당들: {
-        Access계획담당: ["Access계획팀", "Access시스템팀", "계약팀"],
-        Access운용담당: ["Access운용1팀", "Access운용2팀", "Access품질팀"],
-      },
-      직속팀들: ["Access전략팀", "Access신기술팀", "Access지원팀"],
-    },
-    Network본부: {
-      담당들: {
-        Network계획담당: ["Network계획팀", "Network시스템팀", "Network구축팀"],
-        Network운용담당: ["Network운용1팀", "Network운용2팀", "Network품질팀"],
-      },
-      직속팀들: ["Network전략팀", "Network신기술팀", "Network지원팀"],
-    },
-    IT본부: {
-      담당들: {
-        IT기획담당: ["IT기획팀", "IT아키텍처팀", "IT보안팀"],
-        IT개발담당: ["IT개발1팀", "IT개발2팀", "데이터팀"],
-      },
-      직속팀들: ["IT전략팀", "IT품질팀", "IT지원팀"],
-    },
-    "AI/DT본부": {
-      담당들: {
-        AI기획담당: ["AI기획팀", "AI아키텍처팀", "AI솔루션팀"],
-        데이터담당: ["데이터분석팀", "AI개발팀", "빅데이터팀"],
-      },
-      직속팀들: ["AI전략팀", "데이터품질팀", "AI지원팀"],
-    },
-  };
-
   // 부서 선택 관련 상태 및 핸들러
-  const [selectedHeadquarter, setSelectedHeadquarter] = React.useState("");
-  const [selectedDepartment, setSelectedDepartment] = React.useState("");
-  const [selectedTeam, setSelectedTeam] = React.useState("");
-  const [teams, setTeams] = React.useState([]);
+  const [headqtList, setHeadqtList] = useState([]);
+  const [teamsByHeadqt, setTeamsByHeadqt] = useState({});
+  const [selectedHeadqt, setSelectedHeadqt] = useState("");
+  const [selectedTeam, setSelectedTeam] = useState("");
+  const [teams, setTeams] = useState([]);
+  const [teamsLoading, setTeamsLoading] = useState(false);
+
+  // 컴포넌트 마운트 시 본부 및 팀 데이터 로드
+  useEffect(() => {
+    const fetchTeams = async () => {
+      setTeamsLoading(true);
+      try {
+        const response = await axios.get("/api/ideas/teams");
+        const teamData = response.data;
+
+        // 본부 목록 추출
+        const headqtArray = Object.keys(teamData);
+
+        console.log("API에서 가져온 본부 및 팀 데이터:", teamData);
+        console.log("추출된 본부 목록:", headqtArray);
+
+        setHeadqtList(headqtArray);
+        setTeamsByHeadqt(teamData);
+        setTeamsLoading(false);
+      } catch (error) {
+        console.error("본부 및 팀 데이터 로드 오류:", error);
+        setTeamsLoading(false);
+      }
+    };
+
+    fetchTeams();
+  }, []);
 
   // 본부 선택 시
-  const handleHeadquarterChange = (event, value) => {
-    setSelectedHeadquarter(value);
-    setSelectedDepartment(""); // 담당 초기화
-    setSelectedTeam(""); // 팀 초기화
-    setTeams([]); // 팀 목록 초기화
-  };
+  const handleHeadqtChange = (event, newValue) => {
+    console.log("본부 선택 이벤트:", event);
+    console.log("선택된 본부:", newValue);
+    setSelectedHeadqt(newValue);
+    setSelectedTeam("");
 
-  // 담당 선택 시
-  const handleDepartmentChange = (event, value) => {
-    setSelectedDepartment(value);
-    setSelectedTeam(""); // 팀 초기화
-
-    if (value === "선택없음") {
-      // 직속 팀 설정
-      setTeams(organizationData[selectedHeadquarter].직속팀들);
-    } else if (organizationData[selectedHeadquarter]?.담당들[value]) {
-      // 담당의 팀 설정
-      setTeams(organizationData[selectedHeadquarter].담당들[value]);
+    if (newValue && teamsByHeadqt[newValue]) {
+      const teamsArray = teamsByHeadqt[newValue];
+      console.log(`선택된 본부(${newValue})의 팀 목록:`, teamsArray);
+      setTeams(teamsArray);
+    } else {
+      console.log("선택된 본부가 없거나 해당 본부의 팀 목록이 비어있습니다.");
+      setTeams([]);
     }
   };
 
   // 팀 선택 시
-  const handleTeamChange = (event, value) => {
-    setSelectedTeam(value);
+  const handleTeamChange = (event, newValue) => {
+    setSelectedTeam(newValue);
 
     // 선택된 부서 정보 상태 업데이트
-    const departmentInfo = {
-      headquarter: selectedHeadquarter,
-      department: selectedDepartment,
-      team: value,
-      // 표시용 전체 경로
-      fullPath:
-        selectedDepartment === "선택없음"
-          ? `${selectedHeadquarter} > ${value}`
-          : `${selectedHeadquarter} > ${selectedDepartment} > ${value}`,
-    };
-    setVerifyDepartment(departmentInfo);
+    if (newValue && selectedHeadqt) {
+      const departmentInfo = {
+        headqt: selectedHeadqt,
+        team: newValue,
+        // 표시용 전체 경로
+        fullPath: `${selectedHeadqt} > ${newValue}`,
+      };
+      setVerifyDepartment(departmentInfo);
+    } else {
+      setVerifyDepartment(null);
+    }
   };
 
   // 등록 버튼 핸들러
@@ -374,70 +364,181 @@ const IdeaRegister = ({ onClose }) => {
     }
   };
 
-  // VerifyDepartment 컴포넌트를 위한 스타일 컴포넌트들
-  const SelectCustomButton = styled("button")(({ theme }) => ({
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    padding: "8px 12px",
-    width: "100%",
-    textAlign: "left",
-    backgroundColor: "#fff",
-    fontSize: "14px",
-    cursor: "pointer",
-    "&:hover": {
-      borderColor: "#aaa",
-    },
-    "&:focus": {
-      outline: "none",
-      borderColor: "#2e7d32",
-      boxShadow: "0 0 0 2px rgba(46, 125, 50, 0.2)",
-    },
-  }));
+  // 커스텀 Select 컴포넌트
+  const CustomSelect = React.forwardRef(function CustomSelect(props, ref) {
+    const { children, placeholder, disabled, value, onChange, ...other } =
+      props;
 
-  const SelectOption = styled(BaseOption)(({ theme }) => ({
-    listStyle: "none",
-    padding: "8px",
-    borderRadius: "4px",
-    cursor: "pointer",
-    "&:hover": {
-      backgroundColor: "#f5f5f5",
-    },
-    "&.Mui-selected": {
-      backgroundColor: "#e0e0e0",
-      "&:hover": {
-        backgroundColor: "#d0d0d0",
-      },
-    },
-  }));
+    const listboxRef = React.useRef(null);
+    const [open, setOpen] = React.useState(false);
+    const [searchTerm, setSearchTerm] = React.useState("");
+    const [filteredOptions, setFilteredOptions] = React.useState([]);
 
-  const SelectListbox = styled("ul")(({ theme }) => ({
-    margin: "8px 0",
-    padding: "8px",
-    borderRadius: "4px",
-    backgroundColor: "#fff",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-    maxHeight: "200px",
-    overflowY: "auto",
-  }));
+    // 검색어 입력 처리
+    const handleSearchChange = (e) => {
+      const term = e.target.value;
+      setSearchTerm(term);
+      console.log("검색어 입력:", term);
 
-  const SelectPopup = styled("div")(({ theme }) => ({
-    zIndex: 1000,
-  }));
+      // 모든 옵션 확인
+      const allOptions = React.Children.toArray(children);
+      console.log(
+        "전체 옵션 목록:",
+        allOptions.map((child) => ({
+          value: child.props.value,
+          text: child.props.children,
+        }))
+      );
 
-  const SelectContainer = styled("div")({
-    marginBottom: "16px",
-  });
-
-  // 부서 선택 Select 컴포넌트
-  const DepartmentSelect = React.forwardRef(function Select(props, ref) {
-    const slots = {
-      root: SelectCustomButton,
-      listbox: SelectListbox,
-      popup: SelectPopup,
-      ...props.slots,
+      // 검색어가 있으면 필터링, 없으면 전체 목록
+      if (term.trim() === "") {
+        console.log("검색어가 비어 있어 모든 옵션을 표시합니다.");
+        setFilteredOptions(allOptions);
+      } else {
+        const filtered = allOptions.filter((child) => {
+          const childText = String(child.props.children).toLowerCase();
+          const searchTermLower = term.toLowerCase();
+          const includes = childText.includes(searchTermLower);
+          console.log(`옵션 "${child.props.children}" 검색 결과:`, includes);
+          return includes;
+        });
+        console.log(
+          "필터링된 옵션 목록:",
+          filtered.map((child) => child.props.children)
+        );
+        setFilteredOptions(filtered);
+      }
     };
 
-    return <BaseSelect {...props} ref={ref} slots={slots} />;
+    const handleButtonClick = (event) => {
+      console.log("드롭다운 버튼 클릭됨, 현재 상태:", open ? "열림" : "닫힘");
+      setOpen(!open);
+      // 열릴 때 필터 초기화
+      if (!open) {
+        setSearchTerm("");
+        const allOptions = React.Children.toArray(children);
+        console.log("드롭다운 열림 - 모든 옵션 표시:", allOptions.length);
+        setFilteredOptions(allOptions);
+      }
+    };
+
+    const handleButtonKeyDown = (event) => {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        setOpen(true);
+        setSearchTerm("");
+        setFilteredOptions(React.Children.toArray(children));
+      }
+    };
+
+    React.useEffect(() => {
+      const handleOutsideClick = (event) => {
+        if (
+          listboxRef.current &&
+          !listboxRef.current.contains(event.target) &&
+          open &&
+          !event.target.closest(".department-select-button") &&
+          !event.target.closest(".department-search-input")
+        ) {
+          setOpen(false);
+        }
+      };
+
+      // 컴포넌트 마운트 시 모든 옵션 설정
+      const allOptions = React.Children.toArray(children);
+      console.log(
+        "Select 컴포넌트 마운트/업데이트 - 옵션 수:",
+        allOptions.length
+      );
+      setFilteredOptions(allOptions);
+
+      document.addEventListener("mousedown", handleOutsideClick);
+      return () => {
+        document.removeEventListener("mousedown", handleOutsideClick);
+      };
+    }, [open, listboxRef, children]);
+
+    const displayValue = React.useMemo(() => {
+      if (value) {
+        return value;
+      }
+      return placeholder || "";
+    }, [value, placeholder]);
+
+    const handleOptionClick = (optionValue) => {
+      onChange(null, optionValue);
+      setOpen(false);
+      setSearchTerm("");
+    };
+
+    return (
+      <div className="department-select" ref={ref} {...other}>
+        <button
+          type="button"
+          className={`department-select-button ${disabled ? "disabled" : ""}`}
+          disabled={disabled}
+          onClick={handleButtonClick}
+          onKeyDown={handleButtonKeyDown}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+        >
+          {displayValue}
+        </button>
+
+        {open && (
+          <div className="department-select-popup">
+            <div className="department-search-container">
+              <input
+                type="text"
+                className="department-search-input"
+                placeholder="검색..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                autoFocus
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+            <ul
+              className="department-select-listbox"
+              ref={listboxRef}
+              role="listbox"
+            >
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((child, index) => {
+                  console.log(`렌더링된 옵션 ${index}:`, child.props.children);
+                  return React.cloneElement(child, {
+                    onClick: () => handleOptionClick(child.props.value),
+                  });
+                })
+              ) : (
+                <li className="department-select-no-results">
+                  검색 결과가 없습니다
+                </li>
+              )}
+            </ul>
+          </div>
+        )}
+      </div>
+    );
+  });
+
+  // 커스텀 Option 컴포넌트
+  const CustomOption = React.forwardRef(function CustomOption(props, ref) {
+    const { children, value, onClick, ...other } = props;
+    const selected = value === (props.parentValue || "");
+
+    return (
+      <li
+        ref={ref}
+        className={`department-select-option ${selected ? "selected" : ""}`}
+        role="option"
+        aria-selected={selected}
+        onClick={onClick}
+        {...other}
+      >
+        {children}
+      </li>
+    );
   });
 
   return (
@@ -809,57 +910,45 @@ const IdeaRegister = ({ onClose }) => {
                   </div>
                 )}
                 <div className="selectorsRow">
-                  <SelectContainer>
-                    <DepartmentSelect
-                      value={selectedHeadquarter}
-                      onChange={handleHeadquarterChange}
-                      placeholder="본부를 선택하세요"
+                  <div className="selectContainer">
+                    <CustomSelect
+                      value={selectedHeadqt}
+                      onChange={handleHeadqtChange}
+                      placeholder={
+                        teamsLoading ? "로딩 중..." : "본부를 선택하세요"
+                      }
+                      disabled={teamsLoading}
                     >
-                      {Object.keys(organizationData).map((headquarter) => (
-                        <SelectOption key={headquarter} value={headquarter}>
-                          {headquarter}
-                        </SelectOption>
+                      {headqtList.map((headqt) => (
+                        <CustomOption
+                          key={headqt}
+                          value={headqt}
+                          parentValue={selectedHeadqt}
+                        >
+                          {headqt}
+                        </CustomOption>
                       ))}
-                    </DepartmentSelect>
-                  </SelectContainer>
+                    </CustomSelect>
+                  </div>
 
-                  <SelectContainer>
-                    <DepartmentSelect
-                      value={selectedDepartment}
-                      onChange={handleDepartmentChange}
-                      placeholder="담당을 선택하세요"
-                      disabled={!selectedHeadquarter}
-                    >
-                      {selectedHeadquarter &&
-                        Object.keys(
-                          organizationData[selectedHeadquarter].담당들
-                        ).map((department) => (
-                          <SelectOption key={department} value={department}>
-                            {department}
-                          </SelectOption>
-                        ))}
-                      {selectedHeadquarter && (
-                        <SelectOption value="선택없음">
-                          직속팀 선택
-                        </SelectOption>
-                      )}
-                    </DepartmentSelect>
-                  </SelectContainer>
-
-                  <SelectContainer>
-                    <DepartmentSelect
+                  <div className="selectContainer">
+                    <CustomSelect
                       value={selectedTeam}
                       onChange={handleTeamChange}
                       placeholder="팀을 선택하세요"
-                      disabled={!selectedDepartment || teams.length === 0}
+                      disabled={!selectedHeadqt || teams.length === 0}
                     >
                       {teams.map((team) => (
-                        <SelectOption key={team} value={team}>
+                        <CustomOption
+                          key={team}
+                          value={team}
+                          parentValue={selectedTeam}
+                        >
                           {team}
-                        </SelectOption>
+                        </CustomOption>
                       ))}
-                    </DepartmentSelect>
-                  </SelectContainer>
+                    </CustomSelect>
+                  </div>
                 </div>
               </div>
             </div>

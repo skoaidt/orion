@@ -10,6 +10,7 @@ import {
   registerDepartmentVerify,
   registerAIVerify,
   registerIdeaPilot,
+  getTeam,
 } from "../controllers/idea.js";
 
 import {
@@ -31,6 +32,7 @@ router.post("/devreview", registerIdeaDevReview);
 router.get("/verify/:id", getIdeaVerifyById);
 router.get("/developers", getIdeaDevelopers);
 router.get("/debug-mssql", debugMssqlConnection);
+router.get("/teams", getTeam);
 router.get("/", getIdeas);
 router.get("/:id", getIdeaById);
 
