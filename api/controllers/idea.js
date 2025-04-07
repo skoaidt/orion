@@ -157,7 +157,8 @@ export const registerIdea = (req, res) => {
 
 // 아이디어 목록 가져오기
 export const getIdeas = (req, res) => {
-  const q = `SELECT * FROM special.ITAsset_ideas ORDER BY created_at DESC`;
+  // 삭제되지 않은 아이디어만 가져오도록 쿼리 수정
+  const q = `SELECT * FROM special.ITAsset_ideas WHERE status != '삭제' OR status IS NULL ORDER BY created_at DESC`;
 
   db.query(q, (err, data) => {
     if (err) {
@@ -183,6 +184,13 @@ export const getIdeaById = (req, res) => {
       return res
         .status(404)
         .json({ message: "해당 아이디어를 찾을 수 없습니다." });
+    }
+
+    // 삭제된 아이디어인 경우 접근 차단
+    if (data[0].status === "삭제") {
+      return res
+        .status(410) // Gone - 리소스가 더 이상 사용 불가능함
+        .json({ message: "삭제된 아이디어입니다." });
     }
 
     return res.status(200).json(data[0]);
@@ -874,5 +882,314 @@ export const getTeam = (req, res) => {
     });
 
     return res.status(200).json(teamsByHeadqt);
+  });
+};
+
+// 아이디어 수정하기
+export const updateIdea = (req, res) => {
+  console.log("아이디어 수정 요청 데이터:", req.body);
+  const ideaId = req.params.id;
+
+  if (!ideaId) {
+    return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
+  }
+
+  // 필드 이름 한글 매핑 (사용자에게 더 이해하기 쉬운 이름으로 표시)
+  const fieldNameMap = {
+    title: "제목",
+    background: "추진 배경",
+    progress: "추진 내역",
+    quantitative_effect: "정량적 효과",
+    qualitative_effect: "정성적 효과",
+    project_type: "과제 유형",
+    target_user: "사용 대상",
+    business_field: "사업분야",
+    job_field: "업무분야",
+    usability: "활용도",
+    duplication: "중복여부",
+    tboh_status: "TBOH 여부",
+    use_period: "활용기간",
+    use_scope: "사용범위",
+    platform: "플랫폼",
+    usability_points: "유용성",
+    improvement_points: "개선내역",
+    VerifyDepartment: "검증 부서",
+  };
+
+  const {
+    title,
+    background,
+    progress,
+    quantitative_effect,
+    qualitative_effect,
+    project_type,
+    target_user,
+    business_field,
+    job_field,
+    usability,
+    duplication,
+    tboh_status,
+    use_period,
+    use_scope,
+    platform,
+    usability_points,
+    improvement_points,
+    user_id,
+    name,
+    prnt_dept_name,
+    dept_name,
+    VerifyDepartment,
+  } = req.body;
+
+  // 모든 필드가 입력되었는지 확인
+  const requiredFields = [
+    "title",
+    "background",
+    "progress",
+    "quantitative_effect",
+    "qualitative_effect",
+    "project_type",
+    "target_user",
+    "business_field",
+    "job_field",
+    "usability",
+    "duplication",
+    "tboh_status",
+    "use_period",
+    "use_scope",
+    "platform",
+    "usability_points",
+    "improvement_points",
+    "VerifyDepartment",
+  ];
+
+  // 누락된 필드 검사 및 빈 문자열 체크
+  const missingFields = requiredFields.filter((field) => {
+    const value = req.body[field];
+    // undefined, null, 빈 문자열 또는 HTML 태그만 있는 경우("<p></p>" 등) 체크
+    return (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      (typeof value === "string" && value.replace(/<[^>]*>/g, "").trim() === "")
+    );
+  });
+
+  if (missingFields.length > 0) {
+    // 한글 필드명으로 변환하여 응답
+    const missingFieldsKorean = missingFields.map(
+      (field) => fieldNameMap[field] || field
+    );
+
+    console.log(`누락된 필드 발견: ${missingFieldsKorean.join(", ")}`);
+
+    return res.status(400).json({
+      error: "모든 필드를 입력해주세요",
+      missingFields: missingFieldsKorean,
+    });
+  }
+
+  const q = `
+    UPDATE special.ITAsset_ideas SET
+      title = ?, 
+      background = ?, 
+      progress = ?, 
+      quantitative_effect = ?, 
+      qualitative_effect = ?,
+      project_type = ?, 
+      target_user = ?, 
+      business_field = ?, 
+      job_field = ?, 
+      usability = ?, 
+      duplication = ?, 
+      tboh_status = ?, 
+      use_period = ?, 
+      use_scope = ?, 
+      platform = ?, 
+      usability_points = ?, 
+      improvement_points = ?,
+      VerifyDepartment = ?,
+      updated_at = NOW()
+    WHERE id = ?
+  `;
+
+  const values = [
+    title,
+    background,
+    progress,
+    quantitative_effect,
+    qualitative_effect,
+    project_type,
+    target_user,
+    business_field,
+    job_field,
+    usability,
+    duplication,
+    tboh_status,
+    use_period,
+    use_scope,
+    platform,
+    usability_points,
+    improvement_points,
+    VerifyDepartment || "",
+    ideaId,
+  ];
+
+  db.query(q, values, (err, data) => {
+    if (err) {
+      console.error("아이디어 수정 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    if (data.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ error: "해당 아이디어를 찾을 수 없습니다." });
+    }
+
+    return res.status(200).json({
+      message: "아이디어가 성공적으로 수정되었습니다.",
+      ideaId: ideaId,
+    });
+  });
+};
+
+// 아이디어 삭제하기 (실제 삭제하지 않고 상태만 변경)
+export const deleteIdea = (req, res) => {
+  console.log("아이디어 삭제 요청:", req.params);
+  const ideaId = req.params.id;
+
+  if (!ideaId) {
+    return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
+  }
+
+  // 상태를 '삭제'로 변경하는 쿼리
+  const q = `
+    UPDATE special.ITAsset_ideas 
+    SET status = '삭제', updated_at = NOW() 
+    WHERE id = ?
+  `;
+
+  db.query(q, [ideaId], (err, data) => {
+    if (err) {
+      console.error("아이디어 삭제 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    if (data.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ error: "해당 아이디어를 찾을 수 없습니다." });
+    }
+
+    return res.status(200).json({
+      message: "아이디어가 성공적으로 삭제되었습니다.",
+      ideaId: ideaId,
+    });
+  });
+};
+
+// 댓글 등록 기능
+export const addComment = (req, res) => {
+  console.log("댓글 등록 요청 데이터:", req.body);
+
+  const { idea_id, n_id, name, team, comment } = req.body;
+
+  // 필수 필드 검증
+  if (!idea_id || !n_id || !name || !team || !comment) {
+    return res.status(400).json({
+      error: "모든 필드를 입력해주세요",
+      missingFields: !idea_id
+        ? "아이디어 ID"
+        : !n_id
+        ? "사용자 ID"
+        : !name
+        ? "이름"
+        : !team
+        ? "팀"
+        : "댓글 내용",
+    });
+  }
+
+  // 현재 날짜 설정 (로컬 시간 기준으로 정확한 날짜 반환)
+  const now = new Date();
+  const currentDate = `${now.getFullYear()}-${String(
+    now.getMonth() + 1
+  ).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+  const query = `
+    INSERT INTO special.ITAsset_ideaComment (
+      idea_id, n_id, name, team, comment, date
+    ) VALUES (?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [idea_id, n_id, name, team, comment, currentDate];
+
+  db.query(query, values, (err, data) => {
+    if (err) {
+      console.error("댓글 등록 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    return res.status(200).json({
+      message: "댓글이 성공적으로 등록되었습니다.",
+      comment_id: data.insertId,
+      idea_id: idea_id,
+      name: name,
+      team: team,
+      comment: comment,
+      date: currentDate,
+    });
+  });
+};
+
+// 댓글 목록 조회 기능
+export const getComments = (req, res) => {
+  const ideaId = req.params.ideaId;
+
+  if (!ideaId) {
+    return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
+  }
+
+  const query = `
+    SELECT * FROM special.ITAsset_ideaComment 
+    WHERE idea_id = ? 
+    ORDER BY date DESC, comment_id DESC
+  `;
+
+  db.query(query, [ideaId], (err, data) => {
+    if (err) {
+      console.error("댓글 조회 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    return res.status(200).json(data);
+  });
+};
+
+// 댓글 삭제 기능
+export const deleteComment = (req, res) => {
+  const commentId = req.params.commentId;
+
+  if (!commentId) {
+    return res.status(400).json({ error: "댓글 ID가 필요합니다." });
+  }
+
+  const query = `DELETE FROM special.ITAsset_ideaComment WHERE comment_id = ?`;
+
+  db.query(query, [commentId], (err, data) => {
+    if (err) {
+      console.error("댓글 삭제 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    if (data.affectedRows === 0) {
+      return res.status(404).json({ error: "해당 댓글을 찾을 수 없습니다." });
+    }
+
+    return res.status(200).json({
+      message: "댓글이 성공적으로 삭제되었습니다.",
+      commentId: commentId,
+    });
   });
 };

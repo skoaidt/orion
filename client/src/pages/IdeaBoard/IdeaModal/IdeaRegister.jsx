@@ -15,8 +15,14 @@ import { AuthContext } from "../../../context/authContext";
 import { useSelect, SelectProvider } from "@mui/base/useSelect";
 import { useOption } from "@mui/base/useOption";
 
-const IdeaRegister = ({ onClose }) => {
+const IdeaRegister = ({
+  onClose,
+  editMode = false,
+  ideaData = null,
+  onUpdate,
+}) => {
   const { currentUser } = useContext(AuthContext);
+  const [title, setTitle] = useState("");
   // 각 Select 컴포넌트별로 독립적인 상태 생성
   const [businessField, setBusinessField] = React.useState("");
   const [jobField, setJobField] = React.useState("");
@@ -27,6 +33,8 @@ const IdeaRegister = ({ onClose }) => {
   const [usePeriod, setUsePeriod] = React.useState("");
   const [useScope, setUseScope] = React.useState("");
   const [platform, setPlatform] = React.useState("");
+  const [projectType, setProjectType] = useState("");
+  const [targetUser, setTargetUser] = useState("");
 
   // 각 에디터별 개별 상태값 생성
   const [background, setBackground] = useState("");
@@ -42,6 +50,47 @@ const IdeaRegister = ({ onClose }) => {
   const progressRef = useRef(null);
   const quantitativeEffectRef = useRef(null);
   const qualitativeEffectRef = useRef(null);
+
+  // 수정 모드일 때 기존 데이터 불러오기
+  useEffect(() => {
+    if (editMode && ideaData) {
+      // 기본 정보 설정
+      setTitle(ideaData.title || "");
+      setBusinessField(ideaData.business_field || "");
+      setJobField(ideaData.job_field || "");
+      setUsability(ideaData.usability || "");
+      setDuplication(ideaData.duplication || "");
+      setTbohStatus(ideaData.tboh_status || "");
+      setUsePeriod(ideaData.use_period || "");
+      setUseScope(ideaData.use_scope || "");
+      setPlatform(ideaData.platform || "");
+      setProjectType(ideaData.project_type || "");
+      setTargetUser(ideaData.target_user || "");
+
+      // 에디터 내용 설정
+      setBackground(ideaData.background || "");
+      setProgress(ideaData.progress || "");
+      setQuantitativeEffect(ideaData.quantitative_effect || "");
+      setQualitativeEffect(ideaData.qualitative_effect || "");
+
+      // 개선항목 및 유용성 설정
+      if (ideaData.usability_points) {
+        setPersonName(
+          typeof ideaData.usability_points === "string"
+            ? ideaData.usability_points.split(",")
+            : ideaData.usability_points
+        );
+      }
+
+      // 검증 부서 설정
+      if (ideaData.VerifyDepartment) {
+        setVerifyDepartment({
+          team: ideaData.VerifyDepartment,
+          fullPath: ideaData.VerifyDepartment,
+        });
+      }
+    }
+  }, [editMode, ideaData]);
 
   const handleBusinessFieldChange = (event) => {
     setBusinessField(event.target.value);
@@ -276,7 +325,7 @@ const IdeaRegister = ({ onClose }) => {
     }
   };
 
-  // 등록 버튼 핸들러
+  // 등록/수정 버튼 핸들러
   const handleSubmit = async () => {
     try {
       // 검증 부서가 선택되었는지 확인
@@ -286,20 +335,24 @@ const IdeaRegister = ({ onClose }) => {
       }
 
       // 각 입력 필드의 값을 수집
-      const ideaData = {
-        title: document.querySelector(".titleInput").value,
+      const formData = {
+        title: title || document.querySelector(".titleInput").value,
         background,
         progress,
         quantitative_effect: quantitativeEffect,
         qualitative_effect: qualitativeEffect,
         project_type:
+          projectType ||
           document.querySelector(
             'input[name="row-radio-buttons-group"]:checked'
-          )?.value || "",
+          )?.value ||
+          "",
         target_user:
+          targetUser ||
           document.querySelector(
             'input[name="row-radio-buttons-group2"]:checked'
-          )?.value || "",
+          )?.value ||
+          "",
         business_field: businessField,
         job_field: jobField,
         usability: usability,
@@ -319,18 +372,38 @@ const IdeaRegister = ({ onClose }) => {
         VerifyDepartment: verifyDepartment ? verifyDepartment.team : "",
       };
 
-      console.log("등록할 아이디어 데이터:", ideaData);
+      console.log(`${editMode ? "수정" : "등록"}할 아이디어 데이터:`, formData);
 
-      // API 호출하여 데이터베이스에 저장
-      const response = await axios.post("/api/ideas/register", ideaData);
+      let response;
 
-      console.log("아이디어 등록 성공:", response.data);
-      alert("아이디어가 성공적으로 등록되었습니다.");
+      if (editMode) {
+        // 수정 모드: PUT 요청으로 업데이트
+        response = await axios.put(`/api/ideas/${ideaData.id}`, formData);
+        console.log("아이디어 수정 성공:", response.data);
 
-      // 등록 후 모달 닫기
+        // 데이터 업데이트 콜백 호출 (제공된 경우)
+        if (typeof onUpdate === "function") {
+          await onUpdate();
+        }
+
+        alert("아이디어가 성공적으로 수정되었습니다.");
+      } else {
+        // 등록 모드: POST 요청으로 새로 등록
+        response = await axios.post("/api/ideas/register", formData);
+        console.log("아이디어 등록 성공:", response.data);
+
+        // 데이터 업데이트 콜백 호출 (제공된 경우)
+        if (typeof onUpdate === "function") {
+          await onUpdate();
+        }
+
+        alert("아이디어가 성공적으로 등록되었습니다.");
+      }
+
+      // 모달 닫기
       onClose();
     } catch (error) {
-      console.error("아이디어 등록 오류:", error);
+      console.error(`아이디어 ${editMode ? "수정" : "등록"} 오류:`, error);
 
       // 서버에서 반환된 오류 메시지 표시 - 개선된 오류 처리
       if (error.response) {
@@ -545,7 +618,7 @@ const IdeaRegister = ({ onClose }) => {
     <div className="modalOverlay">
       <div className="modalContent">
         <div className="titleBox">
-          <h2>IDEA 등록</h2>
+          <h2>{editMode ? "IDEA 수정" : "IDEA 등록"}</h2>
           <CloseIcon className="closeIcon" onClick={onClose} />
         </div>
         <hr className="titleUnderline" />
@@ -561,6 +634,8 @@ const IdeaRegister = ({ onClose }) => {
                   className="titleInput"
                   placeholder="제목을 입력하세요"
                   style={{ width: "99%" }}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
             </div>
@@ -649,7 +724,12 @@ const IdeaRegister = ({ onClose }) => {
             <div className="projectCategory">
               <span className="fieldLabel">개발 유형</span>
               <FormControl>
-                <RadioGroup row name="row-radio-buttons-group">
+                <RadioGroup
+                  row
+                  name="row-radio-buttons-group"
+                  value={projectType}
+                  onChange={(e) => setProjectType(e.target.value)}
+                >
                   <FormControlLabel
                     value="신규개발"
                     control={<Radio />}
@@ -667,7 +747,12 @@ const IdeaRegister = ({ onClose }) => {
             <div className="projectCategory">
               <span className="fieldLabel">사용 대상</span>
               <FormControl>
-                <RadioGroup row name="row-radio-buttons-group2">
+                <RadioGroup
+                  row
+                  name="row-radio-buttons-group2"
+                  value={targetUser}
+                  onChange={(e) => setTargetUser(e.target.value)}
+                >
                   <FormControlLabel
                     value="전사"
                     control={<Radio />}
@@ -961,7 +1046,7 @@ const IdeaRegister = ({ onClose }) => {
             취소
           </button>
           <button className="registerButton" onClick={handleSubmit}>
-            등록
+            {editMode ? "수정" : "등록"}
           </button>
         </div>
       </div>
