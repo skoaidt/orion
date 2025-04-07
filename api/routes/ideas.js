@@ -10,6 +10,15 @@ import {
   registerDepartmentVerify,
   registerAIVerify,
   registerIdeaPilot,
+  getTeam,
+  updateIdea,
+  deleteIdea,
+  addComment,
+  getComments,
+  deleteComment,
+  logIdeaView,
+  getIdeaViewCount,
+  getAllIdeaViewCounts,
 } from "../controllers/idea.js";
 
 import {
@@ -21,6 +30,8 @@ import {
 const router = express.Router();
 
 router.post("/register", registerIdea);
+router.put("/:id", updateIdea);
+router.delete("/:id", deleteIdea);
 router.post("/selection/:ideaId", registerSelectedIdea);
 router.get("/selection/:ideaId", getSelectedIdea);
 router.post("/verify", registerIdeaVerify);
@@ -31,6 +42,20 @@ router.post("/devreview", registerIdeaDevReview);
 router.get("/verify/:id", getIdeaVerifyById);
 router.get("/developers", getIdeaDevelopers);
 router.get("/debug-mssql", debugMssqlConnection);
+router.get("/teams", getTeam);
+
+// 댓글 관련 라우트 추가
+router.post("/comments", addComment);
+router.get("/comments/:ideaId", getComments);
+router.delete("/comments/:commentId", deleteComment);
+
+// 조회 로그 관련 라우트 추가
+router.post("/log-view", logIdeaView);
+
+// 조회수 관련 라우트 추가
+router.get("/viewcount/:ideaId", getIdeaViewCount);
+router.get("/viewcounts", getAllIdeaViewCounts);
+
 router.get("/", getIdeas);
 router.get("/:id", getIdeaById);
 
