@@ -87,6 +87,15 @@ const IdeaTable = () => {
         setLoading(true);
         const response = await axios.get("/api/ideas");
 
+        // 전체 조회수 정보 가져오기
+        const viewCountsResponse = await axios.get("/api/ideas/viewcounts");
+
+        // 조회수 정보를 아이디어 ID로 맵핑
+        const viewCountsMap = {};
+        viewCountsResponse.data.forEach((item) => {
+          viewCountsMap[item.idea_id] = item.viewcount;
+        });
+
         // 백엔드 데이터를 프론트엔드 형식으로 변환
         const formattedData = response.data.map((idea, index) => ({
           id: idea.id, // 원래 DB의 id (내부 처리용)
@@ -101,8 +110,8 @@ const IdeaTable = () => {
           team: idea.dept_name || "",
           name: idea.name || "",
           reg_date: formatDate(idea.created_at),
-          views: 0, // 기본값 설정 (백엔드에서 제공하지 않음)
-          likes: 0, // 기본값 설정 (백엔드에서 제공하지 않음)
+          views: viewCountsMap[idea.id] || 0, // 실제 조회수 데이터 사용
+          likes: idea.likes || 0, // 기본값 설정 (백엔드에서 제공하지 않음)
           Dday: "D-0", // 기본값 설정 (백엔드에서 제공하지 않음)
         }));
 

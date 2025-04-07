@@ -53,6 +53,7 @@ const IdeaDesc = () => {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [loadingComments, setLoadingComments] = useState(false);
+  const [viewCount, setViewCount] = useState(0);
 
   // 아이디어 데이터 가져오기 함수 - 외부에서도 호출할 수 있도록 수정
   const fetchIdeaData = async () => {
@@ -64,6 +65,43 @@ const IdeaDesc = () => {
       console.error("아이디어 상세 정보 가져오기 오류:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 조회 로그 기록 함수 추가
+  const logIdeaView = async () => {
+    if (!currentUser) return; // 로그인하지 않은 사용자는 기록하지 않음
+
+    try {
+      // 동일 아이디어에 대한 중복 조회 로그 방지 (1분 제한)
+      const viewLogKey = `viewed_idea_${id}_${currentUser.userId}`;
+      const lastViewTime = sessionStorage.getItem(viewLogKey);
+
+      if (lastViewTime) {
+        const now = new Date().getTime();
+        const lastTime = parseInt(lastViewTime);
+        const ONE_MINUTE = 60 * 1000; // 1분(밀리초)
+
+        // 마지막 조회 시간이 1분 이내인 경우 로그 기록 중단
+        if (now - lastTime < ONE_MINUTE) {
+          console.log("1분 이내 중복 조회 - 로그 기록 건너뜀");
+          return;
+        }
+      }
+
+      // 현재 정확한 시간을 사용하기 위해 클라이언트에서 직접 시간 정보를 보내지 않음
+      await axios.post("/api/ideas/log-view", {
+        idea_id: id,
+        n_id: currentUser.userId || "unknown",
+        name: currentUser.name || "사용자",
+        team: currentUser.deptName || "팀 정보 없음",
+      });
+
+      // 현재 시간을 세션 스토리지에 기록
+      sessionStorage.setItem(viewLogKey, new Date().getTime().toString());
+    } catch (error) {
+      console.error("조회 로그 기록 오류:", error);
+      // 로그 기록 실패해도 사용자 경험에 영향을 주지 않도록 조용히 처리
     }
   };
 
@@ -125,13 +163,33 @@ const IdeaDesc = () => {
     }
   };
 
+  // 조회수 가져오기 함수 추가
+  const fetchViewCount = async () => {
+    try {
+      const response = await axios.get(`/api/ideas/viewcount/${id}`);
+      setViewCount(response.data.viewcount);
+    } catch (error) {
+      console.error("조회수 가져오기 오류:", error);
+      // 오류 발생시 기존 조회수 유지
+    }
+  };
+
   // 컴포넌트 마운트 및 id 변경 시 데이터 로드
   useEffect(() => {
     if (id) {
       fetchIdeaData();
       fetchComments(); // 댓글도 함께 로드
+      fetchViewCount(); // 조회수도 함께 로드
     }
   }, [id]);
+
+  // 로그 기록은 별도 useEffect로 분리하여 한 번만 실행되도록 함
+  useEffect(() => {
+    if (id && currentUser) {
+      // 컴포넌트가 마운트된 후에만 로그 기록
+      logIdeaView();
+    }
+  }, [id, currentUser]); // id와 currentUser가 변경될 때만 실행
 
   // 날짜 포맷 함수
   const formatDate = (dateString) => {
@@ -296,7 +354,7 @@ const IdeaDesc = () => {
           <div className="Box">
             <StreetviewIcon style={{ fontSize: "16px" }} />
             <div className="hits">조회수</div>
-            <div className="hitsCount">{ideaData.views || 0}</div>
+            <div className="hitsCount">{viewCount}</div>
           </div>
           <div className="Box">
             <ChatIcon style={{ fontSize: "16px" }} />

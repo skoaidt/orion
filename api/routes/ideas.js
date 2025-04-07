@@ -16,6 +16,9 @@ import {
   addComment,
   getComments,
   deleteComment,
+  logIdeaView,
+  getIdeaViewCount,
+  getAllIdeaViewCounts,
 } from "../controllers/idea.js";
 
 import {
@@ -45,6 +48,13 @@ router.get("/teams", getTeam);
 router.post("/comments", addComment);
 router.get("/comments/:ideaId", getComments);
 router.delete("/comments/:commentId", deleteComment);
+
+// 조회 로그 관련 라우트 추가
+router.post("/log-view", logIdeaView);
+
+// 조회수 관련 라우트 추가
+router.get("/viewcount/:ideaId", getIdeaViewCount);
+router.get("/viewcounts", getAllIdeaViewCounts);
 
 router.get("/", getIdeas);
 router.get("/:id", getIdeaById);

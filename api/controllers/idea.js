@@ -169,6 +169,52 @@ export const getIdeas = (req, res) => {
   });
 };
 
+// 아이디어 조회 로그 기록하기
+export const logIdeaView = (req, res) => {
+  const { idea_id, n_id, name, team } = req.body;
+
+  // 필수 필드 검증
+  if (!idea_id || !n_id || !name || !team) {
+    return res.status(400).json({
+      error: "모든 필드를 입력해주세요",
+      missingFields: !idea_id
+        ? "아이디어 ID"
+        : !n_id
+        ? "사용자 ID"
+        : !name
+        ? "이름"
+        : "팀",
+    });
+  }
+
+  // 현재 날짜 및 시간 (KST 기준으로 설정)
+  const now = new Date();
+  // UTC 시간에 9시간(KST)을 더해 서버의 현지 시간으로 설정
+  now.setHours(now.getHours() + 9);
+  const datetime = now.toISOString().slice(0, 19).replace("T", " "); // YYYY-MM-DD HH:MM:SS 형식
+
+  // 중복 체크 없이 항상 로그 기록 진행
+  const insertQuery = `
+    INSERT INTO special.ITAsset_ideaviewLogs (
+      idea_id, n_id, name, team, datetime
+    ) VALUES (?, ?, ?, ?, ?)
+  `;
+
+  const values = [idea_id, n_id, name, team, datetime];
+
+  db.query(insertQuery, values, (err, data) => {
+    if (err) {
+      console.error("아이디어 조회 로그 기록 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    return res.status(200).json({
+      message: "아이디어 조회 로그가 성공적으로 기록되었습니다.",
+      log_id: data.insertId,
+    });
+  });
+};
+
 // 아이디어 상세 정보 가져오기
 export const getIdeaById = (req, res) => {
   const ideaId = req.params.id;
@@ -193,7 +239,31 @@ export const getIdeaById = (req, res) => {
         .json({ message: "삭제된 아이디어입니다." });
     }
 
-    return res.status(200).json(data[0]);
+    // 로그 테이블에서 실제 조회수 가져오기
+    const viewCountQuery = `
+      SELECT COUNT(id) AS viewcount 
+      FROM special.ITAsset_ideaviewLogs 
+      WHERE idea_id = ?
+    `;
+
+    db.query(viewCountQuery, [ideaId], (viewErr, viewData) => {
+      if (viewErr) {
+        console.error("조회수 조회 오류:", viewErr);
+        // 조회수 조회 실패해도 기본 데이터는 반환
+        return res.status(200).json(data[0]);
+      }
+
+      const viewCount = viewData[0]?.viewcount || 0;
+
+      // 로그 테이블의 실제 조회수를 데이터에 포함시킴
+      const ideaData = {
+        ...data[0],
+        views: viewCount,
+      };
+
+      // 실제 조회수를 포함한 데이터 반환
+      return res.status(200).json(ideaData);
+    });
   });
 };
 
@@ -1191,5 +1261,51 @@ export const deleteComment = (req, res) => {
       message: "댓글이 성공적으로 삭제되었습니다.",
       commentId: commentId,
     });
+  });
+};
+
+// 아이디어 조회수 가져오기
+export const getIdeaViewCount = (req, res) => {
+  const ideaId = req.params.ideaId;
+
+  if (!ideaId) {
+    return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
+  }
+
+  // 특정 아이디어의 조회수를 로그 테이블에서 계산하는 쿼리
+  const query = `
+    SELECT COUNT(id) AS viewcount 
+    FROM special.ITAsset_ideaviewLogs 
+    WHERE idea_id = ?
+  `;
+
+  db.query(query, [ideaId], (err, data) => {
+    if (err) {
+      console.error("조회수 조회 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    return res.status(200).json({
+      viewcount: data[0]?.viewcount || 0,
+    });
+  });
+};
+
+// 전체 아이디어 조회수 목록 가져오기
+export const getAllIdeaViewCounts = (req, res) => {
+  // 모든 아이디어의 조회수를 로그 테이블에서 계산하는 쿼리
+  const query = `
+    SELECT idea_id, COUNT(id) AS viewcount 
+    FROM special.ITAsset_ideaviewLogs 
+    GROUP BY idea_id
+  `;
+
+  db.query(query, (err, data) => {
+    if (err) {
+      console.error("전체 조회수 조회 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    return res.status(200).json(data);
   });
 };
