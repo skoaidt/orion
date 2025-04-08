@@ -16,9 +16,7 @@ import Admin from "./Admin";
 import { AuthContext } from "../context/authContext";
 import IdeaBorad from "./IdeaBoard/IdeaBorad";
 import SolMgmt from "./SolMgmt/SolMgmt";
-import DashBoard from "./DashBoard/DashBoard";
 import Portfolio from "./Portfolio/Portfolio";
-// import Typing from "./Typing/Typing";
 import TypingMain from "./Typing/TypingMain/TypingMain";
 import TypingHome from "./Typing/TypingHome/TypingHome";
 
@@ -31,6 +29,7 @@ export const Main = () => {
   const isPortfolioPage = location.pathname.startsWith("/portfolio");
   const isTypingPage = location.pathname.startsWith("/typing");
   const isIdeaBoardPage = location.pathname.startsWith("/ideaboard");
+  const isDashboardPage = location.pathname.startsWith("/dashboard");
 
   ////////////////////////
   // 개발자 목록 가져오기
@@ -64,9 +63,10 @@ export const Main = () => {
   return (
     <>
       <div className="main">
-        {!isPortfolioPage && !isTypingPage && !isIdeaBoardPage && (
-          <MainNavBar />
-        )}
+        {!isPortfolioPage &&
+          !isTypingPage &&
+          !isIdeaBoardPage &&
+          !isDashboardPage && <MainNavBar />}
         <Routes>
           <Route path="/typingMain" element={<TypingMain />}></Route>
           <Route path="/typingHome" element={<TypingHome />}></Route>
@@ -90,14 +90,18 @@ export const Main = () => {
           <Route path="/ideaboard" element={<IdeaBorad />} />
           <Route path="/ideaboard/detail/:id" element={<IdeaBorad />} />
           <Route path="/ideaboard/gantt/:id" element={<IdeaBorad />} />
+          <Route path="/dashboard" element={<IdeaBorad />} />
           <Route path="/solmgmt" element={<SolMgmt />} />
-          <Route path="/dashboard" element={<DashBoard />} />
         </Routes>
         {!isPortfolioPage && <ScrollToTop />}
       </div>
-      {!(isAdminPage || isPortfolioPage || isTypingPage || isIdeaBoardPage) && (
-        <Footer />
-      )}
+      {!(
+        isAdminPage ||
+        isPortfolioPage ||
+        isTypingPage ||
+        isIdeaBoardPage ||
+        isDashboardPage
+      ) && <Footer />}
     </>
   );
 };

@@ -279,6 +279,7 @@
       display: flex;
       flex-direction: column;
       margin-left: 10px;
+      color: #565656;
 
       .selectedDepartmentInfo {
         margin-top: 10px;
@@ -290,6 +291,169 @@
           margin: 0;
           font-size: 12px;
           color: #2e7d32;
+        }
+      }
+
+      // 부서 선택 관련 스타일 추가
+      .selectorsRow {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 10px;
+      }
+
+      // 선택 컨테이너
+      .selectContainer {
+        margin-bottom: 10px;
+        color: #565656;
+      }
+
+      // 부서 선택 버튼
+      .department-select-button {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 10px 12px;
+        width: 100%;
+        text-align: left;
+        background-color: #fff;
+        font-size: 14px;
+        cursor: pointer;
+        color: #565656;
+
+        &:hover {
+          border-color: #777;
+        }
+
+        &:focus {
+          outline: none;
+          border-color: #2e7d32;
+          box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+        }
+
+        &:disabled {
+          background-color: #f5f5f5;
+          cursor: not-allowed;
+          color: #888;
+        }
+
+        &.disabled {
+          background-color: #f5f5f5;
+          cursor: not-allowed;
+          color: #888;
+        }
+      }
+
+      // 검색 컨테이너 및 입력 필드
+      .department-search-container {
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .department-search-input {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        color: #565656;
+        box-sizing: border-box;
+
+        &:focus {
+          outline: none;
+          border-color: #2e7d32;
+          box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
+        }
+      }
+
+      // 선택 옵션
+      .department-select-option {
+        list-style: none;
+        padding: 8px 12px;
+        cursor: pointer;
+        color: #565656;
+        border-radius: 0;
+        transition: background-color 0.15s ease;
+
+        &:hover {
+          background-color: #f5f5f5;
+        }
+
+        &.selected {
+          background-color: #e8f5e9;
+          color: #2e7d32;
+          font-weight: 500;
+
+          &:hover {
+            background-color: #dcedc8;
+          }
+        }
+      }
+
+      // 검색 결과 없음 메시지
+      .department-select-no-results {
+        list-style: none;
+        padding: 12px;
+        color: #888;
+        text-align: center;
+        font-style: italic;
+        font-size: 13px;
+      }
+
+      // 팝업 컨테이너
+      .department-select-popup {
+        z-index: 1500; // 더 높은 z-index로 수정
+        position: absolute;
+        top: calc(100% + 4px); // 버튼과 간격 조정
+        left: 0;
+        right: 0;
+        margin-top: 0;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        overflow: visible; // 오버플로우 설정 변경
+        color: #565656;
+        max-height: 300px; // 최대 높이 설정
+        display: block; // 명시적으로 블록으로 표시
+      }
+
+      // 부서 선택 필드
+      .department-select {
+        min-width: 160px;
+        position: relative;
+        width: 100%;
+        margin-bottom: 5px;
+      }
+
+      // 드롭다운 메뉴
+      .department-select-listbox {
+        margin: 0;
+        padding: 0;
+        border-radius: 0 0 4px 4px;
+        background-color: #fff;
+        max-height: 230px; // 팝업 내 스크롤 공간 확보
+        overflow-y: auto;
+        color: #565656;
+        box-shadow: none;
+        position: relative; // 상대적 위치 설정
+        z-index: 10; // 지정된 z-index
+
+        &::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
+        }
+
+        &::-webkit-scrollbar-track {
+          background: #f9f9f9;
+        }
+
+        &::-webkit-scrollbar-thumb {
+          background: #ddd;
+          border-radius: 3px;
+        }
+
+        &::-webkit-scrollbar-thumb:hover {
+          background: #ccc;
         }
       }
     }
