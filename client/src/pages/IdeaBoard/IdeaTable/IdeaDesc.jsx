@@ -453,7 +453,7 @@ const IdeaDesc = () => {
   };
 
   // 간트 차트 페이지로 이동
-  const handleGanttNavigate = () => {
+  const handleKanbanNavigate = () => {
     // 진행 가능 여부 확인
     if (!canProceedToStage("ideaDeveloping")) {
       if (ideaData.status === STAGES.DROP) {
@@ -468,7 +468,7 @@ const IdeaDesc = () => {
       return;
     }
 
-    navigate(`/ideaboard/gantt/${id}`);
+    navigate(`/ideaboard/kanban/${id}`);
   };
 
   const handleEditClick = () => {
@@ -981,7 +981,7 @@ const IdeaDesc = () => {
           </div>
         </div>
         <div className="processBox">
-          <div className="processItem" onClick={handleGanttNavigate}>
+          <div className="processItem" onClick={handleKanbanNavigate}>
             <div className={`processItemTitle ${getStageClass("developing")}`}>
               개발중
             </div>
