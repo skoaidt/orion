@@ -16,6 +16,7 @@ import {
 import {
   getIdeaDevelopers,
   registerIdeaDevReview,
+  getIdeaDevReviewById,
   debugMssqlConnection,
 } from "../controllers/ideaDevelopers.js";
 
@@ -28,6 +29,7 @@ router.post("/verify/department", registerDepartmentVerify);
 router.post("/verify/ai", registerAIVerify);
 router.post("/pilot/:idea_id", registerIdeaPilot);
 router.post("/devreview", registerIdeaDevReview);
+router.get("/devreview/:idea_id", getIdeaDevReviewById);
 router.get("/pilot/:id", getPilotDataById);
 router.get("/selection/:idea_id", getSelectedIdea);
 router.get("/verify/:id", getIdeaVerifyById);
