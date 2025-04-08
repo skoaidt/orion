@@ -31,7 +31,7 @@ const STAGES = {
   INITIAL: "", // 초기 상태
   REGISTER: "등록", // 등록 완료
   SELECTION: "선정", // 선정 완료
-  PILOT: "piloted", // 파일럿 완료
+  PILOT: "pilot", // 파일럿 완료
   VERIFY: "verified", // 검증 완료
   DEV_REVIEW: "devReviewed", // 개발자 검토 완료
   DEVELOPING: "developing", // 개발 진행 중
@@ -43,7 +43,7 @@ const STAGES = {
 const STAGE_ORDER = {
   등록: 0,
   선정: 1,
-  piloted: 2,
+  pilot: 2,
   verified: 3,
   devReviewed: 4,
   developing: 5,
@@ -253,8 +253,9 @@ const IdeaDesc = () => {
 
     // 파일럿 상태를 확인하기 위한 정규 표현식 패턴
     const isPilotStatus =
-      ideaData.status === "piloted" ||
+      ideaData.status === "pilot" ||
       ideaData.status === "ideaPilot" ||
+      ideaData.status === "파일럿" ||
       /pilot/i.test(ideaData.status);
 
     console.log("Pilot 상태 체크:", isPilotStatus);
@@ -290,28 +291,36 @@ const IdeaDesc = () => {
           "검증 단계 접근 검사:",
           isPilotStatus ||
             ideaData.status === "verified" ||
+            ideaData.status === "검증" ||
             ideaData.status.includes("verif")
         );
         return (
           isPilotStatus ||
           ideaData.status === "verified" ||
+          ideaData.status === "검증" ||
           ideaData.status.includes("verif")
         );
 
       case "ideaDevReview": // 개발자 검토 단계
-        // 검증 단계를 거친 경우 진행 가능
+        // 검증 단계를 거친 경우 또는 이미 개발심의 상태인 경우 진행 가능
         console.log(
           "개발자 검토 단계 접근 검사:",
           ideaData.status === "verified" ||
+            ideaData.status === "검증" ||
             ideaData.status === "devReviewed" ||
+            ideaData.status === "개발심의" ||
             ideaData.status.includes("verif") ||
-            ideaData.status.includes("review")
+            ideaData.status.includes("review") ||
+            ideaData.status.includes("심의")
         );
         return (
           ideaData.status === "verified" ||
+          ideaData.status === "검증" ||
           ideaData.status === "devReviewed" ||
+          ideaData.status === "개발심의" ||
           ideaData.status.includes("verif") ||
-          ideaData.status.includes("review")
+          ideaData.status.includes("review") ||
+          ideaData.status.includes("심의")
         );
 
       case "ideaDeveloping": // 개발 진행 단계
@@ -366,7 +375,7 @@ const IdeaDesc = () => {
     // STAGES 상수에서 정의한 상태값과 모달 타입 매핑
     const modalToStageMap = {
       ideaSelected: "선정",
-      ideaPiloted: "piloted",
+      ideaPiloted: "pilot",
       ideaVerify: "verified",
       ideaDevReview: "devReviewed",
       ideaDeveloping: "developing",
@@ -389,8 +398,43 @@ const IdeaDesc = () => {
     }
 
     // 특별 처리: Pilot 관련 상태를 일관적으로 관리
-    if (modalType === "ideaPiloted" && /pilot/i.test(ideaData.status)) {
+    if (
+      modalType === "ideaPiloted" &&
+      (ideaData.status === "pilot" ||
+        ideaData.status === "파일럿" ||
+        /pilot/i.test(ideaData.status))
+    ) {
       console.log("Pilot 단계 특별 처리: 이미 Pilot 상태이므로 진행 허용");
+      setOpenModal(modalType);
+      return;
+    }
+
+    // 특별 처리: 검증 단계와 파일럿 상태 관계 확인
+    if (
+      modalType === "ideaVerify" &&
+      (ideaData.status === "pilot" ||
+        ideaData.status === "파일럿" ||
+        /pilot/i.test(ideaData.status) ||
+        ideaData.status === "검증" ||
+        /verif/i.test(ideaData.status))
+    ) {
+      console.log("검증 단계 특별 처리: 파일럿 상태이므로 검증 단계 진행 허용");
+      setOpenModal(modalType);
+      return;
+    }
+
+    // 특별 처리: 개발심의 단계와 검증 상태 관계 확인
+    if (
+      modalType === "ideaDevReview" &&
+      (ideaData.status === "검증" ||
+        ideaData.status === "개발심의" ||
+        /verif/i.test(ideaData.status) ||
+        /review/i.test(ideaData.status) ||
+        ideaData.status.includes("심의"))
+    ) {
+      console.log(
+        "개발심의 단계 특별 처리: 검증 또는 개발심의 상태이므로 개발심의 단계 진행 허용"
+      );
       setOpenModal(modalType);
       return;
     }
@@ -416,19 +460,21 @@ const IdeaDesc = () => {
 
   // 아이디어 상태에 따른 스테이지 인덱스 확인 함수
   const getStageIndex = (status) => {
-    // 직접적인 상태 매핑 확인
+    // 상태에 따른 스테이지 매핑 수정
     const statusStageMap = {
-      null: -1, // 초기 상태
-      "": -1, // 초기 상태
+      null: 0, // 초기 상태
+      "": 0, // 초기 상태
       등록: 0, // 등록 완료
-      선정: 1, // 선정 완료
-      piloted: 2, // Pilot 완료
-      ideaPilot: 2, // 이전 Pilot 상태값 (하위 호환성)
-      verified: 3, // 검증 완료
-      devReviewed: 4, // 개발자 검토 완료
-      developing: 5, // 개발 진행 중
-      completed: 6, // 완료
-      drop: -2, // Drop 상태 (모든 진행 불가)
+      선정: 1,
+      파일럿: 2,
+      검증: 3,
+      개발심의: 4,
+      Drop: -1,
+      // 이전 영문 상태값도 호환성을 위해 유지
+      selected: 1,
+      pilot: 2,
+      verified: 3,
+      devReviewed: 4,
     };
 
     if (statusStageMap[status] !== undefined) {
@@ -455,7 +501,7 @@ const IdeaDesc = () => {
   // 간트 차트 페이지로 이동
   const handleGanttNavigate = () => {
     // 진행 가능 여부 확인
-    if (!canProceedToStage("ideaDeveloping")) {
+    if (!canProceedToStage("developing")) {
       if (ideaData.status === STAGES.DROP) {
         alert(
           "해당 아이디어는 Drop 상태입니다. 다음 단계로 진행할 수 없습니다."
@@ -514,17 +560,19 @@ const IdeaDesc = () => {
 
     // 상태에 따른 진행 단계 매핑
     const statusStageMap = {
-      null: -1, // 초기 상태
-      "": -1, // 초기 상태
+      null: 0, // 초기 상태
+      "": 0, // 초기 상태
       등록: 0, // 등록 완료
-      선정: 1, // 선정 완료
-      piloted: 2, // Pilot 완료
-      ideaPilot: 2, // 이전 Pilot 상태값 (하위 호환성)
-      verified: 3, // 검증 완료
-      devReviewed: 4, // 개발자 검토 완료
-      developing: 5, // 개발 진행 중
-      completed: 6, // 완료
-      drop: -2, // Drop 상태 (모든 진행 불가)
+      선정: 1,
+      파일럿: 2,
+      검증: 3,
+      개발심의: 4,
+      Drop: -1,
+      // 이전 영문 상태값도 호환성을 위해 유지
+      selected: 1,
+      pilot: 2,
+      verified: 3,
+      devReviewed: 4,
     };
 
     // 현재 상태의 단계 인덱스 찾기
@@ -537,9 +585,13 @@ const IdeaDesc = () => {
     // 추가적인 상태 문자열 확인 (부분 일치)
     else if (ideaData.status.includes("선정")) {
       currentStageIndex = 1;
-    } else if (/pilot/i.test(ideaData.status)) {
+    } else if (
+      ideaData.status === "pilot" ||
+      ideaData.status === "파일럿" ||
+      /pilot/i.test(ideaData.status)
+    ) {
       currentStageIndex = 2;
-    } else if (/verif/i.test(ideaData.status)) {
+    } else if (ideaData.status === "검증" || /verif/i.test(ideaData.status)) {
       currentStageIndex = 3;
     } else if (/review/i.test(ideaData.status)) {
       currentStageIndex = 4;
@@ -570,7 +622,9 @@ const IdeaDesc = () => {
       (STAGE_ORDER[stage] !== undefined &&
         STAGE_ORDER[stage] === currentStageIndex) ||
       ideaData.status === stage ||
-      (stage === "piloted" && /pilot/i.test(ideaData.status)) || // Pilot 단계 특별 처리
+      (stage === "pilot" && /pilot/i.test(ideaData.status)) || // Pilot 단계 특별 처리
+      (stage === "verified" &&
+        (ideaData.status === "검증" || /verif/i.test(ideaData.status))) || // 검증 단계 특별 처리
       (ideaData.status && ideaData.status.includes(stage))
     ) {
       console.log(`${stage} 단계는 현재 단계입니다. 'active' 클래스 적용`);
@@ -580,7 +634,7 @@ const IdeaDesc = () => {
     // 현재 상태보다 이후 단계이면서 진행 불가능한 단계
     const stageMap = {
       선정: "ideaSelected",
-      piloted: "ideaPiloted",
+      pilot: "ideaPiloted",
       verified: "ideaVerify",
       devReviewed: "ideaDevReview",
       developing: "ideaDeveloping",
@@ -712,18 +766,18 @@ const IdeaDesc = () => {
         <div className="gap-20"></div>
         <div className="commentsContent">
           {loadingComments ? (
-            <div className="commentItem">
+          <div className="commentItem">
               <div className="commentText">댓글을 불러오는 중입니다...</div>
             </div>
           ) : comments.length > 0 ? (
             comments.map((comment) => (
               <div className="commentItem" key={comment.comment_id}>
-                <div className="commentAuthor">
+            <div className="commentAuthor">
                   <div className="commentAuthorTeam">{comment.team}</div>
                   <div className="commentAuthorNm">{comment.name}</div>
-                </div>
+            </div>
                 <div className="commentText">{comment.comment}</div>
-                <div className="commentDownWrap">
+            <div className="commentDownWrap">
                   <div className="commentDate">
                     {formatCommentDate(comment.date)}
                   </div>
@@ -733,14 +787,14 @@ const IdeaDesc = () => {
                       sx={{ color: "tomato" }}
                       onClick={() => handleDeleteComment(comment.comment_id)}
                     >
-                      삭제
-                    </Button>
+                삭제
+              </Button>
                   )}
-                </div>
-              </div>
+            </div>
+          </div>
             ))
           ) : (
-            <div className="commentItem">
+          <div className="commentItem">
               <div className="commentText">아직 댓글이 없습니다.</div>
             </div>
           )}
@@ -872,7 +926,7 @@ const IdeaDesc = () => {
             className="processItem"
             onClick={() => handleBoxClick("ideaPiloted")}
           >
-            <div className={`processItemTitle ${getStageClass("piloted")}`}>
+            <div className={`processItemTitle ${getStageClass("pilot")}`}>
               Pilot
             </div>
             <div className="lineBox">
@@ -882,7 +936,7 @@ const IdeaDesc = () => {
                 </div>
               </div>
             </div>
-            <div className={`processItemContent ${getStageClass("piloted")}`}>
+            <div className={`processItemContent ${getStageClass("pilot")}`}>
               <div className="itemcontentWrap">
                 <div className="left">
                   <div className="userInfo">
@@ -1086,7 +1140,7 @@ const IdeaDesc = () => {
             onClose={() => setOpenModal(null)}
             ideaId={id}
             ideaData={ideaData}
-            isViewMode={getStageIndex(ideaData.status) > STAGE_ORDER["piloted"]}
+            isViewMode={getStageIndex(ideaData.status) > STAGE_ORDER["pilot"]}
           />
         )}
         {openModal === "ideaVerify" && (

@@ -14,6 +14,7 @@ import axios from "axios";
 const TransferList = ({
   onSelectedDevelopersChange,
   initialSelectedDevelopers = [],
+  isViewMode = false,
 }) => {
   const [leftItems, setLeftItems] = useState([]);
   const [rightItems, setRightItems] = useState([]);
@@ -83,18 +84,21 @@ const TransferList = ({
   }, [rightItems, onSelectedDevelopersChange]);
 
   const moveToRight = () => {
+    if (isViewMode) return; // 조회 모드일 경우 이동 불가
     setRightItems([...rightItems, ...selectedLeft]);
     setLeftItems(leftItems.filter((item) => !selectedLeft.includes(item)));
     setSelectedLeft([]);
   };
 
   const moveToLeft = () => {
+    if (isViewMode) return; // 조회 모드일 경우 이동 불가
     setLeftItems([...leftItems, ...selectedRight]);
     setRightItems(rightItems.filter((item) => !selectedRight.includes(item)));
     setSelectedRight([]);
   };
 
   const toggleSelection = (item, selectedItems, setSelectedItems) => {
+    if (isViewMode) return; // 조회 모드일 경우 선택 불가
     if (selectedItems.includes(item)) {
       setSelectedItems(selectedItems.filter((i) => i !== item));
     } else {
@@ -139,9 +143,11 @@ const TransferList = ({
               <tr
                 key={item.id}
                 onClick={() =>
+                  !isViewMode &&
                   toggleSelection(item, selectedItems, setSelectedItems)
                 }
                 className={selectedItems.includes(item) ? "selected" : ""}
+                style={{ cursor: isViewMode ? "default" : "pointer" }}
               >
                 <td>{item.headqt || "-"}</td>
                 <td>{item.team}</td>
@@ -168,18 +174,20 @@ const TransferList = ({
           src={`${process.env.PUBLIC_URL}/image/icons/right.png`}
           alt="오른쪽 이동"
           className={`moveButton ${
-            selectedLeft.length === 0 ? "disabled" : ""
+            selectedLeft.length === 0 || isViewMode ? "disabled" : ""
           }`}
           onClick={moveToRight}
+          style={{ cursor: isViewMode ? "not-allowed" : "pointer" }}
         />
         {/* 왼쪽으로 이동 버튼 */}
         <img
           src={`${process.env.PUBLIC_URL}/image/icons/left.png`}
           alt="왼쪽 이동"
           className={`moveButton ${
-            selectedRight.length === 0 ? "disabled" : ""
+            selectedRight.length === 0 || isViewMode ? "disabled" : ""
           }`}
           onClick={moveToLeft}
+          style={{ cursor: isViewMode ? "not-allowed" : "pointer" }}
         />
       </div>
 
@@ -211,7 +219,7 @@ const DatePickerComponent = ({ label, value, onChange }) => {
   );
 };
 
-const IdeaDevReview = ({ onClose, ideaId }) => {
+const IdeaDevReview = ({ onClose, ideaId, isViewMode }) => {
   // 상태 변수 정의
   const [selectedDevelopers, setSelectedDevelopers] = useState([]);
   const [startDate, setStartDate] = useState(dayjs()); // 오늘 날짜로 초기화
@@ -242,6 +250,7 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
           // 폼에 데이터 설정
           if (response.data.developers && response.data.developers.length > 0) {
             setInitialSelectedDevelopers(response.data.developers);
+            setSelectedDevelopers(response.data.developers); // 현재 선택된 개발자로도 설정
           }
 
           if (response.data.schedule) {
@@ -411,6 +420,7 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
               <TransferList
                 onSelectedDevelopersChange={setSelectedDevelopers}
                 initialSelectedDevelopers={initialSelectedDevelopers}
+                isViewMode={isViewMode}
               />
             </div>
 
@@ -447,63 +457,45 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
                   className="radioGroup"
                   value={priority}
                   onChange={handlePriorityChange}
+                  disabled={isViewMode}
                 >
                   <FormControlLabel
-                    value="1순위"
-                    control={<Radio />}
+                    value="high"
+                    control={<Radio color="primary" disabled={isViewMode} />}
                     label="1순위"
+                    disabled={isViewMode}
                   />
                   <FormControlLabel
-                    value="2순위"
-                    control={<Radio />}
+                    value="medium"
+                    control={<Radio color="primary" disabled={isViewMode} />}
                     label="2순위"
+                    disabled={isViewMode}
                   />
                   <FormControlLabel
-                    value="3순위"
-                    control={<Radio />}
+                    value="low"
+                    control={<Radio color="primary" disabled={isViewMode} />}
                     label="3순위"
+                    disabled={isViewMode}
                   />
                 </RadioGroup>
               </FormControl>
             </div>
 
-            {/* 등록취소 */}
+            {/* 등록 버튼 */}
             <div className="buttonContainer">
-              <button
-                className="cancelButton"
-                onClick={onClose}
-                disabled={loading}
-              >
-                취소
-              </button>
-              <button
-                className="registerButton"
-                onClick={handleRegister}
-                disabled={loading}
-                style={{
-                  cursor: loading ? "not-allowed" : "pointer",
-                  opacity: loading ? 0.7 : 1,
-                  position: "relative",
-                }}
-              >
-                {loading ? (
-                  <>
-                    <span style={{ visibility: "hidden" }}>등록</span>
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                      }}
-                    >
-                      처리 중...
-                    </span>
-                  </>
-                ) : (
-                  "등록"
-                )}
-              </button>
+              {isViewMode || devReviewData ? (
+                <button className="cancelButton" onClick={onClose}>
+                  닫기
+                </button>
+              ) : (
+                <button
+                  className="registerButton"
+                  onClick={handleRegister}
+                  disabled={loading}
+                >
+                  {loading ? "등록 중..." : "등록"}
+                </button>
+              )}
             </div>
           </>
         )}
