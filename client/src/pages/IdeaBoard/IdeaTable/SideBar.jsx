@@ -15,7 +15,9 @@ const SideBar = () => {
           border: "1px solid #8c8c8c",
         }}
       />
-      <div className="menuNm">Dashboard</div>
+      <Link to="/dashboard">
+        <div className="menuNm">Dashboard</div>
+      </Link>
       <Link to="/ideaboard">
         <div className="menuNm">IDEA 등록</div>
       </Link>

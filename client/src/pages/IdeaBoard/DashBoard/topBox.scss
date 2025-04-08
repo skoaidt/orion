@@ -1,0 +1,47 @@
+@import "../../../style.scss";
+
+.topBox {
+  h1 {
+    color: $purpleIdea;
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 500;
+    text-align: center;
+  }
+  .list {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    .listItem {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      gap: 5px;
+
+      .no {
+        font-size: 14px;
+        font-weight: 500;
+        min-width: 10px;
+        text-align: center;
+      }
+      .team {
+        font-size: 14px;
+        font-weight: 600;
+        min-width: 150px;
+        text-align: center;
+      }
+      .user {
+        font-size: 14px;
+        min-width: 100px;
+        text-align: center;
+      }
+      .connectCnt {
+        font-size: 14px;
+        min-width: 50px;
+        text-align: right;
+        margin-left: auto;
+      }
+    }
+  }
+}
