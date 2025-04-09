@@ -19,7 +19,6 @@ import SolMgmt from "./SolMgmt/SolMgmt";
 import Portfolio from "./Portfolio/Portfolio";
 import TypingMain from "./Typing/TypingMain/TypingMain";
 import TypingHome from "./Typing/TypingHome/TypingHome";
-import Kanban from "./IdeaBoard/Kanban/Kanban";
 
 export const Main = () => {
   const [getDevelopers, setGetDevelopers] = useState([]);
@@ -90,7 +89,6 @@ export const Main = () => {
           {/* <Route path="/fileupload" element={<FileUpload />} /> */}
           <Route path="/ideaboard" element={<IdeaBorad />} />
           <Route path="/ideaboard/detail/:id" element={<IdeaBorad />} />
-          <Route path="/ideaboard/gantt/:id" element={<IdeaBorad />} />
           <Route path="/ideaboard/kanban/:id" element={<IdeaBorad />} />
           <Route path="/dashboard" element={<IdeaBorad />} />
           <Route path="/solmgmt" element={<SolMgmt />} />
