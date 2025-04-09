@@ -4,14 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import "./kanban.scss";
 
-// StrictMode 문제 해결을 위한 함수
-const reorder = (list, startIndex, endIndex) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-  return result;
-};
-
 // StrictMode와 함께 사용할 수 있는 Droppable 래퍼
 const StrictModeDroppable = ({ children, ...props }) => {
   const [enabled, setEnabled] = useState(false);
@@ -34,7 +26,7 @@ const StrictModeDroppable = ({ children, ...props }) => {
 const Kanban = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [newTask, setNewTask] = useState({ title: "", description: "" });
+  const [newTask, setNewTask] = useState({ content: "" });
   const [showForm, setShowForm] = useState(false);
 
   // 초기 데이터 상태
@@ -177,18 +169,18 @@ const Kanban = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewTask({ ...newTask, [name]: value });
+    const { value } = e.target;
+    setNewTask({ content: value });
   };
 
   const handleAddTask = () => {
-    if (newTask.title.trim() === "") return;
+    if (newTask.content.trim() === "") return;
 
     const taskId = `task-${Date.now()}`;
     const newTaskItem = {
       id: taskId,
-      title: newTask.title,
-      description: newTask.description,
+      title: newTask.content,
+      description: "",
       createdAt: new Date().toISOString(),
     };
 
@@ -206,7 +198,7 @@ const Kanban = () => {
     });
 
     // 폼 초기화
-    setNewTask({ title: "", description: "" });
+    setNewTask({ content: "" });
     setShowForm(false);
   };
 
@@ -239,17 +231,10 @@ const Kanban = () => {
                       </button>
                     ) : (
                       <div className="task-form">
-                        <input
-                          type="text"
-                          name="title"
-                          placeholder="작업 제목"
-                          value={newTask.title}
-                          onChange={handleInputChange}
-                        />
                         <textarea
-                          name="description"
-                          placeholder="상세 내용"
-                          value={newTask.description}
+                          name="content"
+                          placeholder="작업 내용을 입력하세요"
+                          value={newTask.content}
                           onChange={handleInputChange}
                         ></textarea>
                         <div className="form-buttons">
@@ -283,8 +268,7 @@ const Kanban = () => {
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                             >
-                              <h3>{task.title}</h3>
-                              <p>{task.description}</p>
+                              <div className="task-content">{task.title}</div>
                               <div className="task-footer">
                                 <small>
                                   {new Date(

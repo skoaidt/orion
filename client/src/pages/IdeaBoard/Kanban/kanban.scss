@@ -172,6 +172,15 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
           }
 
+          .task-content {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            word-break: break-word;
+            white-space: pre-line;
+            color: $grayColor;
+          }
+
           h3 {
             font-size: 16px;
             font-weight: 500;
