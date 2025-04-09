@@ -130,6 +130,71 @@ export const getIdeaDevelopers = async (req, res) => {
   }
 };
 
+// 개발 심의 데이터 조회
+export const getIdeaDevReviewById = (req, res) => {
+  const ideaId = req.params.idea_id;
+  console.log("개발 심의 데이터 조회 요청 (idea_id):", ideaId);
+
+  if (!ideaId) {
+    return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
+  }
+
+  const q = `SELECT * FROM special.ITAsset_ideaDevReview WHERE idea_id = ?`;
+  console.log("실행 쿼리:", q);
+  console.log("쿼리 파라미터:", ideaId);
+
+  try {
+    db.query(q, [ideaId], (err, data) => {
+      if (err) {
+        console.error("개발 심의 데이터 조회 오류:", err);
+        return res.status(500).json({
+          error: err.message,
+          sqlMessage: err.sqlMessage,
+          code: err.code,
+        });
+      }
+
+      if (!data || data.length === 0) {
+        console.log("데이터가 없음: idea_id =", ideaId);
+        return res
+          .status(404)
+          .json({ message: "개발 심의 데이터를 찾을 수 없습니다." });
+      }
+
+      // 개발자 목록, 일정, 우선순위 정보 구성
+      const developers = data.map((dev) => ({
+        id: dev.id,
+        no: dev.n_id,
+        name: dev.name,
+        team: dev.team,
+        headqt: dev.headqt,
+      }));
+
+      // 첫 번째 레코드에서 일정과 우선순위 정보 추출
+      const firstRecord = data[0];
+      const scheduleInfo = {
+        startDate: firstRecord.devScheduleStart,
+        endDate: firstRecord.devScheduleEnd,
+        priority: firstRecord.priority,
+      };
+
+      const result = {
+        ideaId: parseInt(ideaId),
+        developers: developers,
+        schedule: scheduleInfo,
+        // 원본 데이터도 포함
+        rawData: data,
+      };
+
+      console.log("개발 심의 데이터 조회 성공:", result);
+      return res.status(200).json(result);
+    });
+  } catch (error) {
+    console.error("예상치 못한 에러:", error);
+    return res.status(500).json({ error: "서버 내부 오류가 발생했습니다." });
+  }
+};
+
 // 개발 심의 데이터 등록
 export const registerIdeaDevReview = (req, res) => {
   console.log("개발 심의 데이터 등록 요청:", req.body);
@@ -194,6 +259,7 @@ export const registerIdeaDevReview = (req, res) => {
 
   try {
     // 프론트엔드에서 받은 개발자 정보를 그대로 DB에 저장
+    // 각 개발자에 대해 새로운 레코드 삽입 (id는 자동 증가)
     const insertPromises = developers.map((developer) => {
       return new Promise((resolve, reject) => {
         // DB 구조에 맞게 수정
@@ -238,7 +304,7 @@ export const registerIdeaDevReview = (req, res) => {
         // 아이디어 상태 업데이트 (개발심의 완료 상태로 변경)
         const updateIdeaStatusQuery = `
           UPDATE special.ITAsset_ideas 
-          SET status = 'devReviewed' 
+          SET status = '개발심의' 
           WHERE id = ?
         `;
 
@@ -252,7 +318,7 @@ export const registerIdeaDevReview = (req, res) => {
             message: "개발 심의 정보가 성공적으로 등록되었습니다.",
             ideaID: ideaID,
             developerCount: developers.length,
-            status: "devReviewed", // 상태도 함께 반환
+            status: "개발심의", // 상태도 함께 반환
           });
         });
       })

@@ -31,7 +31,7 @@ const STAGES = {
   INITIAL: "", // 초기 상태
   REGISTER: "등록", // 등록 완료
   SELECTION: "선정", // 선정 완료
-  PILOT: "piloted", // 파일럿 완료
+  PILOT: "pilot", // 파일럿 완료
   VERIFY: "verified", // 검증 완료
   DEV_REVIEW: "devReviewed", // 개발자 검토 완료
   DEVELOPING: "developing", // 개발 진행 중
@@ -43,7 +43,7 @@ const STAGES = {
 const STAGE_ORDER = {
   등록: 0,
   선정: 1,
-  piloted: 2,
+  pilot: 2,
   verified: 3,
   devReviewed: 4,
   developing: 5,
@@ -206,7 +206,7 @@ const IdeaDesc = () => {
       fetchComments(); // 댓글도 함께 로드
       fetchViewCount(); // 조회수도 함께 로드
     }
-  }, [id, openModal]);
+  }, [id, openModal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 로그 기록은 별도 useEffect로 분리하여 한 번만 실행되도록 함
   useEffect(() => {
@@ -214,7 +214,7 @@ const IdeaDesc = () => {
       // 컴포넌트가 마운트된 후에만 로그 기록
       logIdeaView();
     }
-  }, [id, currentUser]); // id와 currentUser가 변경될 때만 실행
+  }, [id, currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 날짜 포맷 함수
   const formatDate = (dateString) => {
@@ -251,100 +251,35 @@ const IdeaDesc = () => {
       return false;
     }
 
-    // 파일럿 상태를 확인하기 위한 정규 표현식 패턴
-    const isPilotStatus =
-      ideaData.status === "piloted" ||
-      ideaData.status === "ideaPilot" ||
-      /pilot/i.test(ideaData.status);
-
-    console.log("Pilot 상태 체크:", isPilotStatus);
+    // 현재 상태의 단계 인덱스 구하기
+    const currentStageIndex = getStageIndex(ideaData.status);
+    console.log("현재 단계 인덱스:", currentStageIndex);
 
     // 각 단계별 진행 가능 조건 정의
     switch (stage) {
       case "ideaSelected": // 선정 단계
-        // 등록 상태거나 선정/검증 단계를 이미 거친 경우 선정 단계 진행 가능
-        // Pilot, 검증 단계를 거친 아이디어도 다시 선정 단계 진행 가능하도록 함
-        return true; // 선정 단계는 언제든지 접근 가능하도록 설정
+        // 선정 단계는 언제든지 접근 가능하도록 설정 (등록 상태 이상)
+        return true;
 
       case "ideaPiloted": // Pilot 단계
-        // 선정 단계를 거쳤거나 이미 Pilot 또는 그 이후 단계인 경우 진행 가능
-        console.log(
-          "Pilot 단계 접근 검사:",
-          ideaData.status === "선정" ||
-            isPilotStatus ||
-            ideaData.status === "verified" ||
-            ideaData.status.includes("선정") ||
-            ideaData.status.includes("verif")
-        );
-        return (
-          ideaData.status === "선정" ||
-          isPilotStatus ||
-          ideaData.status === "verified" ||
-          ideaData.status.includes("선정") ||
-          ideaData.status.includes("verif")
-        );
+        // 선정 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
+        return currentStageIndex >= 1; // 선정 이상
 
       case "ideaVerify": // 검증 단계
-        // Pilot 단계를 거쳤거나 이미 검증 단계인 경우 진행 가능
-        console.log(
-          "검증 단계 접근 검사:",
-          isPilotStatus ||
-            ideaData.status === "verified" ||
-            ideaData.status.includes("verif")
-        );
-        return (
-          isPilotStatus ||
-          ideaData.status === "verified" ||
-          ideaData.status.includes("verif")
-        );
+        // Pilot 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
+        return currentStageIndex >= 2; // 파일럿 이상
 
-      case "ideaDevReview": // 개발자 검토 단계
-        // 검증 단계를 거친 경우 진행 가능
-        console.log(
-          "개발자 검토 단계 접근 검사:",
-          ideaData.status === "verified" ||
-            ideaData.status === "devReviewed" ||
-            ideaData.status.includes("verif") ||
-            ideaData.status.includes("review")
-        );
-        return (
-          ideaData.status === "verified" ||
-          ideaData.status === "devReviewed" ||
-          ideaData.status.includes("verif") ||
-          ideaData.status.includes("review")
-        );
+      case "ideaDevReview": // 개발 심의 단계
+        // 검증 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
+        return currentStageIndex >= 3; // 검증 이상
 
-      case "ideaDeveloping": // 개발 진행 단계
-        // 개발자 검토 단계를 거친 경우 진행 가능
-        console.log(
-          "개발 진행 단계 접근 검사:",
-          ideaData.status === "devReviewed" ||
-            ideaData.status === "developing" ||
-            ideaData.status.includes("review") ||
-            ideaData.status.includes("develop")
-        );
-        return (
-          ideaData.status === "devReviewed" ||
-          ideaData.status === "developing" ||
-          ideaData.status.includes("review") ||
-          ideaData.status.includes("develop")
-        );
+      case "ideaDeveloping": // 개발중 단계
+        // 개발 심의 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
+        return currentStageIndex >= 4; // 개발심의 이상
 
       case "ideaCompleted": // 완료 단계
-        // 개발 진행 단계를 거친 경우 진행 가능
-        console.log(
-          "완료 단계 접근 검사:",
-          ideaData.status === "developing" ||
-            ideaData.status === "completed" ||
-            ideaData.status.includes("develop") ||
-            ideaData.status.includes("complete")
-        );
-        return (
-          ideaData.status === "developing" ||
-          ideaData.status === "completed" ||
-          ideaData.status.includes("develop") ||
-          ideaData.status.includes("complete")
-        );
+        // 개발중 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
+        return currentStageIndex >= 5; // 개발중 이상
 
       case "ideaDrop": // Drop 단계
         return true; // Drop은 언제든지 가능
@@ -366,7 +301,7 @@ const IdeaDesc = () => {
     // STAGES 상수에서 정의한 상태값과 모달 타입 매핑
     const modalToStageMap = {
       ideaSelected: "선정",
-      ideaPiloted: "piloted",
+      ideaPiloted: "pilot",
       ideaVerify: "verified",
       ideaDevReview: "devReviewed",
       ideaDeveloping: "developing",
@@ -388,9 +323,51 @@ const IdeaDesc = () => {
       return;
     }
 
-    // 특별 처리: Pilot 관련 상태를 일관적으로 관리
-    if (modalType === "ideaPiloted" && /pilot/i.test(ideaData.status)) {
-      console.log("Pilot 단계 특별 처리: 이미 Pilot 상태이므로 진행 허용");
+    // 특별 처리: 선정 단계는 언제든지 접근 가능
+    if (modalType === "ideaSelected") {
+      console.log("선정 단계는 언제든지 접근 가능합니다.");
+      setOpenModal(modalType);
+      return;
+    }
+
+    // 특별 처리: Pilot 단계 접근 - 선정 단계 이상
+    if (modalType === "ideaPiloted" && getStageIndex(ideaData.status) >= 1) {
+      console.log("Pilot 단계 접근: 선정 단계 이상이므로 진행 허용");
+      setOpenModal(modalType);
+      return;
+    }
+
+    // 특별 처리: 검증 단계 접근 - Pilot 단계 이상
+    if (modalType === "ideaVerify" && getStageIndex(ideaData.status) >= 2) {
+      console.log("검증 단계 접근: Pilot 단계 이상이므로 진행 허용");
+      setOpenModal(modalType);
+      return;
+    }
+
+    // 특별 처리: 개발심의 단계 접근 - 검증 단계 이상
+    if (modalType === "ideaDevReview" && getStageIndex(ideaData.status) >= 3) {
+      console.log("개발심의 단계 접근: 검증 단계 이상이므로 진행 허용");
+      setOpenModal(modalType);
+      return;
+    }
+
+    // 특별 처리: 개발중 단계 접근 - 개발심의 단계 이상
+    if (modalType === "ideaDeveloping" && getStageIndex(ideaData.status) >= 4) {
+      console.log("개발중 단계 접근: 개발심의 단계 이상이므로 진행 허용");
+      setOpenModal(modalType);
+      return;
+    }
+
+    // 특별 처리: 완료 단계 접근 - 개발중 단계 이상
+    if (modalType === "ideaCompleted" && getStageIndex(ideaData.status) >= 5) {
+      console.log("완료 단계 접근: 개발중 단계 이상이므로 진행 허용");
+      setOpenModal(modalType);
+      return;
+    }
+
+    // 특별 처리: Drop 단계는 언제든지 접근 가능
+    if (modalType === "ideaDrop") {
+      console.log("Drop 단계는 언제든지 접근 가능합니다.");
       setOpenModal(modalType);
       return;
     }
@@ -416,19 +393,25 @@ const IdeaDesc = () => {
 
   // 아이디어 상태에 따른 스테이지 인덱스 확인 함수
   const getStageIndex = (status) => {
-    // 직접적인 상태 매핑 확인
+    // 상태에 따른 스테이지 매핑 수정
     const statusStageMap = {
-      null: -1, // 초기 상태
-      "": -1, // 초기 상태
+      null: 0, // 초기 상태
+      "": 0, // 초기 상태
       등록: 0, // 등록 완료
-      선정: 1, // 선정 완료
-      piloted: 2, // Pilot 완료
-      ideaPilot: 2, // 이전 Pilot 상태값 (하위 호환성)
-      verified: 3, // 검증 완료
-      devReviewed: 4, // 개발자 검토 완료
-      developing: 5, // 개발 진행 중
-      completed: 6, // 완료
-      drop: -2, // Drop 상태 (모든 진행 불가)
+      선정: 1,
+      파일럿: 2,
+      검증: 3,
+      개발심의: 4,
+      개발중: 5,
+      완료: 6,
+      Drop: -1,
+      // 이전 영문 상태값도 호환성을 위해 유지
+      selected: 1,
+      pilot: 2,
+      verified: 3,
+      devReviewed: 4,
+      developing: 5,
+      complete: 6,
     };
 
     if (statusStageMap[status] !== undefined) {
@@ -512,89 +495,56 @@ const IdeaDesc = () => {
       return "disabled";
     }
 
-    // 상태에 따른 진행 단계 매핑
-    const statusStageMap = {
-      null: -1, // 초기 상태
-      "": -1, // 초기 상태
-      등록: 0, // 등록 완료
-      선정: 1, // 선정 완료
-      piloted: 2, // Pilot 완료
-      ideaPilot: 2, // 이전 Pilot 상태값 (하위 호환성)
-      verified: 3, // 검증 완료
-      devReviewed: 4, // 개발자 검토 완료
-      developing: 5, // 개발 진행 중
-      completed: 6, // 완료
-      drop: -2, // Drop 상태 (모든 진행 불가)
-    };
+    // 현재 단계의 인덱스 (0-6)
+    const currentStageIndex = getStageIndex(ideaData.status);
 
-    // 현재 상태의 단계 인덱스 찾기
-    let currentStageIndex = 0;
-
-    // 직접적인 상태 매핑 확인
-    if (statusStageMap[ideaData.status] !== undefined) {
-      currentStageIndex = statusStageMap[ideaData.status];
-    }
-    // 추가적인 상태 문자열 확인 (부분 일치)
-    else if (ideaData.status.includes("선정")) {
-      currentStageIndex = 1;
-    } else if (/pilot/i.test(ideaData.status)) {
-      currentStageIndex = 2;
-    } else if (/verif/i.test(ideaData.status)) {
-      currentStageIndex = 3;
-    } else if (/review/i.test(ideaData.status)) {
-      currentStageIndex = 4;
-    } else if (/develop/i.test(ideaData.status)) {
-      currentStageIndex = 5;
-    } else if (/complete/i.test(ideaData.status)) {
-      currentStageIndex = 6;
-    }
+    // 요청된 단계의 인덱스 (0-6)
+    const requestedStageIndex = STAGE_ORDER[stage];
 
     console.log(
       "현재 단계 인덱스:",
       currentStageIndex,
-      "요청 단계 인덱스:",
-      STAGE_ORDER[stage]
+      "요청된 단계 인덱스:",
+      requestedStageIndex
     );
 
-    // 주어진 단계가 현재 상태보다 이전 단계인 경우 (이미 완료된 단계)
+    // 이미 완료된 단계 (현재 단계보다 이전 단계)
     if (
-      STAGE_ORDER[stage] !== undefined &&
-      STAGE_ORDER[stage] < currentStageIndex
+      requestedStageIndex !== undefined &&
+      requestedStageIndex < currentStageIndex
     ) {
-      console.log(`${stage} 단계는 완료된 단계입니다. 'active' 클래스 적용`);
-      return "active"; // 완료된 단계는 등록 단계와 같은 색상(active)으로 표시
+      return "active"; // 완료된 단계는 active로 표시
     }
 
-    // 현재 상태와 같은 단계인 경우 active 클래스 반환
+    // 현재 진행 중인 단계
     if (
-      (STAGE_ORDER[stage] !== undefined &&
-        STAGE_ORDER[stage] === currentStageIndex) ||
-      ideaData.status === stage ||
-      (stage === "piloted" && /pilot/i.test(ideaData.status)) || // Pilot 단계 특별 처리
-      (ideaData.status && ideaData.status.includes(stage))
+      requestedStageIndex !== undefined &&
+      requestedStageIndex === currentStageIndex
     ) {
-      console.log(`${stage} 단계는 현재 단계입니다. 'active' 클래스 적용`);
-      return "active";
+      return "active"; // 현재 단계도 active로 표시
     }
 
-    // 현재 상태보다 이후 단계이면서 진행 불가능한 단계
-    const stageMap = {
-      선정: "ideaSelected",
-      piloted: "ideaPiloted",
-      verified: "ideaVerify",
-      devReviewed: "ideaDevReview",
-      developing: "ideaDeveloping",
-      completed: "ideaCompleted",
-    };
-
-    if (stageMap[stage] && !canProceedToStage(stageMap[stage])) {
-      console.log(
-        `${stage} 단계는 아직 진행할 수 없는 단계입니다. 'disabled' 클래스 적용`
-      );
-      return "disabled";
+    // 다음에 진행할 수 있는 단계 (현재 단계 바로 다음 단계)
+    if (
+      requestedStageIndex !== undefined &&
+      requestedStageIndex === currentStageIndex + 1
+    ) {
+      // 특별 케이스: Drop은 항상 접근 가능
+      if (stage === "drop") {
+        return ""; // 기본 스타일 (접근 가능)
+      }
+      return ""; // 기본 스타일 (접근 가능)
     }
 
-    console.log(`${stage} 단계는 기본 스타일을 적용합니다.`);
+    // 아직 진행할 수 없는 단계 (현재 단계보다 2개 이상 앞선 단계)
+    if (
+      requestedStageIndex !== undefined &&
+      requestedStageIndex > currentStageIndex + 1
+    ) {
+      return "disabled"; // 비활성화된 스타일
+    }
+
+    // 그 외 상태
     return "";
   };
 
@@ -872,7 +822,7 @@ const IdeaDesc = () => {
             className="processItem"
             onClick={() => handleBoxClick("ideaPiloted")}
           >
-            <div className={`processItemTitle ${getStageClass("piloted")}`}>
+            <div className={`processItemTitle ${getStageClass("pilot")}`}>
               Pilot
             </div>
             <div className="lineBox">
@@ -882,7 +832,7 @@ const IdeaDesc = () => {
                 </div>
               </div>
             </div>
-            <div className={`processItemContent ${getStageClass("piloted")}`}>
+            <div className={`processItemContent ${getStageClass("pilot")}`}>
               <div className="itemcontentWrap">
                 <div className="left">
                   <div className="userInfo">
@@ -1086,7 +1036,7 @@ const IdeaDesc = () => {
             onClose={() => setOpenModal(null)}
             ideaId={id}
             ideaData={ideaData}
-            isViewMode={getStageIndex(ideaData.status) > STAGE_ORDER["piloted"]}
+            isViewMode={getStageIndex(ideaData.status) > STAGE_ORDER["pilot"]}
           />
         )}
         {openModal === "ideaVerify" && (
@@ -1117,6 +1067,7 @@ const IdeaDesc = () => {
             isViewMode={
               getStageIndex(ideaData.status) > STAGE_ORDER["developing"]
             }
+            onGanttNavigate={navigateToGantt}
           />
         )}
         {openModal === "ideaCompleted" && (
