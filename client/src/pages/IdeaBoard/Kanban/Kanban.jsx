@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import axios from "axios";
 import "./kanban.scss";
 
 // StrictMode와 함께 사용할 수 있는 Droppable 래퍼
@@ -28,6 +29,8 @@ const Kanban = () => {
   const navigate = useNavigate();
   const [newTask, setNewTask] = useState({ content: "" });
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // 초기 데이터 상태
   const [columns, setColumns] = useState({
@@ -60,11 +63,58 @@ const Kanban = () => {
   // 칼럼 순서
   const columnOrder = ["todo", "kickoff", "inprogress", "done"];
 
+  // 초기 데이터 로드
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        // 칸반 컬럼 초기화 (필요한 경우)
+        await axios.post(`/api/kanbans/${id}/init`);
+
+        // 작업 데이터 가져오기
+        const response = await axios.get(`/api/kanbans/${id}/tasks`);
+
+        // 작업 데이터를 컬럼별로 분류
+        const newColumns = { ...columns };
+
+        // 모든 컬럼 작업 초기화
+        columnOrder.forEach((colId) => {
+          newColumns[colId].tasks = [];
+          newColumns[colId].taskIds = [];
+        });
+
+        // 서버에서 받은 작업을 적절한 컬럼에 배치
+        response.data.forEach((task) => {
+          const status = task.status || "todo";
+          if (newColumns[status]) {
+            const taskItem = {
+              id: task.task_id,
+              title: task.content,
+              createdAt: task.created_at,
+            };
+            newColumns[status].tasks.push(taskItem);
+            newColumns[status].taskIds.push(task.task_id);
+          }
+        });
+
+        setColumns(newColumns);
+        setLoading(false);
+      } catch (err) {
+        console.error("데이터 로딩 오류:", err);
+        setError("칸반 보드 데이터를 로드하는 중 오류가 발생했습니다.");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
   const handleBackClick = () => {
     navigate(`/ideaboard/detail/${id}`);
   };
 
-  const onDragEnd = (result) => {
+  const onDragEnd = async (result) => {
     console.log("onDragEnd result:", result);
     const { destination, source, draggableId } = result;
 
@@ -117,6 +167,17 @@ const Kanban = () => {
         ...columns,
         [newColumn.id]: newColumn,
       });
+
+      // 서버에 작업 순서 업데이트
+      try {
+        await axios.put(`/api/kanbans/${id}/tasks/${draggableId}`, {
+          status: newColumn.id,
+          position: destination.index,
+        });
+      } catch (err) {
+        console.error("작업 순서 업데이트 오류:", err);
+        // 오류 발생 시 상태를 원래대로 복원할 수도 있음
+      }
     } else {
       // 다른 컬럼으로 이동
       console.log("Moving to a different column");
@@ -165,6 +226,17 @@ const Kanban = () => {
         [newSourceColumn.id]: newSourceColumn,
         [newDestColumn.id]: newDestColumn,
       });
+
+      // 서버에 작업 상태 및 순서 업데이트
+      try {
+        await axios.put(`/api/kanbans/${id}/tasks/${draggableId}`, {
+          status: newDestColumn.id,
+          position: destination.index,
+        });
+      } catch (err) {
+        console.error("작업 상태 업데이트 오류:", err);
+        // 오류 발생 시 상태를 원래대로 복원할 수도 있음
+      }
     }
   };
 
@@ -173,18 +245,17 @@ const Kanban = () => {
     setNewTask({ content: value });
   };
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (newTask.content.trim() === "") return;
 
     const taskId = `task-${Date.now()}`;
     const newTaskItem = {
       id: taskId,
       title: newTask.content,
-      description: "",
       createdAt: new Date().toISOString(),
     };
 
-    // Todo 컬럼에 새 태스크 추가
+    // Todo 컬럼에 새 태스크 추가 (클라이언트)
     const todoColumn = columns.todo;
     const newTodoColumn = {
       ...todoColumn,
@@ -200,7 +271,23 @@ const Kanban = () => {
     // 폼 초기화
     setNewTask({ content: "" });
     setShowForm(false);
+
+    // 서버에 작업 추가
+    try {
+      await axios.post(`/api/kanbans/${id}/tasks`, {
+        task_id: taskId,
+        content: newTask.content,
+        status: "todo",
+        position: todoColumn.tasks.length,
+      });
+    } catch (err) {
+      console.error("작업 추가 오류:", err);
+      // 오류 발생 시 상태를 원래대로 복원할 수도 있음
+    }
   };
+
+  if (loading) return <div className="loading">로딩 중...</div>;
+  if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="kanban">

@@ -7,6 +7,20 @@
   padding: 20px;
   background-color: #f5f7fa;
 
+  .loading,
+  .error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    font-size: 18px;
+    color: #5e6c84;
+  }
+
+  .error {
+    color: #e53935;
+  }
+
   .kanban-header {
     display: flex;
     justify-content: space-between;
