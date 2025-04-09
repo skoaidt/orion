@@ -1067,7 +1067,7 @@ const IdeaDesc = () => {
             isViewMode={
               getStageIndex(ideaData.status) > STAGE_ORDER["developing"]
             }
-            onGanttNavigate={navigateToGantt}
+            onGanttNavigate={handleKanbanNavigate}
           />
         )}
         {openModal === "ideaCompleted" && (
