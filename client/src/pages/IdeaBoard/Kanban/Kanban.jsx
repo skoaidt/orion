@@ -1,0 +1,383 @@
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import axios from "axios";
+import "./kanban.scss";
+
+// StrictMode와 함께 사용할 수 있는 Droppable 래퍼
+const StrictModeDroppable = ({ children, ...props }) => {
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    const animation = requestAnimationFrame(() => setEnabled(true));
+    return () => {
+      cancelAnimationFrame(animation);
+      setEnabled(false);
+    };
+  }, []);
+
+  if (!enabled) {
+    return null;
+  }
+
+  return <Droppable {...props}>{children}</Droppable>;
+};
+
+const Kanban = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [newTask, setNewTask] = useState({ content: "" });
+  const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 초기 데이터 상태
+  const [columns, setColumns] = useState({
+    todo: {
+      id: "todo",
+      title: "To do",
+      taskIds: [],
+      tasks: [],
+    },
+    kickoff: {
+      id: "kickoff",
+      title: "Kick Off",
+      taskIds: [],
+      tasks: [],
+    },
+    inprogress: {
+      id: "inprogress",
+      title: "In Progress",
+      taskIds: [],
+      tasks: [],
+    },
+    done: {
+      id: "done",
+      title: "Done",
+      taskIds: [],
+      tasks: [],
+    },
+  });
+
+  // 칼럼 순서
+  const columnOrder = ["todo", "kickoff", "inprogress", "done"];
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        // 칸반 컬럼 초기화 (필요한 경우)
+        await axios.post(`/api/kanbans/${id}/init`);
+
+        // 작업 데이터 가져오기
+        const response = await axios.get(`/api/kanbans/${id}/tasks`);
+
+        // 작업 데이터를 컬럼별로 분류
+        const newColumns = { ...columns };
+
+        // 모든 컬럼 작업 초기화
+        columnOrder.forEach((colId) => {
+          newColumns[colId].tasks = [];
+          newColumns[colId].taskIds = [];
+        });
+
+        // 서버에서 받은 작업을 적절한 컬럼에 배치
+        response.data.forEach((task) => {
+          const status = task.status || "todo";
+          if (newColumns[status]) {
+            const taskItem = {
+              id: task.task_id,
+              title: task.content,
+              createdAt: task.created_at,
+            };
+            newColumns[status].tasks.push(taskItem);
+            newColumns[status].taskIds.push(task.task_id);
+          }
+        });
+
+        setColumns(newColumns);
+        setLoading(false);
+      } catch (err) {
+        console.error("데이터 로딩 오류:", err);
+        setError("칸반 보드 데이터를 로드하는 중 오류가 발생했습니다.");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  const handleBackClick = () => {
+    navigate(`/ideaboard/detail/${id}`);
+  };
+
+  const onDragEnd = async (result) => {
+    console.log("onDragEnd result:", result);
+    const { destination, source, draggableId } = result;
+
+    // 목적지가 없는 경우 (드래그앤드롭이 취소된 경우)
+    if (!destination) {
+      console.log("No destination found");
+      return;
+    }
+
+    // 같은 위치에 드롭된 경우
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      console.log("Dropped in the same position");
+      return;
+    }
+
+    console.log("Source column ID:", source.droppableId);
+    console.log("Destination column ID:", destination.droppableId);
+
+    // 출발지 컬럼
+    const sourceColumn = columns[source.droppableId];
+    // 도착지 컬럼
+    const destColumn = columns[destination.droppableId];
+
+    console.log("Source column:", sourceColumn);
+    console.log("Destination column:", destColumn);
+
+    if (sourceColumn === destColumn) {
+      // 같은 컬럼 내에서 순서만 변경
+      console.log("Moving within the same column");
+      const newTaskIds = Array.from(sourceColumn.taskIds);
+      const newTasks = Array.from(sourceColumn.tasks);
+      const [movedTask] = newTasks.splice(source.index, 1);
+
+      newTaskIds.splice(source.index, 1);
+      newTasks.splice(destination.index, 0, movedTask);
+      newTaskIds.splice(destination.index, 0, draggableId);
+
+      const newColumn = {
+        ...sourceColumn,
+        taskIds: newTaskIds,
+        tasks: newTasks,
+      };
+
+      console.log("Updated column:", newColumn);
+
+      setColumns({
+        ...columns,
+        [newColumn.id]: newColumn,
+      });
+
+      // 서버에 작업 순서 업데이트
+      try {
+        await axios.put(`/api/kanbans/${id}/tasks/${draggableId}`, {
+          status: newColumn.id,
+          position: destination.index,
+        });
+      } catch (err) {
+        console.error("작업 순서 업데이트 오류:", err);
+        // 오류 발생 시 상태를 원래대로 복원할 수도 있음
+      }
+    } else {
+      // 다른 컬럼으로 이동
+      console.log("Moving to a different column");
+      const sourceTaskIds = Array.from(sourceColumn.taskIds);
+      const sourceTasks = Array.from(sourceColumn.tasks);
+      const destTaskIds = Array.from(destColumn.taskIds);
+      const destTasks = Array.from(destColumn.tasks);
+
+      console.log("Source tasks before:", sourceTasks);
+      console.log("Source index:", source.index);
+
+      // 이동할 태스크 찾기
+      const taskToMove = sourceTasks[source.index];
+      console.log("Task to move:", taskToMove);
+
+      // 원본 배열에서 태스크 제거
+      const newSourceTasks = [...sourceTasks];
+      newSourceTasks.splice(source.index, 1);
+      sourceTaskIds.splice(source.index, 1);
+
+      // 목적지 배열에 태스크 추가
+      const newDestTasks = [...destTasks];
+      newDestTasks.splice(destination.index, 0, taskToMove);
+      destTaskIds.splice(destination.index, 0, taskToMove.id);
+
+      console.log("Updated source tasks:", newSourceTasks);
+      console.log("Updated destination tasks:", newDestTasks);
+
+      const newSourceColumn = {
+        ...sourceColumn,
+        taskIds: sourceTaskIds,
+        tasks: newSourceTasks,
+      };
+
+      const newDestColumn = {
+        ...destColumn,
+        taskIds: destTaskIds,
+        tasks: newDestTasks,
+      };
+
+      console.log("New source column:", newSourceColumn);
+      console.log("New destination column:", newDestColumn);
+
+      setColumns({
+        ...columns,
+        [newSourceColumn.id]: newSourceColumn,
+        [newDestColumn.id]: newDestColumn,
+      });
+
+      // 서버에 작업 상태 및 순서 업데이트
+      try {
+        await axios.put(`/api/kanbans/${id}/tasks/${draggableId}`, {
+          status: newDestColumn.id,
+          position: destination.index,
+        });
+      } catch (err) {
+        console.error("작업 상태 업데이트 오류:", err);
+        // 오류 발생 시 상태를 원래대로 복원할 수도 있음
+      }
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { value } = e.target;
+    setNewTask({ content: value });
+  };
+
+  const handleAddTask = async () => {
+    if (newTask.content.trim() === "") return;
+
+    const taskId = `task-${Date.now()}`;
+    const newTaskItem = {
+      id: taskId,
+      title: newTask.content,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Todo 컬럼에 새 태스크 추가 (클라이언트)
+    const todoColumn = columns.todo;
+    const newTodoColumn = {
+      ...todoColumn,
+      taskIds: [...todoColumn.taskIds, taskId],
+      tasks: [...todoColumn.tasks, newTaskItem],
+    };
+
+    setColumns({
+      ...columns,
+      todo: newTodoColumn,
+    });
+
+    // 폼 초기화
+    setNewTask({ content: "" });
+    setShowForm(false);
+
+    // 서버에 작업 추가
+    try {
+      await axios.post(`/api/kanbans/${id}/tasks`, {
+        task_id: taskId,
+        content: newTask.content,
+        status: "todo",
+        position: todoColumn.tasks.length,
+      });
+    } catch (err) {
+      console.error("작업 추가 오류:", err);
+      // 오류 발생 시 상태를 원래대로 복원할 수도 있음
+    }
+  };
+
+  if (loading) return <div className="loading">로딩 중...</div>;
+  if (error) return <div className="error">{error}</div>;
+
+  return (
+    <div className="kanban">
+      <div className="kanban-header">
+        <h1>{id}번 : 프로젝트 칸반 보드</h1>
+        <button className="back-button" onClick={handleBackClick}>
+          돌아가기
+        </button>
+      </div>
+
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="kanban-board">
+          {columnOrder.map((columnId) => {
+            const column = columns[columnId];
+
+            return (
+              <div className="kanban-column" key={column.id}>
+                <h2 className="column-title">{column.title}</h2>
+
+                {column.id === "todo" && (
+                  <div className="add-task-section">
+                    {!showForm ? (
+                      <button
+                        className="add-task-button"
+                        onClick={() => setShowForm(true)}
+                      >
+                        + 새 작업 추가
+                      </button>
+                    ) : (
+                      <div className="task-form">
+                        <textarea
+                          name="content"
+                          placeholder="작업 내용을 입력하세요"
+                          value={newTask.content}
+                          onChange={handleInputChange}
+                        ></textarea>
+                        <div className="form-buttons">
+                          <button onClick={handleAddTask}>추가</button>
+                          <button onClick={() => setShowForm(false)}>
+                            취소
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <StrictModeDroppable droppableId={column.id}>
+                  {(provided) => (
+                    <div
+                      className="task-list"
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                    >
+                      {column.tasks.map((task, index) => (
+                        <Draggable
+                          key={task.id}
+                          draggableId={task.id}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              className="task-card"
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                            >
+                              <div className="task-content">{task.title}</div>
+                              <div className="task-footer">
+                                <small>
+                                  {new Date(
+                                    task.createdAt
+                                  ).toLocaleDateString()}
+                                </small>
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </StrictModeDroppable>
+              </div>
+            );
+          })}
+        </div>
+      </DragDropContext>
+    </div>
+  );
+};
+
+export default Kanban;
