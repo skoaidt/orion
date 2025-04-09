@@ -436,6 +436,11 @@ const IdeaDesc = () => {
   };
 
   // 간트 차트 페이지로 이동
+  const navigateToGantt = () => {
+    navigate(`/ideaboard/gantt/${id}`);
+  };
+
+  // 칸반 보드 페이지로 이동 (원래의 handleKanbanNavigate 역할 복원)
   const handleKanbanNavigate = () => {
     // 진행 가능 여부 확인
     if (!canProceedToStage("ideaDeveloping")) {
@@ -546,6 +551,24 @@ const IdeaDesc = () => {
 
     // 그 외 상태
     return "";
+  };
+
+  // 상태에 따른 검증 상태 텍스트 반환 함수
+  const getVerifyStatusText = (stage, stageText) => {
+    // 개발중과 완료 단계는 항상 "-" 표시
+    if (stage === "developing" || stage === "completed") {
+      return "-";
+    }
+
+    const currentStageIndex = getStageIndex(ideaData.status);
+    const stageIndex = STAGE_ORDER[stage];
+
+    // 현재 상태의 인덱스가 해당 단계의 인덱스보다 크거나 같으면 해당 단계는 완료된 상태
+    if (currentStageIndex >= stageIndex) {
+      return `${stageText} 검증 완료`;
+    } else {
+      return `${stageText} 검증 필요`;
+    }
   };
 
   if (loading) {
@@ -806,7 +829,10 @@ const IdeaDesc = () => {
                         marginBottom: "3px",
                       }}
                     >
-                      {`${ideaData.VerifyDepartment} 검증 필요`}
+                      {getVerifyStatusText(
+                        "선정",
+                        ideaData.VerifyDepartment || "부서"
+                      )}
                     </div>
                   </div>
                 </div>
@@ -840,7 +866,10 @@ const IdeaDesc = () => {
                       className="processItemContentTitle"
                       style={{ fontSize: "13px", fontWeight: "300" }}
                     >
-                      {ideaData.dept_name} 검증 필요
+                      {getVerifyStatusText(
+                        "pilot",
+                        ideaData.dept_name || "소속부서"
+                      )}
                     </div>
                   </div>
                 </div>
@@ -886,7 +915,10 @@ const IdeaDesc = () => {
                         width: "100%",
                       }}
                     >
-                      {`${ideaData.VerifyDepartment} 검증 필요`}
+                      {getVerifyStatusText(
+                        "verified",
+                        ideaData.VerifyDepartment || "검증부서"
+                      )}
                     </div>
                   </div>
                 </div>
@@ -922,7 +954,7 @@ const IdeaDesc = () => {
                       className="processItemContentTitle"
                       style={{ fontSize: "13px", fontWeight: "300" }}
                     >
-                      준비중
+                      {getVerifyStatusText("devReviewed", "개발심의")}
                     </div>
                   </div>
                 </div>
@@ -952,7 +984,7 @@ const IdeaDesc = () => {
                       className="processItemContentTitle"
                       style={{ fontSize: "13px", fontWeight: "300" }}
                     >
-                      준비중
+                      {getVerifyStatusText("developing", "개발")}
                     </div>
                   </div>
                 </div>
@@ -983,7 +1015,7 @@ const IdeaDesc = () => {
                       className="processItemContentTitle"
                       style={{ fontSize: "13px", fontWeight: "300" }}
                     >
-                      준비중
+                      {getVerifyStatusText("completed", "서비스")}
                     </div>
                   </div>
                 </div>
@@ -1067,7 +1099,8 @@ const IdeaDesc = () => {
             isViewMode={
               getStageIndex(ideaData.status) > STAGE_ORDER["developing"]
             }
-            onGanttNavigate={handleKanbanNavigate}
+            onGanttNavigate={navigateToGantt}
+            onKanbanNavigate={handleKanbanNavigate}
           />
         )}
         {openModal === "ideaCompleted" && (
