@@ -41,6 +41,7 @@ const IdeaBorad = () => {
     } else if (isDashBoardPage) {
       return <DashBoard />;
     } else {
+      // /ideaboard 경로일 때 IdeaTable 렌더링
       return <IdeaTable />;
     }
   };

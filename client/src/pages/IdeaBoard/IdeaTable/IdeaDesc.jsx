@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import IdeaSelected from "../IdeaModal/IdeaSelected";
 import IdeaPilot from "../IdeaModal/IdeaPilot";
 import IdeaVerify from "../IdeaModal/IdeaVerify";
@@ -602,13 +601,6 @@ const IdeaDesc = () => {
               <div className="date">{formatDate(ideaData.updated_at)}</div>
             </div>
           </div>
-
-          <div className="likeWrap">
-            <div className="like">
-              <ThumbUpOffAltIcon size={24} />
-            </div>
-            <div className="likeCount">{ideaData.likes || 0}</div>
-          </div>
         </div>
         <hr style={{ margin: "20px 0", color: "#8c8c8c" }} />
 
@@ -810,9 +802,6 @@ const IdeaDesc = () => {
                     </div>
                   </div>
                 </div>
-                <div className="right">
-                  <div className="dDay">D-9</div>
-                </div>
               </div>
             </div>
           </div>
@@ -843,9 +832,6 @@ const IdeaDesc = () => {
                       {ideaData.dept_name} 검증 필요
                     </div>
                   </div>
-                </div>
-                <div className="right">
-                  <div className="dDay">D-6</div>
                 </div>
               </div>
             </div>
@@ -889,9 +875,6 @@ const IdeaDesc = () => {
                       {`${ideaData.VerifyDepartment} 검증 필요`}
                     </div>
                   </div>
-                </div>
-                <div className="right">
-                  <div className="dDay">D-3</div>
                 </div>
               </div>
             </div>

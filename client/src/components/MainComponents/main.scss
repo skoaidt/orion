@@ -84,6 +84,40 @@
         justify-content: right;
         align-items: center;
 
+        .textwarp {
+          .text {
+            font-size: 24px;
+            font-family: $notoSans;
+            font-weight: 100;
+            color: white;
+            margin-bottom: 10px;
+          }
+          .subText {
+            font-size: 16px;
+            font-family: $notoSans;
+            font-weight: 300;
+            color: white;
+          }
+          .ideaBtn {
+            background-color: $purpleIdea;
+            color: white;
+            border-radius: 10px;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-family: $notoSans;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 120px;
+            margin-top: 30px;
+            &:hover {
+              background-color: $purpleIdeaLight;
+              color: $grayColor;
+            }
+          }
+        }
+
         img {
           height: 350px;
           cursor: pointer;
@@ -113,6 +147,7 @@
     max-width: 1600px;
     padding: 0 20px;
     display: flex;
+    position: relative;
 
     .middleIcon {
       margin-left: 50px;
@@ -141,6 +176,27 @@
             color: black;
             border-radius: 10px;
           }
+        }
+        img {
+          width: 60px;
+          height: 60px;
+        }
+      }
+    }
+    .typingIcon {
+      position: absolute;
+      right: 10px;
+      height: 60px;
+      width: 60px;
+      z-index: 100;
+      img {
+        height: 60px;
+        width: 60px;
+        transition: all 0.3s ease;
+        &:hover {
+          transform: scale(1.1) translateY(-200px) translateX(-100px); // 위로 올라가는 효과 추가
+          height: 300px;
+          width: 300px;
         }
       }
     }

@@ -42,7 +42,7 @@ export const MainNavBar = () => {
           </Link>
         </div>
         <div className="controls">
-          <Link to="/ideaboard" className="menu regLink">
+          <Link to="/dashboard" className="menu regLink">
             <LuClipboardEdit size={24} />
             <span>Idea 등록</span>
           </Link>

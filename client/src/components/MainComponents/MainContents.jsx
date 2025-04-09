@@ -50,11 +50,23 @@ export const MainContents = ({ solutionData, onSearch }) => {
           </div>
 
           <div className="rightSide">
+            <div className="textwarp">
+              <div className="text">아이디어를 등록해주세요.</div>
+              <div className="subText">
+                현장의 모든 생각은 우리 회사의 미래를 바꿀 수 있습니다.
+              </div>
+              <button
+                className="ideaBtn"
+                onClick={() => navigate("/dashboard")}
+              >
+                ► 바로가기
+              </button>
+            </div>
             <img
               className="animation-updown"
-              src={process.env.PUBLIC_URL + "/image/main/MainTitile.png"}
+              src={process.env.PUBLIC_URL + "/image/main/ideaMain01.png"}
               alt="title"
-              onClick={() => navigate("/typingMain")}
+              onClick={() => navigate("/dashboard")}
             />
           </div>
         </div>

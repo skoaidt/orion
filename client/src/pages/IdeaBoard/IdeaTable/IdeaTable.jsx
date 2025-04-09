@@ -14,7 +14,7 @@ dayjs.extend(isBetween);
 
 const columns = [
   { field: "display_id", headerName: "ID", width: 50 }, // 화면에 표시되는 ID
-  { field: "status", headerName: "Status", width: 80, editable: true },
+  { field: "status", headerName: "Status", width: 100, editable: true },
   { field: "dev_category", headerName: "개발유형", width: 100, editable: true },
   { field: "biz_category", headerName: "사업분야", width: 100, editable: true },
   {
@@ -23,13 +23,13 @@ const columns = [
     width: 100,
     editable: true,
   },
-  { field: "idea_title", headerName: "제목", width: 450, editable: true },
+  { field: "idea_title", headerName: "제목", width: 500, editable: true },
   { field: "headqt", headerName: "제안본부", width: 80, editable: true },
   { field: "team", headerName: "제안팀", width: 100, editable: true },
   { field: "name", headerName: "작성자", width: 100, editable: true },
   { field: "reg_date", headerName: "등록일", width: 100, editable: true },
   { field: "views", headerName: "조회수", width: 80, editable: true },
-  { field: "likes", headerName: "Like", width: 80, editable: true },
+  // { field: "likes", headerName: "Like", width: 80, editable: true },
   { field: "Dday", headerName: "D-day", width: 80, editable: true },
 ];
 
@@ -111,7 +111,7 @@ const IdeaTable = () => {
           name: idea.name || "",
           reg_date: formatDate(idea.created_at),
           views: viewCountsMap[idea.id] || 0, // 실제 조회수 데이터 사용
-          likes: idea.likes || 0, // 기본값 설정 (백엔드에서 제공하지 않음)
+          // likes: idea.likes || 0, // 기본값 설정 (백엔드에서 제공하지 않음)
           Dday: "D-0", // 기본값 설정 (백엔드에서 제공하지 않음)
         }));
 
