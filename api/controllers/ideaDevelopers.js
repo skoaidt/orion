@@ -259,6 +259,7 @@ export const registerIdeaDevReview = (req, res) => {
 
   try {
     // 프론트엔드에서 받은 개발자 정보를 그대로 DB에 저장
+    // 각 개발자에 대해 새로운 레코드 삽입 (id는 자동 증가)
     const insertPromises = developers.map((developer) => {
       return new Promise((resolve, reject) => {
         // DB 구조에 맞게 수정
@@ -303,7 +304,7 @@ export const registerIdeaDevReview = (req, res) => {
         // 아이디어 상태 업데이트 (개발심의 완료 상태로 변경)
         const updateIdeaStatusQuery = `
           UPDATE special.ITAsset_ideas 
-          SET status = 'devReviewed' 
+          SET status = '개발심의' 
           WHERE id = ?
         `;
 
@@ -317,7 +318,7 @@ export const registerIdeaDevReview = (req, res) => {
             message: "개발 심의 정보가 성공적으로 등록되었습니다.",
             ideaID: ideaID,
             developerCount: developers.length,
-            status: "devReviewed", // 상태도 함께 반환
+            status: "개발심의", // 상태도 함께 반환
           });
         });
       })
