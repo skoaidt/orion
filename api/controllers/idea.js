@@ -350,7 +350,7 @@ export const registerSelectedIdea = (req, res) => {
       const newStatus =
         is_selected === true || is_selected === "true" || is_selected === 1
           ? "선정"
-          : "drop";
+          : "Drop";
 
       db.query(
         updateIdeaStatusQuery,
@@ -561,17 +561,17 @@ export const registerIdeaVerify = (req, res) => {
       `;
 
       // 검증 상태에 따라 아이디어 상태 업데이트
-      // 검증 상태가 두 부서 모두 true일 때만 verified, 하나라도 false이면 rejected
-      let newStatus = "verified";
+      // 검증 상태가 두 부서 모두 true일 때만 "검증", 하나라도 false이면 Drop
+      let newStatus = "검증";
 
-      // verification_status가 false이거나 ai_verification_status가 false일 때만 rejected로 설정
+      // verification_status가 false이거나 ai_verification_status가 false일 때만 Drop으로 설정
       if (
         verification_status === false ||
         verification_status === "false" ||
         ai_verification_status === false ||
         ai_verification_status === "false"
       ) {
-        newStatus = "rejected";
+        newStatus = "Drop";
         console.log("검증 단계에서 Drop 처리됨:", {
           선임부서_검증상태: verification_status,
           AI부서_검증상태: ai_verification_status,
@@ -886,12 +886,12 @@ export const registerAIVerify = (req, res) => {
             : false;
 
         // 검증 상태에 따라 아이디어 상태 업데이트
-        // 두 부서 중 하나라도 false면 rejected, 둘 다 true면 verified
-        let newStatus = "verified";
+        // 두 부서 중 하나라도 false면 "Drop", 둘 다 true면 "검증"
+        let newStatus = "검증";
 
-        // 선임부서 또는 AI/DT 부서 중 하나라도 명시적으로 false인 경우에만 rejected
+        // 선임부서 또는 AI/DT 부서 중 하나라도 명시적으로 false인 경우에만 "Drop"
         if (verificationStatus === false || aiVerificationStatus === false) {
-          newStatus = "rejected";
+          newStatus = "Drop";
           console.log("AI/DT 검증 단계에서 Drop 처리됨:", {
             선임부서_검증상태: verificationStatus,
             AI부서_검증상태: aiVerificationStatus,
@@ -946,6 +946,7 @@ export const registerIdeaPilot = (req, res) => {
     productivity, // 생산성
     cost, // 비용
     quantitybasis, // 정량적 기대효과 근거
+    filePath, // 파일 경로 (선택적)
   } = req.body;
 
   const idea_id = req.params.idea_id; // URL 파라미터에서 아이디어 ID 가져오기
@@ -989,19 +990,36 @@ export const registerIdeaPilot = (req, res) => {
     });
   }
 
-  // 데이터 삽입 쿼리
-  const insertQuery = `
-    INSERT INTO special.ITAsset_ideaPilot (
-      idea_id, productivity, cost, quantitybasis
-    ) VALUES (?, ?, ?, ?)
-  `;
+  // 데이터 삽입 쿼리 - created_at과 filePath 필드 추가
+  let insertQuery;
+  let values;
 
-  const values = [
-    idea_id,
-    parseFloat(productivity) || 0,
-    parseFloat(cost) || 0,
-    quantitybasis,
-  ];
+  if (filePath) {
+    insertQuery = `
+      INSERT INTO special.ITAsset_ideaPilot (
+        idea_id, productivity, cost, quantitybasis, filePath, created_at
+      ) VALUES (?, ?, ?, ?, ?, NOW())
+    `;
+    values = [
+      idea_id,
+      parseFloat(productivity) || 0,
+      parseFloat(cost) || 0,
+      quantitybasis,
+      filePath,
+    ];
+  } else {
+    insertQuery = `
+      INSERT INTO special.ITAsset_ideaPilot (
+        idea_id, productivity, cost, quantitybasis, created_at
+      ) VALUES (?, ?, ?, ?, NOW())
+    `;
+    values = [
+      idea_id,
+      parseFloat(productivity) || 0,
+      parseFloat(cost) || 0,
+      quantitybasis,
+    ];
+  }
 
   db.query(insertQuery, values, (err, data) => {
     if (err) {
@@ -1012,7 +1030,7 @@ export const registerIdeaPilot = (req, res) => {
     // 아이디어 상태 업데이트 (Pilot으로 변경)
     const updateIdeaStatusQuery = `
       UPDATE special.ITAsset_ideas 
-      SET status = 'piloted' 
+      SET status = 'pilot' 
       WHERE id = ?
     `;
 
@@ -1025,7 +1043,7 @@ export const registerIdeaPilot = (req, res) => {
       return res.status(200).json({
         message: "Pilot 데이터가 성공적으로 등록되었습니다.",
         idea_id: idea_id, // pilotId 대신 idea_id만 반환
-        status: "piloted", // 상태도 함께 반환
+        status: "pilot", // 상태도 함께 반환
       });
     });
   });

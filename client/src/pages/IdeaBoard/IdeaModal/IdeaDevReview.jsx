@@ -11,7 +11,10 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import axios from "axios";
 
-const TransferList = ({ onSelectedDevelopersChange }) => {
+const TransferList = ({
+  onSelectedDevelopersChange,
+  initialSelectedDevelopers = [],
+}) => {
   const [leftItems, setLeftItems] = useState([]);
   const [rightItems, setRightItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,9 +39,31 @@ const TransferList = ({ onSelectedDevelopersChange }) => {
           headqt: dev.headqt,
         }));
 
-        // 초기에는 모든 개발자를 왼쪽 리스트에 배치
-        setLeftItems(developers);
-        setRightItems([]); // 오른쪽 리스트는 초기에 비어있음
+        // 초기 선택된 개발자가 있으면 오른쪽 리스트에 배치
+        if (initialSelectedDevelopers && initialSelectedDevelopers.length > 0) {
+          // 초기 선택된 개발자들의 ID 목록
+          const selectedIds = initialSelectedDevelopers.map(
+            (dev) => dev.no || dev.n_id
+          );
+
+          // 오른쪽 리스트에 배치할 개발자들
+          const initialRightItems = developers.filter((dev) =>
+            selectedIds.includes(dev.no)
+          );
+
+          // 왼쪽 리스트에 배치할 개발자들 (선택되지 않은 개발자들)
+          const initialLeftItems = developers.filter(
+            (dev) => !selectedIds.includes(dev.no)
+          );
+
+          setLeftItems(initialLeftItems);
+          setRightItems(initialRightItems);
+        } else {
+          // 초기 선택된 개발자가 없으면 모든 개발자를 왼쪽 리스트에 배치
+          setLeftItems(developers);
+          setRightItems([]); // 오른쪽 리스트는 비어있음
+        }
+
         setError("");
       } catch (error) {
         console.error("개발자 목록 가져오기 오류:", error);
@@ -49,7 +74,7 @@ const TransferList = ({ onSelectedDevelopersChange }) => {
     };
 
     fetchDevelopers();
-  }, []);
+  }, [initialSelectedDevelopers]);
 
   // rightItems가 변경될 때마다 부모 컴포넌트에게 전달
   useEffect(() => {
@@ -194,6 +219,63 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
   const [priority, setPriority] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [devReviewData, setDevReviewData] = useState(null);
+  const [initialSelectedDevelopers, setInitialSelectedDevelopers] = useState(
+    []
+  );
+
+  // 개발심의 데이터 가져오기
+  useEffect(() => {
+    const fetchDevReviewData = async () => {
+      if (!ideaId) return;
+
+      try {
+        setLoading(true);
+        const response = await axios.get(`/api/ideas/devreview/${ideaId}`);
+        console.log("개발심의 데이터 조회 결과:", response.data);
+
+        // 데이터가 있으면 상태 업데이트
+        if (response.data) {
+          setDevReviewData(response.data);
+
+          // 폼에 데이터 설정
+          if (response.data.developers && response.data.developers.length > 0) {
+            setInitialSelectedDevelopers(response.data.developers);
+          }
+
+          if (response.data.schedule) {
+            if (response.data.schedule.startDate) {
+              setStartDate(dayjs(response.data.schedule.startDate));
+            }
+
+            if (response.data.schedule.endDate) {
+              setEndDate(dayjs(response.data.schedule.endDate));
+            }
+
+            if (response.data.schedule.priority) {
+              setPriority(response.data.schedule.priority);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("개발심의 데이터 조회 오류:", error);
+        if (error.response && error.response.status === 404) {
+          // 404 오류는 데이터가 없는 정상적인 상황일 수 있음
+          console.log(
+            "개발심의 데이터가 없습니다. 새로운 데이터를 등록합니다."
+          );
+        } else {
+          setError("개발심의 데이터를 불러올 수 없습니다.");
+        }
+      } finally {
+        setLoading(false);
+        setDataLoaded(true);
+      }
+    };
+
+    fetchDevReviewData();
+  }, [ideaId]);
 
   // 우선순위 변경 핸들러
   const handlePriorityChange = (event) => {
@@ -319,121 +401,112 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
           </div>
         )}
 
-        {/* 인력편성 */}
-        <div className="manRowContainer">
-          <div className="fieldLabel">인력 편성</div>
-          <TransferList onSelectedDevelopersChange={setSelectedDevelopers} />
-        </div>
-
-        <div className="ScheduleRowContainer">
-          <div className="fieldLabel">개발 일정</div>
-          <div className="datePickerContainer">
-            {/* 시작일자 */}
-            <div className="dateLeft">
-              <DatePickerComponent
-                label="시작일자"
-                value={startDate}
-                onChange={handleStartDateChange}
+        {loading ? (
+          <div className="loadingMessage">데이터를 불러오는 중입니다...</div>
+        ) : (
+          <>
+            {/* 인력편성 */}
+            <div className="manRowContainer">
+              <div className="fieldLabel">인력 편성</div>
+              <TransferList
+                onSelectedDevelopersChange={setSelectedDevelopers}
+                initialSelectedDevelopers={initialSelectedDevelopers}
               />
             </div>
 
-            {/* 종료일자 */}
-            <div className="dateRight">
-              <DatePickerComponent
-                label="종료일자"
-                value={endDate}
-                onChange={handleEndDateChange}
-              />
+            <div className="ScheduleRowContainer">
+              <div className="fieldLabel">개발 일정</div>
+              <div className="datePickerContainer">
+                {/* 시작일자 */}
+                <div className="dateLeft">
+                  <DatePickerComponent
+                    label="시작일자"
+                    value={startDate}
+                    onChange={handleStartDateChange}
+                  />
+                </div>
+
+                {/* 종료일자 */}
+                <div className="dateRight">
+                  <DatePickerComponent
+                    label="종료일자"
+                    value={endDate}
+                    onChange={handleEndDateChange}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* 우선순위 */}
-        <div className="priorityRowContainer">
-          <div className="fieldLabel">우선 순위</div>
-          <FormControl className="formControl">
-            <RadioGroup
-              row
-              name="priority-group"
-              className="radioGroup"
-              value={priority}
-              onChange={handlePriorityChange}
-            >
-              <FormControlLabel
-                value="1순위"
-                control={<Radio />}
-                label="1순위"
-              />
-              <FormControlLabel
-                value="2순위"
-                control={<Radio />}
-                label="2순위"
-              />
-              <FormControlLabel
-                value="3순위"
-                control={<Radio />}
-                label="3순위"
-              />
-            </RadioGroup>
-          </FormControl>
-        </div>
-
-        {/* 등록취소 */}
-        <div className="buttonContainer">
-          <button className="cancelButton" onClick={onClose} disabled={loading}>
-            취소
-          </button>
-          <button
-            className="registerButton"
-            onClick={handleRegister}
-            disabled={loading}
-            style={{
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.7 : 1,
-              position: "relative",
-            }}
-          >
-            {loading ? (
-              <>
-                <span style={{ visibility: "hidden" }}>등록</span>
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
+            {/* 우선순위 */}
+            <div className="priorityRowContainer">
+              <div className="fieldLabel">우선 순위</div>
+              <FormControl className="formControl">
+                <RadioGroup
+                  row
+                  name="priority-group"
+                  className="radioGroup"
+                  value={priority}
+                  onChange={handlePriorityChange}
                 >
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: "16px",
-                      height: "16px",
-                      border: "2px solid #fff",
-                      borderTopColor: "transparent",
-                      borderRadius: "50%",
-                      animation: "spin 1s linear infinite",
-                      marginRight: "8px",
-                    }}
-                  ></span>
-                  등록 중...
-                </span>
-                <style>
-                  {`
-                    @keyframes spin {
-                      0% { transform: rotate(0deg); }
-                      100% { transform: rotate(360deg); }
-                    }
-                  `}
-                </style>
-              </>
-            ) : (
-              "등록"
-            )}
-          </button>
-        </div>
+                  <FormControlLabel
+                    value="1순위"
+                    control={<Radio />}
+                    label="1순위"
+                  />
+                  <FormControlLabel
+                    value="2순위"
+                    control={<Radio />}
+                    label="2순위"
+                  />
+                  <FormControlLabel
+                    value="3순위"
+                    control={<Radio />}
+                    label="3순위"
+                  />
+                </RadioGroup>
+              </FormControl>
+            </div>
+
+            {/* 등록취소 */}
+            <div className="buttonContainer">
+              <button
+                className="cancelButton"
+                onClick={onClose}
+                disabled={loading}
+              >
+                취소
+              </button>
+              <button
+                className="registerButton"
+                onClick={handleRegister}
+                disabled={loading}
+                style={{
+                  cursor: loading ? "not-allowed" : "pointer",
+                  opacity: loading ? 0.7 : 1,
+                  position: "relative",
+                }}
+              >
+                {loading ? (
+                  <>
+                    <span style={{ visibility: "hidden" }}>등록</span>
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                      }}
+                    >
+                      처리 중...
+                    </span>
+                  </>
+                ) : (
+                  "등록"
+                )}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
