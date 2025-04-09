@@ -7,12 +7,14 @@ import SideBar from "./IdeaTable/SideBar";
 import IdeaNavbar from "./IdeaTable/IdeaNavbar";
 import IdeaGantt from "./IdeaGantt/IdeaGantt";
 import DashBoard from "./DashBoard/DashBoard";
+import IdeaManagement from "./IdeaTable/ideaManagement";
 
 const IdeaBorad = () => {
   const location = useLocation();
   const isDetailPage = location.pathname.includes("/detail/");
   const isGanttPage = location.pathname.includes("/gantt/");
   const isDashBoardPage = location.pathname.includes("/dashboard");
+  const isManagementPage = location.pathname.includes("/ideamanagement");
 
   // 화면 초기화 설정
   useEffect(() => {
@@ -40,6 +42,8 @@ const IdeaBorad = () => {
       return <IdeaGantt />;
     } else if (isDashBoardPage) {
       return <DashBoard />;
+    } else if (isManagementPage) {
+      return <IdeaManagement />;
     } else {
       return <IdeaTable />;
     }
