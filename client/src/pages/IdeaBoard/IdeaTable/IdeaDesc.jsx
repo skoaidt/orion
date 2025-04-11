@@ -570,6 +570,17 @@ const IdeaDesc = () => {
     }
   };
 
+  // 수정, 삭제 버튼 표시 여부를 결정하는 함수 추가
+  const isAuthor = () => {
+    console.log("현재 로그인한 사용자:", currentUser.userId);
+    console.log("아이디어 작성자:", ideaData.user_id);
+    // 로그인하지 않았거나 작성자 정보가 없는 경우 false 반환
+    if (!currentUser || !ideaData.user_id) return false;
+
+    // 현재 로그인한 사용자의 사번(userId)과 아이디어 작성자의 사번(n_id) 비교
+    return currentUser.userId === ideaData.user_id;
+  };
+
   if (loading) {
     return <div>데이터를 불러오는 중입니다...</div>;
   }
@@ -579,8 +590,12 @@ const IdeaDesc = () => {
       <div className="ideaDescWrap">
         <div className="ideaDescBtn">
           <div className="left">
-            <button onClick={handleEditClick}>수정</button>
-            <button onClick={handleDeleteClick}>삭제</button>
+            {isAuthor() && (
+              <>
+                <button onClick={handleEditClick}>수정</button>
+                <button onClick={handleDeleteClick}>삭제</button>
+              </>
+            )}
           </div>
           <div className="right">
             <Link to="/ideaboard">
@@ -746,8 +761,12 @@ const IdeaDesc = () => {
         <div className="gap-20"></div>
         <div className="ideaDescBtn">
           <div className="left">
-            <button onClick={handleEditClick}>수정</button>
-            <button onClick={handleDeleteClick}>삭제</button>
+            {isAuthor() && (
+              <>
+                <button onClick={handleEditClick}>수정</button>
+                <button onClick={handleDeleteClick}>삭제</button>
+              </>
+            )}
           </div>
           <div className="right">
             <Link to="/ideaboard">
