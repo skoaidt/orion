@@ -1,8 +1,9 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-// 오류를 일으키는 import 제거
-// import { formatDate } from "../../../utils/dateUtils";
+import axios from "axios";
+import "./ideaDesc.scss";
+
 import IdeaSelected from "../IdeaModal/IdeaSelected";
 import IdeaPilot from "../IdeaModal/IdeaPilot";
 import IdeaVerify from "../IdeaModal/IdeaVerify";
@@ -10,6 +11,7 @@ import IdeaDevReview from "../IdeaModal/IdeaDevReview";
 import IdeaCompleted from "../IdeaModal/IdeaCompleted";
 import IdeaDrop from "../IdeaModal/IdeaDrop";
 import IdeaRegister from "../IdeaModal/IdeaRegister";
+import PropTypes from "prop-types";
 
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -19,9 +21,6 @@ import RateReviewIcon from "@mui/icons-material/RateReview";
 import DeveloperModeIcon from "@mui/icons-material/DeveloperMode";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import CancelIcon from "@mui/icons-material/Cancel";
-
-import axios from "axios";
-import "./ideaDesc.scss";
 
 // formatDate 함수 직접 정의
 const formatDate = (dateString) => {
@@ -56,13 +55,42 @@ const STAGE_ORDER = {
   completed: 6,
 };
 
-const DescProcess = () => {
+const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
   const { id } = useParams();
   const [openModal, setOpenModal] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [ideaData, setIdeaData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [ideaData, setIdeaData] = useState(propIdeaData || null);
+  const [loading, setLoading] = useState(!propIdeaData);
   const navigate = useNavigate();
+
+  // API 호출하는 함수를 useCallback으로 감싸기
+  const fetchIdeaData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`/api/ideas/${id}`);
+      setIdeaData(response.data);
+    } catch (error) {
+      console.error("아이디어 상세 정보 가져오기 오류:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  // propIdeaData 변경 시 상태 업데이트
+  useEffect(() => {
+    if (propIdeaData) {
+      setIdeaData(propIdeaData);
+      setLoading(false);
+    }
+  }, [propIdeaData]);
+
+  // 컴포넌트가 마운트되었을 때 데이터가 없는 경우에만 가져오기
+  useEffect(() => {
+    if (!propIdeaData && id) {
+      fetchIdeaData();
+    }
+  }, [fetchIdeaData, propIdeaData, id]);
+
   // 아이디어 상태에 따른 스테이지 인덱스 확인 함수
   const getStageIndex = (status) => {
     // 상태에 따른 스테이지 매핑 수정
@@ -90,17 +118,17 @@ const DescProcess = () => {
       return statusStageMap[status];
     }
     // 추가적인 상태 문자열 확인 (부분 일치)
-    else if (status.includes("선정")) {
+    else if (status && status.includes("선정")) {
       return 1;
-    } else if (/pilot/i.test(status)) {
+    } else if (status && /pilot/i.test(status)) {
       return 2;
-    } else if (/verif/i.test(status)) {
+    } else if (status && /verif/i.test(status)) {
       return 3;
-    } else if (/review/i.test(status)) {
+    } else if (status && /review/i.test(status)) {
       return 4;
-    } else if (/develop/i.test(status)) {
+    } else if (status && /develop/i.test(status)) {
       return 5;
-    } else if (/complete/i.test(status)) {
+    } else if (status && /complete/i.test(status)) {
       return 6;
     }
 
@@ -109,6 +137,8 @@ const DescProcess = () => {
 
   // 단계 클릭 처리 함수
   const handleBoxClick = (modalType) => {
+    if (!ideaData) return;
+
     console.log(
       "handleBoxClick 호출:",
       modalType,
@@ -209,26 +239,10 @@ const DescProcess = () => {
     setOpenModal(modalType);
   };
 
-  const fetchIdeaData = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`/api/ideas/${id}`);
-      setIdeaData(response.data);
-    } catch (error) {
-      console.error("아이디어 상세 정보 가져오기 오류:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // 단계 진행 가능 여부 확인 함수
   const canProceedToStage = (stage) => {
-    // console.log(
-    //   "canProceedToStage 호출:",
-    //   stage,
-    //   "현재 상태:",
-    //   ideaData.status
-    // );
+    // 필요한 데이터가 없을 경우 진행 불가
+    if (!ideaData) return false;
 
     // Drop 상태인 경우, 어떤 단계도 진행 불가
     if (ideaData.status === STAGES.DROP) {
@@ -276,6 +290,8 @@ const DescProcess = () => {
 
   // 단계별 스타일 클래스 결정 함수
   const getStageClass = (stage) => {
+    if (!ideaData) return "";
+
     console.log("현재 아이디어 상태:", ideaData.status, "요청 단계:", stage);
 
     // 아이디어가 Drop 상태인 경우
@@ -338,6 +354,8 @@ const DescProcess = () => {
 
   // 상태에 따른 검증 상태 텍스트 반환 함수
   const getVerifyStatusText = (stage, stageText) => {
+    if (!ideaData) return "";
+
     // 개발중과 완료 단계는 항상 "-" 표시
     if (stage === "developing" || stage === "completed") {
       return "-";
@@ -356,6 +374,8 @@ const DescProcess = () => {
 
   // 칸반 보드 페이지로 이동 (원래의 handleKanbanNavigate 역할 복원)
   const handleKanbanNavigate = () => {
+    if (!ideaData) return;
+
     // 진행 가능 여부 확인
     if (!canProceedToStage("ideaDeveloping")) {
       if (ideaData.status === STAGES.DROP) {
@@ -374,21 +394,43 @@ const DescProcess = () => {
   };
 
   // 모달 닫기 및 데이터 새로고침 처리
+  const handleCloseModal = () => {
+    setOpenModal(null);
+
+    // 모달이 닫힐 때 부모 컴포넌트에 상태 변경 알림
+    if (onStatusChange) {
+      onStatusChange();
+    }
+
+    // 자체적으로도 데이터 다시 가져오기
+    fetchIdeaData();
+  };
+
+  // 수정 모달 닫기 처리
   const handleCloseEditModal = () => {
     setShowEditModal(false);
     // 수정 모달이 닫힐 때 데이터 다시 불러오기
     fetchIdeaData();
+
+    // 부모 컴포넌트에 상태 변경 알림
+    if (onStatusChange) {
+      onStatusChange();
+    }
   };
 
   if (loading) {
     return <div>데이터를 불러오는 중입니다...</div>;
   }
 
+  if (!ideaData) {
+    return <div>아이디어 정보를 가져올 수 없습니다.</div>;
+  }
+
   return (
     <div className="ideaProcess">
       <div className="processTitle">진행 현황</div>
       <hr style={{ margin: "10px 0", width: "100%", color: "#8c8c8c" }} />
-      {/* 과제 관리 Process : 진행 현황 */}
+
       <div className="processBox">
         <div className="processItem">
           <div className="processItemTitle active">등록</div>
@@ -659,10 +701,9 @@ const DescProcess = () => {
         </div>
       </div>
 
-      {/* 모달 컴포넌트 렌더링 */}
       {openModal === "ideaSelected" && (
         <IdeaSelected
-          onClose={() => setOpenModal(null)}
+          onClose={handleCloseModal}
           ideaId={id}
           ideaData={ideaData}
           isViewMode={getStageIndex(ideaData.status) > STAGE_ORDER["선정"]}
@@ -670,7 +711,7 @@ const DescProcess = () => {
       )}
       {openModal === "ideaPiloted" && (
         <IdeaPilot
-          onClose={() => setOpenModal(null)}
+          onClose={handleCloseModal}
           ideaId={id}
           ideaData={ideaData}
           isViewMode={getStageIndex(ideaData.status) > STAGE_ORDER["pilot"]}
@@ -678,7 +719,7 @@ const DescProcess = () => {
       )}
       {openModal === "ideaVerify" && (
         <IdeaVerify
-          onClose={() => setOpenModal(null)}
+          onClose={handleCloseModal}
           ideaId={id}
           ideaData={ideaData}
           isViewMode={getStageIndex(ideaData.status) > STAGE_ORDER["verified"]}
@@ -686,7 +727,7 @@ const DescProcess = () => {
       )}
       {openModal === "ideaDevReview" && (
         <IdeaDevReview
-          onClose={() => setOpenModal(null)}
+          onClose={handleCloseModal}
           ideaId={id}
           ideaData={ideaData}
           isViewMode={
@@ -696,21 +737,16 @@ const DescProcess = () => {
       )}
       {openModal === "ideaCompleted" && (
         <IdeaCompleted
-          onClose={() => setOpenModal(null)}
+          onClose={handleCloseModal}
           ideaId={id}
           ideaData={ideaData}
           isViewMode={getStageIndex(ideaData.status) > STAGE_ORDER["completed"]}
         />
       )}
       {openModal === "ideaDrop" && (
-        <IdeaDrop
-          onClose={() => setOpenModal(null)}
-          ideaId={id}
-          ideaData={ideaData}
-        />
+        <IdeaDrop onClose={handleCloseModal} ideaId={id} ideaData={ideaData} />
       )}
 
-      {/* 수정 모달 추가 */}
       {showEditModal && (
         <IdeaRegister
           onClose={handleCloseEditModal}
@@ -721,6 +757,11 @@ const DescProcess = () => {
       )}
     </div>
   );
+};
+
+DescProcess.propTypes = {
+  ideaData: PropTypes.object,
+  onStatusChange: PropTypes.func,
 };
 
 export default DescProcess;
