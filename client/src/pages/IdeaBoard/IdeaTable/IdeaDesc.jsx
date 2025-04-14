@@ -22,6 +22,7 @@ import { AuthContext } from "../../../context/authContext";
 import axios from "axios";
 
 import DescComments from "./DescComments";
+import DescProcess from "./DescProcess";
 
 // 상태값 상수 정의
 const STAGES = {
@@ -638,10 +639,12 @@ const IdeaDesc = () => {
           </div>
         </div>
       </div>
-      <div className="ideaProcess">
+
+      {/* <DescProcess /> */}
+      {/* <div className="ideaProcess">
         <div className="processTitle">진행 현황</div>
         <hr style={{ margin: "10px 0", width: "100%", color: "#8c8c8c" }} />
-        {/* 과제 관리 Process : 진행 현황 */}
+
         <div className="processBox">
           <div className="processItem">
             <div className="processItemTitle active">등록</div>
@@ -919,7 +922,7 @@ const IdeaDesc = () => {
           </div>
         </div>
 
-        {/* 모달 컴포넌트 렌더링 */}
+
         {openModal === "ideaSelected" && (
           <IdeaSelected
             onClose={() => setOpenModal(null)}
@@ -974,7 +977,6 @@ const IdeaDesc = () => {
           />
         )}
 
-        {/* 수정 모달 추가 */}
         {showEditModal && (
           <IdeaRegister
             onClose={handleCloseEditModal}
@@ -983,7 +985,7 @@ const IdeaDesc = () => {
             onUpdate={fetchIdeaData}
           />
         )}
-      </div>
+      </div> */}
     </div>
   );
 };
