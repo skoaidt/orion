@@ -95,6 +95,17 @@
           border-radius: 4px;
           margin-left: 5px;
         }
+        .devPriority {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          color: #3072ff;
+          background-color: #e6eaff;
+          padding: 2px 8px;
+          border-radius: 4px;
+          margin-left: 5px;
+        }
       }
 
       .right {
@@ -117,6 +128,86 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+
+      .left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        .developerList {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+
+          .title {
+            font-size: 14px;
+            color: #6b778c;
+            background-color: #f5f7fa;
+            padding: 2px 8px;
+            border-radius: 4px;
+          }
+
+          .developerListItem {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 2px 8px;
+            .developerListItemName {
+              font-size: 16px;
+              font-weight: 500;
+              color: $purpleIdea;
+            }
+            .developerListItemTeam {
+              font-size: 12px;
+              font-weight: 300;
+              color: #6b778c;
+            }
+          }
+        }
+      }
+      .right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        .icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 35px;
+          height: 35px;
+          border-radius: 50%;
+          background-color: $purpleIdeaLight;
+          color: #fff;
+          &:hover {
+            background-color: $purpleIdea;
+          }
+        }
+        .date {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          .wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            .dateTitle {
+              text-align: start;
+              font-size: 12px;
+              font-weight: 300;
+              color: #6b778c;
+            }
+            .dateValue {
+              font-size: 14px;
+              font-weight: 300;
+              color: #333;
+            }
+            &:hover {
+              border: 1px solid $purpleIdea;
+              border-radius: 5px;
+              padding: 5px;
+            }
+          }
+        }
+      }
     }
   }
 

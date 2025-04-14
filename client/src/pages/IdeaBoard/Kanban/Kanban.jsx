@@ -5,6 +5,8 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import axios from "axios";
 import "./kanban.scss";
 
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+
 // StrictMode와 함께 사용할 수 있는 Droppable 래퍼
 const StrictModeDroppable = ({ children, ...props }) => {
   const [enabled, setEnabled] = useState(false);
@@ -83,7 +85,6 @@ const Kanban = () => {
   const fetchDevReviewData = async () => {
     try {
       const response = await axios.get(`/api/ideas/devreview/${id}`);
-      console.log("개발자 정보 응답:", response.data);
       setDevReviewData(response.data);
     } catch (error) {
       console.error("개발자 정보 가져오기 오류:", error);
@@ -141,23 +142,18 @@ const Kanban = () => {
     };
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-
-  useEffect(() => {
-    console.log("devReviewData 변경됨:", devReviewData);
-  }, [devReviewData]);
 
   const handleBackClick = () => {
     navigate(`/ideaboard/detail/${id}`);
   };
 
   const onDragEnd = async (result) => {
-    console.log("onDragEnd result:", result);
     const { destination, source, draggableId } = result;
 
     // 목적지가 없는 경우 (드래그앤드롭이 취소된 경우)
     if (!destination) {
-      console.log("No destination found");
       return;
     }
 
@@ -166,24 +162,16 @@ const Kanban = () => {
       destination.droppableId === source.droppableId &&
       destination.index === source.index
     ) {
-      console.log("Dropped in the same position");
       return;
     }
-
-    console.log("Source column ID:", source.droppableId);
-    console.log("Destination column ID:", destination.droppableId);
 
     // 출발지 컬럼
     const sourceColumn = columns[source.droppableId];
     // 도착지 컬럼
     const destColumn = columns[destination.droppableId];
 
-    console.log("Source column:", sourceColumn);
-    console.log("Destination column:", destColumn);
-
     if (sourceColumn === destColumn) {
       // 같은 컬럼 내에서 순서만 변경
-      console.log("Moving within the same column");
       const newTaskIds = Array.from(sourceColumn.taskIds);
       const newTasks = Array.from(sourceColumn.tasks);
       const [movedTask] = newTasks.splice(source.index, 1);
@@ -197,8 +185,6 @@ const Kanban = () => {
         taskIds: newTaskIds,
         tasks: newTasks,
       };
-
-      console.log("Updated column:", newColumn);
 
       setColumns({
         ...columns,
@@ -217,18 +203,13 @@ const Kanban = () => {
       }
     } else {
       // 다른 컬럼으로 이동
-      console.log("Moving to a different column");
       const sourceTaskIds = Array.from(sourceColumn.taskIds);
       const sourceTasks = Array.from(sourceColumn.tasks);
       const destTaskIds = Array.from(destColumn.taskIds);
       const destTasks = Array.from(destColumn.tasks);
 
-      console.log("Source tasks before:", sourceTasks);
-      console.log("Source index:", source.index);
-
       // 이동할 태스크 찾기
       const taskToMove = sourceTasks[source.index];
-      console.log("Task to move:", taskToMove);
 
       // 원본 배열에서 태스크 제거
       const newSourceTasks = [...sourceTasks];
@@ -239,9 +220,6 @@ const Kanban = () => {
       const newDestTasks = [...destTasks];
       newDestTasks.splice(destination.index, 0, taskToMove);
       destTaskIds.splice(destination.index, 0, taskToMove.id);
-
-      console.log("Updated source tasks:", newSourceTasks);
-      console.log("Updated destination tasks:", newDestTasks);
 
       const newSourceColumn = {
         ...sourceColumn,
@@ -254,9 +232,6 @@ const Kanban = () => {
         taskIds: destTaskIds,
         tasks: newDestTasks,
       };
-
-      console.log("New source column:", newSourceColumn);
-      console.log("New destination column:", newDestColumn);
 
       setColumns({
         ...columns,
@@ -326,8 +301,6 @@ const Kanban = () => {
   if (loading) return <div className="loading">로딩 중...</div>;
   if (error) return <div className="error">{error}</div>;
 
-  console.log("현재 devReviewData:", devReviewData);
-
   // 날짜 포맷팅 함수
   const formatDate = (dateString) => {
     if (!dateString) return "-";
@@ -341,8 +314,8 @@ const Kanban = () => {
           <div className="left">
             <div className="title">{ideaData.title || "프로젝트 이름"}</div>
             <div className="idNo">
-              <span>[ID] </span>
-              <span>{id}</span>
+              <span>ID - </span>
+              <span> {id}</span>
             </div>
             {ideaData.project_type && (
               <div className="projectType">[{ideaData.project_type}]</div>
@@ -353,6 +326,13 @@ const Kanban = () => {
             {ideaData.job_field && (
               <div className="jobField">[{ideaData.job_field}]</div>
             )}
+            {devReviewData &&
+              devReviewData.schedule &&
+              devReviewData.schedule.priority && (
+                <div className="devPriority">
+                  [{devReviewData.schedule.priority}]
+                </div>
+              )}
           </div>
           <div className="right">
             <button className="back-button" onClick={handleBackClick}>
@@ -372,6 +352,7 @@ const Kanban = () => {
           <div className="left">
             <div className="developerList">
               <div className="title">개발자 정보</div>
+
               <div className="developerListItem">
                 {devReviewData &&
                 devReviewData.developers &&
@@ -389,32 +370,29 @@ const Kanban = () => {
             </div>
           </div>
           <div className="right">
-            <div className="date">
-              <div className="dateTitle">시작일</div>
-              <div className="dateValue">
-                {devReviewData && devReviewData.schedule
-                  ? formatDate(devReviewData.schedule.startDate)
-                  : "-"}
-              </div>
+            <div className="icon">
+              <EventAvailableIcon />
             </div>
             <div className="date">
-              <div className="dateTitle">종료일</div>
-              <div className="dateValue">
-                {devReviewData && devReviewData.schedule
-                  ? formatDate(devReviewData.schedule.endDate)
-                  : "-"}
-              </div>
-            </div>
-            {devReviewData &&
-              devReviewData.schedule &&
-              devReviewData.schedule.priority && (
-                <div className="date">
-                  <div className="dateTitle">우선순위</div>
-                  <div className="dateValue">
-                    {devReviewData.schedule.priority}
-                  </div>
+              <div className="wrap">
+                <div className="dateTitle">START</div>
+                <div className="dateValue">
+                  {devReviewData && devReviewData.schedule
+                    ? formatDate(devReviewData.schedule.startDate)
+                    : "-"}
                 </div>
-              )}
+              </div>
+            </div>
+            <div className="date">
+              <div className="wrap">
+                <div className="dateTitle">END</div>
+                <div className="dateValue">
+                  {devReviewData && devReviewData.schedule
+                    ? formatDate(devReviewData.schedule.endDate)
+                    : "-"}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
