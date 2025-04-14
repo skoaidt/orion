@@ -31,6 +31,12 @@ const Kanban = () => {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [ideaData, setIdeaData] = useState({ title: "", project_type: "" });
+  const [devReviewData, setDevReviewData] = useState({
+    developers: [],
+    schedule: { startDate: null, endDate: null, priority: "" },
+    rawData: [],
+  });
 
   // 초기 데이터 상태
   const [columns, setColumns] = useState({
@@ -48,13 +54,13 @@ const Kanban = () => {
     },
     inprogress: {
       id: "inprogress",
-      title: "In Progress",
+      title: "진행중",
       taskIds: [],
       tasks: [],
     },
     done: {
       id: "done",
-      title: "Done",
+      title: "완료",
       taskIds: [],
       tasks: [],
     },
@@ -63,11 +69,38 @@ const Kanban = () => {
   // 칼럼 순서
   const columnOrder = ["todo", "kickoff", "inprogress", "done"];
 
+  // 아이디어 데이터 가져오기
+  const fetchIdeaData = async () => {
+    try {
+      const response = await axios.get(`/api/ideas/${id}`);
+      setIdeaData(response.data);
+    } catch (error) {
+      console.error("아이디어 정보 가져오기 오류:", error);
+    }
+  };
+
+  // 개발자 리뷰 데이터 가져오기
+  const fetchDevReviewData = async () => {
+    try {
+      const response = await axios.get(`/api/ideas/devreview/${id}`);
+      console.log("개발자 정보 응답:", response.data);
+      setDevReviewData(response.data);
+    } catch (error) {
+      console.error("개발자 정보 가져오기 오류:", error);
+    }
+  };
+
   // 초기 데이터 로드
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+
+        // 아이디어 정보 가져오기
+        await fetchIdeaData();
+
+        // 개발자 정보 가져오기
+        await fetchDevReviewData();
 
         // 칸반 컬럼 초기화 (필요한 경우)
         await axios.post(`/api/kanbans/${id}/init`);
@@ -109,6 +142,10 @@ const Kanban = () => {
 
     fetchData();
   }, [id]);
+
+  useEffect(() => {
+    console.log("devReviewData 변경됨:", devReviewData);
+  }, [devReviewData]);
 
   const handleBackClick = () => {
     navigate(`/ideaboard/detail/${id}`);
@@ -289,15 +326,98 @@ const Kanban = () => {
   if (loading) return <div className="loading">로딩 중...</div>;
   if (error) return <div className="error">{error}</div>;
 
+  console.log("현재 devReviewData:", devReviewData);
+
+  // 날짜 포맷팅 함수
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toISOString().split("T")[0];
+  };
+
   return (
     <div className="kanban">
       <div className="kanban-header">
-        <h1>{id}번 : 프로젝트 칸반 보드</h1>
-        <button className="back-button" onClick={handleBackClick}>
-          돌아가기
-        </button>
+        <div className="header">
+          <div className="left">
+            <div className="title">{ideaData.title || "프로젝트 이름"}</div>
+            <div className="idNo">
+              <span>[ID] </span>
+              <span>{id}</span>
+            </div>
+            {ideaData.project_type && (
+              <div className="projectType">[{ideaData.project_type}]</div>
+            )}
+            {ideaData.business_field && (
+              <div className="businessField">[{ideaData.business_field}]</div>
+            )}
+            {ideaData.job_field && (
+              <div className="jobField">[{ideaData.job_field}]</div>
+            )}
+          </div>
+          <div className="right">
+            <button className="back-button" onClick={handleBackClick}>
+              돌아가기
+            </button>
+          </div>
+        </div>
+        <hr
+          style={{
+            margin: "10px 0",
+            borderColor: "#e0e0e0",
+            borderWidth: "1px",
+            borderStyle: "solid",
+          }}
+        />
+        <div className="devInfo">
+          <div className="left">
+            <div className="developerList">
+              <div className="title">개발자 정보</div>
+              <div className="developerListItem">
+                {devReviewData &&
+                devReviewData.developers &&
+                devReviewData.developers.length > 0 ? (
+                  devReviewData.developers.map((dev, index) => (
+                    <React.Fragment key={index}>
+                      <div className="developerListItemName">{dev.name}</div>
+                      <div className="developerListItemTeam">{dev.team}</div>
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <div>개발자 정보가 없습니다.</div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="right">
+            <div className="date">
+              <div className="dateTitle">시작일</div>
+              <div className="dateValue">
+                {devReviewData && devReviewData.schedule
+                  ? formatDate(devReviewData.schedule.startDate)
+                  : "-"}
+              </div>
+            </div>
+            <div className="date">
+              <div className="dateTitle">종료일</div>
+              <div className="dateValue">
+                {devReviewData && devReviewData.schedule
+                  ? formatDate(devReviewData.schedule.endDate)
+                  : "-"}
+              </div>
+            </div>
+            {devReviewData &&
+              devReviewData.schedule &&
+              devReviewData.schedule.priority && (
+                <div className="date">
+                  <div className="dateTitle">우선순위</div>
+                  <div className="dateValue">
+                    {devReviewData.schedule.priority}
+                  </div>
+                </div>
+              )}
+          </div>
+        </div>
       </div>
-
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="kanban-board">
           {columnOrder.map((columnId) => {
