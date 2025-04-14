@@ -20,8 +20,13 @@
 
 ## 개발목적
 
-- Orion은 SK오앤에스의 AI/DT Solution을 관리하기 위해 만든 시스템이다. 2024년 5월에 개발 완료했다.
-- 2024년 7월에는 개발자 소개 페이지를 추가 개발하였다.
+- Orion은 SK오앤에스의 AI/DT Solution을 관리하기 위해 만든 시스템이다.
+
+- 1st Open : 2024년 5월에 개발 완료
+
+- 2nd Open : 2024년 7월에는 개발자 소개 페이지를 추가 개발
+
+- 3rd : '25.3 ~ 아이디어 게시판 개발 작업중
 
 ![메인화면](/client/public/image/readme/orion_capture.png)
 
@@ -31,16 +36,30 @@ https://github.com/Kyuyong/skoOrion
 
 ---
 
-## 개발환경 실행법법
+## MAC or Linux 개발환경 실행법법
 
-> api : redis-server
+> redis 실행 : Login 횟수 관리
+> /api -> redis-server
 
-> api : yarn start
+> Back-end 실행
+> /api -> yarn start
 
-> client : yarn start
+> Front-end 실행
+> /client -> yarn start
+
+## Windows 개발환경 실행법법
+
+> redis-server : windows Linux VM ware 구동 후 redis 실행
+> redis-server
+
+> Back-end 실행
+> api -> yarn start
+
+> Front-end 실행
+> client -> yarn start
 
 ## 개발자 기여
 
 > PM : AI/DT 조규용 (mvpcouple@naver.com)
 
-> Support : 전다현 / 김민영 (참여 예정)
+> Front-end / API 개발 : 전다현 / 김민영
