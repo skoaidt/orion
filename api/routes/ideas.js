@@ -20,6 +20,7 @@ import {
   logIdeaView,
   getIdeaViewCount,
   getAllIdeaViewCounts,
+  updateIdeaStatus,
 } from "../controllers/idea.js";
 
 import {
@@ -62,5 +63,6 @@ router.get("/viewcounts", getAllIdeaViewCounts);
 
 router.get("/", getIdeas);
 router.get("/:id", getIdeaById);
+router.put("/status/:id", updateIdeaStatus);
 
 export default router; //test

@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import axios from "axios";
 import "./kanban.scss";
 
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import { Tooltip, IconButton } from "@mui/material";
+
+import { AuthContext } from "../../../context/authContext";
+import IdeaDevelop from "../IdeaModal/IdeaDevelop";
 // StrictMode와 함께 사용할 수 있는 Droppable 래퍼
 const StrictModeDroppable = ({ children, ...props }) => {
   const [enabled, setEnabled] = useState(false);
@@ -25,12 +30,20 @@ const StrictModeDroppable = ({ children, ...props }) => {
 };
 
 const Kanban = () => {
+  const { currentUser } = useContext(AuthContext);
   const { id } = useParams();
   const navigate = useNavigate();
   const [newTask, setNewTask] = useState({ content: "" });
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [ideaData, setIdeaData] = useState({ title: "", project_type: "" });
+  const [devReviewData, setDevReviewData] = useState({
+    developers: [],
+    schedule: { startDate: null, endDate: null, priority: "" },
+    rawData: [],
+  });
+  const [showDevelopModal, setShowDevelopModal] = useState(false);
 
   // 초기 데이터 상태
   const [columns, setColumns] = useState({
@@ -48,13 +61,13 @@ const Kanban = () => {
     },
     inprogress: {
       id: "inprogress",
-      title: "In Progress",
+      title: "진행중",
       taskIds: [],
       tasks: [],
     },
     done: {
       id: "done",
-      title: "Done",
+      title: "완료",
       taskIds: [],
       tasks: [],
     },
@@ -63,11 +76,37 @@ const Kanban = () => {
   // 칼럼 순서
   const columnOrder = ["todo", "kickoff", "inprogress", "done"];
 
+  // 아이디어 데이터 가져오기
+  const fetchIdeaData = async () => {
+    try {
+      const response = await axios.get(`/api/ideas/${id}`);
+      setIdeaData(response.data);
+    } catch (error) {
+      console.error("아이디어 정보 가져오기 오류:", error);
+    }
+  };
+
+  // 개발자 리뷰 데이터 가져오기
+  const fetchDevReviewData = async () => {
+    try {
+      const response = await axios.get(`/api/ideas/devreview/${id}`);
+      setDevReviewData(response.data);
+    } catch (error) {
+      console.error("개발자 정보 가져오기 오류:", error);
+    }
+  };
+
   // 초기 데이터 로드
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+
+        // 아이디어 정보 가져오기
+        await fetchIdeaData();
+
+        // 개발자 정보 가져오기
+        await fetchDevReviewData();
 
         // 칸반 컬럼 초기화 (필요한 경우)
         await axios.post(`/api/kanbans/${id}/init`);
@@ -108,6 +147,7 @@ const Kanban = () => {
     };
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const handleBackClick = () => {
@@ -115,12 +155,10 @@ const Kanban = () => {
   };
 
   const onDragEnd = async (result) => {
-    console.log("onDragEnd result:", result);
     const { destination, source, draggableId } = result;
 
     // 목적지가 없는 경우 (드래그앤드롭이 취소된 경우)
     if (!destination) {
-      console.log("No destination found");
       return;
     }
 
@@ -129,24 +167,16 @@ const Kanban = () => {
       destination.droppableId === source.droppableId &&
       destination.index === source.index
     ) {
-      console.log("Dropped in the same position");
       return;
     }
-
-    console.log("Source column ID:", source.droppableId);
-    console.log("Destination column ID:", destination.droppableId);
 
     // 출발지 컬럼
     const sourceColumn = columns[source.droppableId];
     // 도착지 컬럼
     const destColumn = columns[destination.droppableId];
 
-    console.log("Source column:", sourceColumn);
-    console.log("Destination column:", destColumn);
-
     if (sourceColumn === destColumn) {
       // 같은 컬럼 내에서 순서만 변경
-      console.log("Moving within the same column");
       const newTaskIds = Array.from(sourceColumn.taskIds);
       const newTasks = Array.from(sourceColumn.tasks);
       const [movedTask] = newTasks.splice(source.index, 1);
@@ -160,8 +190,6 @@ const Kanban = () => {
         taskIds: newTaskIds,
         tasks: newTasks,
       };
-
-      console.log("Updated column:", newColumn);
 
       setColumns({
         ...columns,
@@ -180,18 +208,13 @@ const Kanban = () => {
       }
     } else {
       // 다른 컬럼으로 이동
-      console.log("Moving to a different column");
       const sourceTaskIds = Array.from(sourceColumn.taskIds);
       const sourceTasks = Array.from(sourceColumn.tasks);
       const destTaskIds = Array.from(destColumn.taskIds);
       const destTasks = Array.from(destColumn.tasks);
 
-      console.log("Source tasks before:", sourceTasks);
-      console.log("Source index:", source.index);
-
       // 이동할 태스크 찾기
       const taskToMove = sourceTasks[source.index];
-      console.log("Task to move:", taskToMove);
 
       // 원본 배열에서 태스크 제거
       const newSourceTasks = [...sourceTasks];
@@ -202,9 +225,6 @@ const Kanban = () => {
       const newDestTasks = [...destTasks];
       newDestTasks.splice(destination.index, 0, taskToMove);
       destTaskIds.splice(destination.index, 0, taskToMove.id);
-
-      console.log("Updated source tasks:", newSourceTasks);
-      console.log("Updated destination tasks:", newDestTasks);
 
       const newSourceColumn = {
         ...sourceColumn,
@@ -217,9 +237,6 @@ const Kanban = () => {
         taskIds: destTaskIds,
         tasks: newDestTasks,
       };
-
-      console.log("New source column:", newSourceColumn);
-      console.log("New destination column:", newDestColumn);
 
       setColumns({
         ...columns,
@@ -286,18 +303,159 @@ const Kanban = () => {
     }
   };
 
+  const handleDevelopComplete = () => {
+    console.log("개발 완료 버튼 클릭, 현재 아이디어 ID:", id);
+    setShowDevelopModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowDevelopModal(false);
+  };
+
   if (loading) return <div className="loading">로딩 중...</div>;
   if (error) return <div className="error">{error}</div>;
 
+  // 날짜 포맷팅 함수
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toISOString().split("T")[0];
+  };
+
+  // 현재 사용자가 개발자인지 확인하는 함수
+  const isCurrentUserDeveloper = () => {
+    // 개발자 목록이 없거나 빈 배열인 경우
+    if (
+      !devReviewData ||
+      !devReviewData.developers ||
+      devReviewData.developers.length === 0
+    ) {
+      return false;
+    }
+
+    // currentUser가 없는 경우
+    if (!currentUser) {
+      return false;
+    }
+
+    // 개발자 목록에서 현재 사용자 확인 (n_id 또는 이름으로 비교)
+    return devReviewData.developers.some(
+      (dev) =>
+        (dev.no && currentUser.n_id && dev.no === currentUser.n_id) ||
+        (dev.name && currentUser.name && dev.name === currentUser.name)
+    );
+  };
+
+  // 개발 완료 버튼 표시 여부
+  const showCompleteButton = isCurrentUserDeveloper();
+
   return (
     <div className="kanban">
+      {showDevelopModal && <IdeaDevelop onClose={handleCloseModal} id={id} />}
       <div className="kanban-header">
-        <h1>{id}번 : 프로젝트 칸반 보드</h1>
-        <button className="back-button" onClick={handleBackClick}>
-          돌아가기
-        </button>
-      </div>
+        <div className="header">
+          <div className="left">
+            <div className="title">{ideaData.title || "프로젝트 이름"}</div>
+            <div className="idNo">
+              <span>ID - </span>
+              <span> {id}</span>
+            </div>
+            {ideaData.project_type && (
+              <div className="projectType">[{ideaData.project_type}]</div>
+            )}
+            {ideaData.business_field && (
+              <div className="businessField">[{ideaData.business_field}]</div>
+            )}
+            {ideaData.job_field && (
+              <div className="jobField">[{ideaData.job_field}]</div>
+            )}
+            {devReviewData &&
+              devReviewData.schedule &&
+              devReviewData.schedule.priority && (
+                <div className="devPriority">
+                  [{devReviewData.schedule.priority}]
+                </div>
+              )}
+          </div>
+          <div className="right">
+            {showCompleteButton && (
+              <button
+                className="completedButton"
+                onClick={handleDevelopComplete}
+              >
+                개발 완료
+              </button>
+            )}
+            <button className="back-button" onClick={handleBackClick}>
+              돌아가기
+            </button>
+          </div>
+        </div>
+        <hr
+          style={{
+            margin: "10px 0",
+            borderColor: "#e0e0e0",
+            borderWidth: "1px",
+            borderStyle: "solid",
+          }}
+        />
+        <div className="devInfo">
+          <div className="left">
+            <div className="developerList">
+              <div className="title">개발자 정보</div>
 
+              <div className="developerListItem">
+                {devReviewData &&
+                devReviewData.developers &&
+                devReviewData.developers.length > 0 ? (
+                  devReviewData.developers.map((dev, index) => (
+                    <React.Fragment key={index}>
+                      <div className="developerListItemName">{dev.name}</div>
+                      <div className="developerListItemTeam">{dev.team}</div>
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <div>개발자 정보가 없습니다.</div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="right">
+            <div className="devSchedule">
+              <div>
+                <Tooltip title="개발 일정" arrow placement="top">
+                  <IconButton className="icon" size="small" color="primary">
+                    <EventAvailableIcon />
+                  </IconButton>
+                </Tooltip>
+              </div>
+            </div>
+            <div className="date">
+              <Tooltip title="개발 시작일" arrow placement="top">
+                <div className="wrap">
+                  <div className="dateTitle">START</div>
+                  <div className="dateValue">
+                    {devReviewData && devReviewData.schedule
+                      ? formatDate(devReviewData.schedule.startDate)
+                      : "-"}
+                  </div>
+                </div>
+              </Tooltip>
+            </div>
+            <div className="date">
+              <Tooltip title="개발 종료일" arrow placement="top">
+                <div className="wrap">
+                  <div className="dateTitle">END</div>
+                  <div className="dateValue">
+                    {devReviewData && devReviewData.schedule
+                      ? formatDate(devReviewData.schedule.endDate)
+                      : "-"}
+                  </div>
+                </div>
+              </Tooltip>
+            </div>
+          </div>
+        </div>
+      </div>
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="kanban-board">
           {columnOrder.map((columnId) => {

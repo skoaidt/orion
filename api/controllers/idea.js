@@ -1494,3 +1494,32 @@ export const getAllIdeaViewCounts = (req, res) => {
     return res.status(200).json(data);
   });
 };
+
+export const updateIdeaStatus = (req, res) => {
+  const id = req.params.id;
+  const { status } = req.body;
+
+  console.log("백엔드 아이디어 상태 업데이트 요청:", id, status);
+  console.log("백엔드 id:", id);
+  console.log("백엔드 req.body:", req.body);
+
+  if (!id || !status) {
+    return res.status(400).json({ error: "아이디어 ID와 상태가 필요합니다." });
+  }
+
+  const query = `
+    UPDATE special.ITAsset_ideas 
+    SET status = ? 
+    WHERE id = ?
+  `;
+  const values = [status, id];
+  db.query(query, values, (err, data) => {
+    if (err) {
+      console.error("아이디어 상태 업데이트 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+    return res
+      .status(200)
+      .json({ message: "아이디어 상태가 성공적으로 업데이트되었습니다." });
+  });
+};
