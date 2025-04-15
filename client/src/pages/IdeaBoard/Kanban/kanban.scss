@@ -109,6 +109,22 @@
       }
 
       .right {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        .completedButton {
+          background-color: #4945b3;
+          border: none;
+          border-radius: 4px;
+          padding: 6px 12px;
+          cursor: pointer;
+          font-size: 14px;
+          color: #fff;
+          &:hover {
+            background-color: #2d2a82;
+          }
+        }
         .back-button {
           background-color: #6554c0;
           border: none;
@@ -168,17 +184,27 @@
         display: flex;
         align-items: center;
         gap: 20px;
-        .icon {
+        .devSchedule {
           display: flex;
           align-items: center;
-          justify-content: center;
-          width: 35px;
-          height: 35px;
-          border-radius: 50%;
-          background-color: $purpleIdeaLight;
-          color: #fff;
-          &:hover {
-            background-color: $purpleIdea;
+          flex-direction: column;
+          gap: 5px;
+          p {
+            font-size: 12px;
+            font-weight: 300;
+          }
+          .icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: $purpleIdeaLight;
+            color: #fff;
+            &:hover {
+              background-color: $purpleIdea;
+            }
           }
         }
         .date {
@@ -201,6 +227,7 @@
               color: #333;
             }
             &:hover {
+              background-color: #eae6ff;
               border: 1px solid $purpleIdea;
               border-radius: 5px;
               padding: 5px;
@@ -261,7 +288,7 @@
 
           input,
           textarea {
-            width: 100%;
+            width: 95%;
             padding: 8px;
             margin-bottom: 10px;
             border: 1px solid #dfe1e6;
@@ -290,12 +317,12 @@
               cursor: pointer;
 
               &:first-child {
-                background-color: #36b37e;
+                background-color: #4945b3;
                 color: white;
                 border: none;
 
                 &:hover {
-                  background-color: #2c9a6a;
+                  background-color: #353292;
                 }
               }
 

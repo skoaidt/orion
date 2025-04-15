@@ -57,7 +57,7 @@ export const MainContents = ({ solutionData, onSearch }) => {
               </div>
               <button
                 className="ideaBtn"
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate("/ideaboard")}
               >
                 ► 바로가기
               </button>
@@ -66,7 +66,7 @@ export const MainContents = ({ solutionData, onSearch }) => {
               className="animation-updown"
               src={process.env.PUBLIC_URL + "/image/main/ideaMain01.png"}
               alt="title"
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/ideaboard")}
             />
           </div>
         </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -6,7 +6,10 @@ import axios from "axios";
 import "./kanban.scss";
 
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import { Tooltip, IconButton } from "@mui/material";
 
+import { AuthContext } from "../../../context/authContext";
+import IdeaDevelop from "../IdeaModal/IdeaDevelop";
 // StrictMode와 함께 사용할 수 있는 Droppable 래퍼
 const StrictModeDroppable = ({ children, ...props }) => {
   const [enabled, setEnabled] = useState(false);
@@ -27,6 +30,7 @@ const StrictModeDroppable = ({ children, ...props }) => {
 };
 
 const Kanban = () => {
+  const { currentUser } = useContext(AuthContext);
   const { id } = useParams();
   const navigate = useNavigate();
   const [newTask, setNewTask] = useState({ content: "" });
@@ -39,6 +43,7 @@ const Kanban = () => {
     schedule: { startDate: null, endDate: null, priority: "" },
     rawData: [],
   });
+  const [showDevelopModal, setShowDevelopModal] = useState(false);
 
   // 초기 데이터 상태
   const [columns, setColumns] = useState({
@@ -298,6 +303,15 @@ const Kanban = () => {
     }
   };
 
+  const handleDevelopComplete = () => {
+    console.log("개발 완료 버튼 클릭, 현재 아이디어 ID:", id);
+    setShowDevelopModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowDevelopModal(false);
+  };
+
   if (loading) return <div className="loading">로딩 중...</div>;
   if (error) return <div className="error">{error}</div>;
 
@@ -307,8 +321,36 @@ const Kanban = () => {
     return new Date(dateString).toISOString().split("T")[0];
   };
 
+  // 현재 사용자가 개발자인지 확인하는 함수
+  const isCurrentUserDeveloper = () => {
+    // 개발자 목록이 없거나 빈 배열인 경우
+    if (
+      !devReviewData ||
+      !devReviewData.developers ||
+      devReviewData.developers.length === 0
+    ) {
+      return false;
+    }
+
+    // currentUser가 없는 경우
+    if (!currentUser) {
+      return false;
+    }
+
+    // 개발자 목록에서 현재 사용자 확인 (n_id 또는 이름으로 비교)
+    return devReviewData.developers.some(
+      (dev) =>
+        (dev.no && currentUser.n_id && dev.no === currentUser.n_id) ||
+        (dev.name && currentUser.name && dev.name === currentUser.name)
+    );
+  };
+
+  // 개발 완료 버튼 표시 여부
+  const showCompleteButton = isCurrentUserDeveloper();
+
   return (
     <div className="kanban">
+      {showDevelopModal && <IdeaDevelop onClose={handleCloseModal} id={id} />}
       <div className="kanban-header">
         <div className="header">
           <div className="left">
@@ -335,6 +377,14 @@ const Kanban = () => {
               )}
           </div>
           <div className="right">
+            {showCompleteButton && (
+              <button
+                className="completedButton"
+                onClick={handleDevelopComplete}
+              >
+                개발 완료
+              </button>
+            )}
             <button className="back-button" onClick={handleBackClick}>
               돌아가기
             </button>
@@ -370,28 +420,38 @@ const Kanban = () => {
             </div>
           </div>
           <div className="right">
-            <div className="icon">
-              <EventAvailableIcon />
-            </div>
-            <div className="date">
-              <div className="wrap">
-                <div className="dateTitle">START</div>
-                <div className="dateValue">
-                  {devReviewData && devReviewData.schedule
-                    ? formatDate(devReviewData.schedule.startDate)
-                    : "-"}
-                </div>
+            <div className="devSchedule">
+              <div>
+                <Tooltip title="개발 일정" arrow placement="top">
+                  <IconButton className="icon" size="small" color="primary">
+                    <EventAvailableIcon />
+                  </IconButton>
+                </Tooltip>
               </div>
             </div>
             <div className="date">
-              <div className="wrap">
-                <div className="dateTitle">END</div>
-                <div className="dateValue">
-                  {devReviewData && devReviewData.schedule
-                    ? formatDate(devReviewData.schedule.endDate)
-                    : "-"}
+              <Tooltip title="개발 시작일" arrow placement="top">
+                <div className="wrap">
+                  <div className="dateTitle">START</div>
+                  <div className="dateValue">
+                    {devReviewData && devReviewData.schedule
+                      ? formatDate(devReviewData.schedule.startDate)
+                      : "-"}
+                  </div>
                 </div>
-              </div>
+              </Tooltip>
+            </div>
+            <div className="date">
+              <Tooltip title="개발 종료일" arrow placement="top">
+                <div className="wrap">
+                  <div className="dateTitle">END</div>
+                  <div className="dateValue">
+                    {devReviewData && devReviewData.schedule
+                      ? formatDate(devReviewData.schedule.endDate)
+                      : "-"}
+                  </div>
+                </div>
+              </Tooltip>
             </div>
           </div>
         </div>
