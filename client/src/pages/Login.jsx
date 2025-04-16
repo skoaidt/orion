@@ -43,9 +43,23 @@ export const Login = ({ onLogin }) => {
         </div>
         <div className={`dadaBox ${showDadaBox ? "show" : ""}`}>
           <img
-            src={`${process.env.PUBLIC_URL}/image/login/dadah.png`}
+            src={`${process.env.PUBLIC_URL}/image/login/dada.png`}
             alt="loginBG"
           />
+          <p className="dadaText">Coding 요정은 언제나 당신의 곁에 있습니다.</p>
+          <div className={`codingElf ${showDadaBox ? "show" : ""}`}>
+            <img
+              src={`${process.env.PUBLIC_URL}/image/login/codingElf.png`}
+              alt="codingElf"
+            />
+          </div>
+          <div className={`elf ${showDadaBox ? "show" : ""}`}>
+            <img
+              className="animation-updown"
+              src={`${process.env.PUBLIC_URL}/image/login/elf.png`}
+              alt="elf"
+            />
+          </div>
         </div>
         <div
           className="circle"
@@ -101,11 +115,10 @@ export const Login = ({ onLogin }) => {
                 )}
               </div>
             )}
-            <button variant="contained" type="submit" className="loginBtn">
+            <button type="submit" className="loginBtn">
               Login
             </button>
           </form>
-          <div className="gap-20"></div>
         </div>
         <div className="loginFooter">
           <div className="loginFooterText">
