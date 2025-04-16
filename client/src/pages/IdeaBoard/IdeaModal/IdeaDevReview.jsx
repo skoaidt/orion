@@ -14,6 +14,7 @@ import axios from "axios";
 const TransferList = ({
   onSelectedDevelopersChange,
   initialSelectedDevelopers = [],
+  disabled = false,
 }) => {
   const [leftItems, setLeftItems] = useState([]);
   const [rightItems, setRightItems] = useState([]);
@@ -39,21 +40,38 @@ const TransferList = ({
           headqt: dev.headqt,
         }));
 
+        // 개발자 목록을 이름순(ㄱㄴㄷ순)으로 정렬
+        developers.sort((a, b) => a.name.localeCompare(b.name, "ko"));
+
         // 초기 선택된 개발자가 있으면 오른쪽 리스트에 배치
         if (initialSelectedDevelopers && initialSelectedDevelopers.length > 0) {
-          // 초기 선택된 개발자들의 ID 목록
+          // 초기 선택된 개발자들의 ID 목록 (no 또는 n_id)
           const selectedIds = initialSelectedDevelopers.map(
             (dev) => dev.no || dev.n_id
           );
 
           // 오른쪽 리스트에 배치할 개발자들
-          const initialRightItems = developers.filter((dev) =>
-            selectedIds.includes(dev.no)
-          );
+          const initialRightItems = [];
+
+          // 선택된 ID에 해당하는 개발자들을 찾아서 오른쪽 리스트에 추가
+          // 매칭되는 개발자만 오른쪽 리스트에 추가 (매칭되지 않는 개발자는 무시)
+          selectedIds.forEach((id) => {
+            // 개발자 목록에서 해당 ID를 가진 개발자 찾기
+            const matchingDev = developers.find((dev) => dev.no === id);
+
+            // 찾은 개발자가 있고, 아직 오른쪽 리스트에 없는 경우에만 추가
+            if (
+              matchingDev &&
+              !initialRightItems.some((item) => item.no === id)
+            ) {
+              initialRightItems.push(matchingDev);
+            }
+            // 매칭되는 개발자가 없는 경우는 무시 (왼쪽 리스트에 남게 됨)
+          });
 
           // 왼쪽 리스트에 배치할 개발자들 (선택되지 않은 개발자들)
           const initialLeftItems = developers.filter(
-            (dev) => !selectedIds.includes(dev.no)
+            (dev) => !initialRightItems.some((item) => item.no === dev.no)
           );
 
           setLeftItems(initialLeftItems);
@@ -83,18 +101,69 @@ const TransferList = ({
   }, [rightItems, onSelectedDevelopersChange]);
 
   const moveToRight = () => {
-    setRightItems([...rightItems, ...selectedLeft]);
+    if (disabled) return; // 읽기모드에서는 작동하지 않음
+
+    // 오른쪽으로 이동할 아이템들
+    const itemsToMove = selectedLeft;
+
+    // 오른쪽 리스트에 추가될 새 아이템들 (기존 + 새로 이동하는 아이템들)
+    // 중복 제거: 이미 rightItems에 있는 아이템은 추가하지 않음
+    const newRightItems = [...rightItems];
+
+    itemsToMove.forEach((item) => {
+      // 이미 오른쪽 리스트에 no가 같은 아이템이 있는지 확인
+      const isDuplicate = newRightItems.some(
+        (rightItem) => rightItem.no === item.no
+      );
+
+      // 중복이 아닌 경우에만 오른쪽 리스트에 추가
+      if (!isDuplicate) {
+        newRightItems.push(item);
+      }
+    });
+
+    // 업데이트된 오른쪽 리스트와 필터링된 왼쪽 리스트 설정
+    setRightItems(newRightItems);
     setLeftItems(leftItems.filter((item) => !selectedLeft.includes(item)));
     setSelectedLeft([]);
   };
 
   const moveToLeft = () => {
-    setLeftItems([...leftItems, ...selectedRight]);
+    if (disabled) return; // 읽기모드에서는 작동하지 않음
+
+    // 왼쪽으로 이동할 아이템들
+    const itemsToMove = selectedRight;
+
+    // 왼쪽 리스트에 추가될 새 아이템들 (기존 + 새로 이동하는 아이템들)
+    // 중복 제거: 이미 leftItems에 있는 아이템은 추가하지 않음
+    const newLeftItems = [...leftItems];
+
+    itemsToMove.forEach((item) => {
+      // 이미 왼쪽 리스트에 no가 같은 아이템이 있는지 확인
+      const isDuplicate = newLeftItems.some(
+        (leftItem) => leftItem.no === item.no
+      );
+
+      // 중복이 아닌 경우에만 왼쪽 리스트에 추가
+      if (!isDuplicate) {
+        newLeftItems.push(item);
+      }
+    });
+
+    // 이름순(ㄱㄴㄷ순)으로 정렬
+    const sortedLeftItems = newLeftItems.sort((a, b) => {
+      return a.name.localeCompare(b.name, "ko");
+    });
+
+    // 업데이트된 왼쪽 리스트와 필터링된 오른쪽 리스트 설정
+    setLeftItems(sortedLeftItems);
     setRightItems(rightItems.filter((item) => !selectedRight.includes(item)));
     setSelectedRight([]);
   };
 
   const toggleSelection = (item, selectedItems, setSelectedItems) => {
+    if (disabled) return; // 읽기모드에서는 작동하지 않음
+
     if (selectedItems.includes(item)) {
       setSelectedItems(selectedItems.filter((i) => i !== item));
     } else {
@@ -142,6 +211,7 @@ const TransferList = ({
                   toggleSelection(item, selectedItems, setSelectedItems)
                 }
                 className={selectedItems.includes(item) ? "selected" : ""}
+                style={{ cursor: disabled ? "default" : "pointer" }}
               >
                 <td>{item.headqt || "-"}</td>
                 <td>{item.team}</td>
@@ -168,18 +238,20 @@ const TransferList = ({
           src={`${process.env.PUBLIC_URL}/image/icons/right.png`}
           alt="오른쪽 이동"
           className={`moveButton ${
-            selectedLeft.length === 0 ? "disabled" : ""
+            selectedLeft.length === 0 || disabled ? "disabled" : ""
           }`}
           onClick={moveToRight}
+          style={{ cursor: disabled ? "default" : "pointer" }}
         />
         {/* 왼쪽으로 이동 버튼 */}
         <img
           src={`${process.env.PUBLIC_URL}/image/icons/left.png`}
           alt="왼쪽 이동"
           className={`moveButton ${
-            selectedRight.length === 0 ? "disabled" : ""
+            selectedRight.length === 0 || disabled ? "disabled" : ""
           }`}
           onClick={moveToLeft}
+          style={{ cursor: disabled ? "default" : "pointer" }}
         />
       </div>
 
@@ -191,7 +263,7 @@ const TransferList = ({
   );
 };
 
-const DatePickerComponent = ({ label, value, onChange }) => {
+const DatePickerComponent = ({ label, value, onChange, readOnly = false }) => {
   return (
     <div className="datePickerWrapper">
       {/* 날짜 라벨 */}
@@ -205,13 +277,15 @@ const DatePickerComponent = ({ label, value, onChange }) => {
           displayStaticWrapperAs="desktop"
           value={value}
           onChange={onChange}
+          readOnly={readOnly}
+          disabled={readOnly}
         />
       </LocalizationProvider>
     </div>
   );
 };
 
-const IdeaDevReview = ({ onClose, ideaId }) => {
+const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
   // 상태 변수 정의
   const [selectedDevelopers, setSelectedDevelopers] = useState([]);
   const [startDate, setStartDate] = useState(dayjs()); // 오늘 날짜로 초기화
@@ -219,11 +293,11 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
   const [priority, setPriority] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [dataLoaded, setDataLoaded] = useState(false);
   const [devReviewData, setDevReviewData] = useState(null);
   const [initialSelectedDevelopers, setInitialSelectedDevelopers] = useState(
     []
   );
+  const [viewMode, setViewMode] = useState(isViewMode); // 읽기모드 상태 추가
 
   // 개발심의 데이터 가져오기
   useEffect(() => {
@@ -233,7 +307,6 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
       try {
         setLoading(true);
         const response = await axios.get(`/api/ideas/devreview/${ideaId}`);
-        console.log("개발심의 데이터 조회 결과:", response.data);
 
         // 데이터가 있으면 상태 업데이트
         if (response.data) {
@@ -241,7 +314,26 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
 
           // 폼에 데이터 설정
           if (response.data.developers && response.data.developers.length > 0) {
-            setInitialSelectedDevelopers(response.data.developers);
+            // 중복 제거: 개발자 ID(n_id)를 기준으로 고유한 개발자만 추출
+            const uniqueDevelopers = [];
+            const addedIds = new Set();
+
+            response.data.developers.forEach((dev) => {
+              // n_id가 있는지 확인하고 no로 사용
+              const devId = dev.no || dev.n_id;
+              if (devId && !addedIds.has(devId)) {
+                addedIds.add(devId);
+                // 항상 no 필드를 사용하도록 통일
+                uniqueDevelopers.push({
+                  ...dev,
+                  no: devId, // n_id를 no로 통일
+                });
+              }
+            });
+
+            setInitialSelectedDevelopers(uniqueDevelopers);
+            // 선택된 개발자 상태도 함께 설정 (읽기 모드 전환 시 상태 유지를 위함)
+            setSelectedDevelopers(uniqueDevelopers);
           }
 
           if (response.data.schedule) {
@@ -262,20 +354,21 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
         console.error("개발심의 데이터 조회 오류:", error);
         if (error.response && error.response.status === 404) {
           // 404 오류는 데이터가 없는 정상적인 상황일 수 있음
-          console.log(
-            "개발심의 데이터가 없습니다. 새로운 데이터를 등록합니다."
-          );
         } else {
           setError("개발심의 데이터를 불러올 수 없습니다.");
         }
       } finally {
         setLoading(false);
-        setDataLoaded(true);
       }
     };
 
     fetchDevReviewData();
   }, [ideaId]);
+
+  // 읽기모드 변경 시 상태 설정
+  useEffect(() => {
+    setViewMode(isViewMode);
+  }, [isViewMode]);
 
   // 우선순위 변경 핸들러
   const handlePriorityChange = (event) => {
@@ -284,6 +377,8 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
 
   // 날짜 변경 핸들러
   const handleStartDateChange = (newValue) => {
+    if (viewMode) return; // 읽기 모드에서는 변경 불가
+
     if (newValue) {
       setStartDate(newValue);
 
@@ -295,6 +390,8 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
   };
 
   const handleEndDateChange = (newValue) => {
+    if (viewMode) return; // 읽기 모드에서는 변경 불가
+
     if (newValue) {
       // 종료일이 시작일보다 이전이면 변경하지 않음
       if (newValue.isBefore(startDate)) {
@@ -334,24 +431,38 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
       setError("");
 
       // 개발자 정보 전체를 전송 (id, n_id, name, team, headqt)
-      const devReviewData = {
+      const reviewData = {
         ideaID: ideaId || 1,
         developers: selectedDevelopers,
         startDate: startDate.format("YYYY-MM-DD"),
         endDate: endDate.format("YYYY-MM-DD"),
         priority: priority,
+        isUpdate: devReviewData ? true : false, // 업데이트 여부 표시
+        deleteBeforeInsert: true, // 백엔드에서 처리하도록 플래그 전달
       };
 
-      console.log("등록할 개발 심의 데이터:", devReviewData);
+      // 단일 POST 요청으로 처리 (백엔드에서 deleteBeforeInsert 플래그를 확인하여 처리)
+      const response = await axios.post("/api/ideas/devreview", reviewData);
 
-      // API 호출
-      const response = await axios.post("/api/ideas/devreview", devReviewData);
+      if (devReviewData) {
+        alert("개발 심의 정보가 성공적으로 업데이트되었습니다.");
+      } else {
+        alert("개발 심의 정보가 성공적으로 등록되었습니다.");
+      }
 
-      console.log("개발 심의 등록 성공:", response.data);
+      // 등록 성공 시 devReviewData와 initialSelectedDevelopers 업데이트
+      setDevReviewData(response.data);
 
-      // 성공 메시지 표시 후 모달 닫기
-      alert("개발 심의 정보가 성공적으로 등록되었습니다.");
-      onClose();
+      // 최신 상태로 initialSelectedDevelopers 업데이트
+      setInitialSelectedDevelopers(selectedDevelopers);
+
+      // 등록 후 읽기 모드로 변경
+      setViewMode(true);
+
+      // 상위 컴포넌트에 등록 완료 알림 (있는 경우)
+      if (onRegister) {
+        onRegister(response.data);
+      }
     } catch (error) {
       console.error("개발 심의 등록 오류:", error);
 
@@ -372,12 +483,17 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
     }
   };
 
+  // 편집 모드로 전환
+  const handleEdit = () => {
+    setViewMode(false);
+  };
+
   return (
     <div className="reviewModalOverlay">
       <div className="reviewModalContent">
         {/* 제목 */}
         <div className="titleBox">
-          <h2>개발 심의</h2>
+          <h2>{viewMode ? "개발 심의" : "개발 심의"}</h2>
           <CloseIcon className="closeIcon" onClick={onClose} />
         </div>
         <hr className="titleUnderline" />
@@ -411,6 +527,7 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
               <TransferList
                 onSelectedDevelopersChange={setSelectedDevelopers}
                 initialSelectedDevelopers={initialSelectedDevelopers}
+                disabled={viewMode} // 읽기 모드일 때 비활성화
               />
             </div>
 
@@ -423,6 +540,7 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
                     label="시작일자"
                     value={startDate}
                     onChange={handleStartDateChange}
+                    readOnly={viewMode} // 읽기 모드 시 읽기 전용
                   />
                 </div>
 
@@ -432,6 +550,7 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
                     label="종료일자"
                     value={endDate}
                     onChange={handleEndDateChange}
+                    readOnly={viewMode} // 읽기 모드 시 읽기 전용
                   />
                 </div>
               </div>
@@ -447,63 +566,87 @@ const IdeaDevReview = ({ onClose, ideaId }) => {
                   className="radioGroup"
                   value={priority}
                   onChange={handlePriorityChange}
+                  disabled={viewMode} // 읽기 모드일 때 비활성화
                 >
                   <FormControlLabel
                     value="1순위"
-                    control={<Radio />}
+                    control={<Radio disabled={viewMode} />}
                     label="1순위"
                   />
                   <FormControlLabel
                     value="2순위"
-                    control={<Radio />}
+                    control={<Radio disabled={viewMode} />}
                     label="2순위"
                   />
                   <FormControlLabel
                     value="3순위"
-                    control={<Radio />}
+                    control={<Radio disabled={viewMode} />}
                     label="3순위"
                   />
                 </RadioGroup>
               </FormControl>
             </div>
 
-            {/* 등록취소 */}
+            {/* 버튼 영역 */}
             <div className="buttonContainer">
-              <button
-                className="cancelButton"
-                onClick={onClose}
-                disabled={loading}
-              >
-                취소
-              </button>
-              <button
-                className="registerButton"
-                onClick={handleRegister}
-                disabled={loading}
-                style={{
-                  cursor: loading ? "not-allowed" : "pointer",
-                  opacity: loading ? 0.7 : 1,
-                  position: "relative",
-                }}
-              >
-                {loading ? (
-                  <>
-                    <span style={{ visibility: "hidden" }}>등록</span>
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                      }}
-                    >
-                      처리 중...
-                    </span>
-                  </>
-                ) : (
-                  "등록"
-                )}
-              </button>
+              {viewMode ? (
+                // 읽기 모드: 왼쪽 버튼 = 수정, 오른쪽 버튼 = 닫기
+                <>
+                  <button
+                    className="cancelButton"
+                    onClick={handleEdit}
+                    disabled={loading}
+                  >
+                    수정
+                  </button>
+                  <button
+                    className="registerButton"
+                    onClick={onClose}
+                    disabled={loading}
+                  >
+                    닫기
+                  </button>
+                </>
+              ) : (
+                // 편집 모드: 왼쪽 버튼 = 취소, 오른쪽 버튼 = 등록
+                <>
+                  <button
+                    className="cancelButton"
+                    onClick={onClose}
+                    disabled={loading}
+                  >
+                    취소
+                  </button>
+                  <button
+                    className="registerButton"
+                    onClick={handleRegister}
+                    disabled={loading}
+                    style={{
+                      cursor: loading ? "not-allowed" : "pointer",
+                      opacity: loading ? 0.7 : 1,
+                      position: "relative",
+                    }}
+                  >
+                    {loading ? (
+                      <>
+                        <span style={{ visibility: "hidden" }}>등록</span>
+                        <span
+                          style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                          }}
+                        >
+                          처리 중...
+                        </span>
+                      </>
+                    ) : (
+                      "등록"
+                    )}
+                  </button>
+                </>
+              )}
             </div>
           </>
         )}

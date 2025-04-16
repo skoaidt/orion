@@ -12,8 +12,6 @@ import "react-quill/dist/quill.snow.css";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { AuthContext } from "../../../context/authContext";
-import { useSelect, SelectProvider } from "@mui/base/useSelect";
-import { useOption } from "@mui/base/useOption";
 
 const IdeaRegister = ({
   onClose,
@@ -437,183 +435,6 @@ const IdeaRegister = ({
     }
   };
 
-  // 커스텀 Select 컴포넌트
-  const CustomSelect = React.forwardRef(function CustomSelect(props, ref) {
-    const { children, placeholder, disabled, value, onChange, ...other } =
-      props;
-
-    const listboxRef = React.useRef(null);
-    const [open, setOpen] = React.useState(false);
-    const [searchTerm, setSearchTerm] = React.useState("");
-    const [filteredOptions, setFilteredOptions] = React.useState([]);
-
-    // 검색어 입력 처리
-    const handleSearchChange = (e) => {
-      const term = e.target.value;
-      setSearchTerm(term);
-      console.log("검색어 입력:", term);
-
-      // 모든 옵션 확인
-      const allOptions = React.Children.toArray(children);
-      console.log(
-        "전체 옵션 목록:",
-        allOptions.map((child) => ({
-          value: child.props.value,
-          text: child.props.children,
-        }))
-      );
-
-      // 검색어가 있으면 필터링, 없으면 전체 목록
-      if (term.trim() === "") {
-        console.log("검색어가 비어 있어 모든 옵션을 표시합니다.");
-        setFilteredOptions(allOptions);
-      } else {
-        const filtered = allOptions.filter((child) => {
-          const childText = String(child.props.children).toLowerCase();
-          const searchTermLower = term.toLowerCase();
-          const includes = childText.includes(searchTermLower);
-          console.log(`옵션 "${child.props.children}" 검색 결과:`, includes);
-          return includes;
-        });
-        console.log(
-          "필터링된 옵션 목록:",
-          filtered.map((child) => child.props.children)
-        );
-        setFilteredOptions(filtered);
-      }
-    };
-
-    const handleButtonClick = (event) => {
-      console.log("드롭다운 버튼 클릭됨, 현재 상태:", open ? "열림" : "닫힘");
-      setOpen(!open);
-      // 열릴 때 필터 초기화
-      if (!open) {
-        setSearchTerm("");
-        const allOptions = React.Children.toArray(children);
-        console.log("드롭다운 열림 - 모든 옵션 표시:", allOptions.length);
-        setFilteredOptions(allOptions);
-      }
-    };
-
-    const handleButtonKeyDown = (event) => {
-      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-        event.preventDefault();
-        setOpen(true);
-        setSearchTerm("");
-        setFilteredOptions(React.Children.toArray(children));
-      }
-    };
-
-    React.useEffect(() => {
-      const handleOutsideClick = (event) => {
-        if (
-          listboxRef.current &&
-          !listboxRef.current.contains(event.target) &&
-          open &&
-          !event.target.closest(".department-select-button") &&
-          !event.target.closest(".department-search-input")
-        ) {
-          setOpen(false);
-        }
-      };
-
-      // 컴포넌트 마운트 시 모든 옵션 설정
-      const allOptions = React.Children.toArray(children);
-      console.log(
-        "Select 컴포넌트 마운트/업데이트 - 옵션 수:",
-        allOptions.length
-      );
-      setFilteredOptions(allOptions);
-
-      document.addEventListener("mousedown", handleOutsideClick);
-      return () => {
-        document.removeEventListener("mousedown", handleOutsideClick);
-      };
-    }, [open, listboxRef, children]);
-
-    const displayValue = React.useMemo(() => {
-      if (value) {
-        return value;
-      }
-      return placeholder || "";
-    }, [value, placeholder]);
-
-    const handleOptionClick = (optionValue) => {
-      onChange(null, optionValue);
-      setOpen(false);
-      setSearchTerm("");
-    };
-
-    return (
-      <div className="department-select" ref={ref} {...other}>
-        <button
-          type="button"
-          className={`department-select-button ${disabled ? "disabled" : ""}`}
-          disabled={disabled}
-          onClick={handleButtonClick}
-          onKeyDown={handleButtonKeyDown}
-          aria-haspopup="listbox"
-          aria-expanded={open}
-        >
-          {displayValue}
-        </button>
-
-        {open && (
-          <div className="department-select-popup">
-            <div className="department-search-container">
-              <input
-                type="text"
-                className="department-search-input"
-                placeholder="검색..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-                autoFocus
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-            <ul
-              className="department-select-listbox"
-              ref={listboxRef}
-              role="listbox"
-            >
-              {filteredOptions.length > 0 ? (
-                filteredOptions.map((child, index) => {
-                  console.log(`렌더링된 옵션 ${index}:`, child.props.children);
-                  return React.cloneElement(child, {
-                    onClick: () => handleOptionClick(child.props.value),
-                  });
-                })
-              ) : (
-                <li className="department-select-no-results">
-                  검색 결과가 없습니다
-                </li>
-              )}
-            </ul>
-          </div>
-        )}
-      </div>
-    );
-  });
-
-  // 커스텀 Option 컴포넌트
-  const CustomOption = React.forwardRef(function CustomOption(props, ref) {
-    const { children, value, onClick, ...other } = props;
-    const selected = value === (props.parentValue || "");
-
-    return (
-      <li
-        ref={ref}
-        className={`department-select-option ${selected ? "selected" : ""}`}
-        role="option"
-        aria-selected={selected}
-        onClick={onClick}
-        {...other}
-      >
-        {children}
-      </li>
-    );
-  });
-
   return (
     <div className="modalOverlay">
       <div className="modalContent">
@@ -996,7 +817,7 @@ const IdeaRegister = ({
                 )}
                 <div className="selectorsRow">
                   <div className="selectContainer">
-                    <CustomSelect
+                    <Select
                       value={selectedHeadqt}
                       onChange={handleHeadqtChange}
                       placeholder={
@@ -1005,34 +826,26 @@ const IdeaRegister = ({
                       disabled={teamsLoading}
                     >
                       {headqtList.map((headqt) => (
-                        <CustomOption
-                          key={headqt}
-                          value={headqt}
-                          parentValue={selectedHeadqt}
-                        >
+                        <MenuItem key={headqt} value={headqt}>
                           {headqt}
-                        </CustomOption>
+                        </MenuItem>
                       ))}
-                    </CustomSelect>
+                    </Select>
                   </div>
 
                   <div className="selectContainer">
-                    <CustomSelect
+                    <Select
                       value={selectedTeam}
                       onChange={handleTeamChange}
                       placeholder="팀을 선택하세요"
                       disabled={!selectedHeadqt || teams.length === 0}
                     >
                       {teams.map((team) => (
-                        <CustomOption
-                          key={team}
-                          value={team}
-                          parentValue={selectedTeam}
-                        >
+                        <MenuItem key={team} value={team}>
                           {team}
-                        </CustomOption>
+                        </MenuItem>
                       ))}
-                    </CustomSelect>
+                    </Select>
                   </div>
                 </div>
               </div>

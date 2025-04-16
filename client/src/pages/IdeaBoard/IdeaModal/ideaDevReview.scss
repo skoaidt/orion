@@ -467,48 +467,36 @@
     .buttonContainer {
       display: flex;
       justify-content: center;
-      gap: 15px;
+      gap: 10px;
+      padding: 0px;
       width: 100%;
-      padding: 5px 0;
-      margin-top: 10px;
 
       button {
-        padding: 8px 20px;
+        padding: 5px 15px;
         cursor: pointer;
         border: none;
-        border-radius: 25px;
-        min-width: 100px;
-        font-weight: bold;
-        font-size: 14px;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        border-radius: 5px;
+        min-width: 80px;
 
         &:hover {
-          transform: scale(1.05);
-          box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+          transform: scale(1.05); // Slightly enlarge the button on hover
+          background-color: #666; // Change background color on hover (default for all buttons)
         }
 
         &:active {
-          transform: scale(0.95);
+          transform: scale(0.95); // Slightly shrink the button when clicked
+          background-color: #444; // Change background color on click (default for all buttons)
         }
       }
 
       .registerButton {
-        background-color: $purpleIdea;
+        background-color: #565656;
         color: white;
-
-        &:hover {
-          background-color: darken($purpleIdeaLight, 10%);
-        }
       }
 
       .cancelButton {
-        background-color: #a3a3a3;
+        background-color: #999;
         color: white;
-
-        &:hover {
-          background-color: darken(#a3a3a3, 10%);
-        }
       }
     }
   }
