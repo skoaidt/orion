@@ -128,100 +128,162 @@ body {
     height: 100vh;
     left: 0;
     top: 0;
-    background-image: url(../public/image/login/loginbg.jpg);
-    background-size: cover;
+    background-color: #5c7eec;
 
     .leftSide {
-      position: relative;
-      flex: 60;
+      flex: 6;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      background-image: url(../public/image/login/loginSide.png);
-      background-position: center;
-      background-size: cover;
-      padding: 20px;
-      margin: 5vw 0 100px 15vw;
-      border-top-left-radius: 20px;
-      border-bottom-left-radius: 20px;
+      position: relative;
 
-      .logoName {
+      .logoBox {
+        width: 70%;
+        img {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          height: 50px;
+        }
+      }
+
+      .imgBox {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        img {
+          width: 880px;
+          height: 640px;
+        }
+      }
+      .dadaBox {
         position: absolute;
-        color: white;
-        top: 40px;
-        left: 40px;
-        font-size: 30px;
-        font-weight: 800;
+        bottom: 0;
+        z-index: 10;
+        transform: translateX(-100%);
+        opacity: 0;
+        transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out;
+
+        &.show {
+          transform: translateX(0);
+          opacity: 1;
+        }
+
+        img {
+          width: 50%;
+          height: 50%;
+        }
+      }
+      .circle {
+        position: absolute;
+        top: 50;
+        left: 60;
+        width: 50px;
+        height: 50px;
+        background-color: #e05cb3;
+        border-radius: 50%;
+        cursor: pointer;
       }
     }
 
     .rightSide {
-      flex: 40;
+      flex: 4;
       display: flex;
-      flex-direction: column;
       justify-content: center;
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 40px;
-      margin: 5vw 35vh 100px 0;
-      border-top-right-radius: 20px;
-      border-bottom-right-radius: 20px;
-      gap: 50px;
+      align-items: center;
+      flex-direction: column;
 
       .logoBox {
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-        align-items: center;
-
+        margin-right: 100px;
         img {
-          width: 30%;
-          margin-bottom: 10px;
+          height: 50px;
         }
+      }
 
-        .loginTitle {
+      .loginBox {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #efedf3e8;
+        width: 560px;
+        height: 600px;
+        border-radius: 20px;
+        padding: 40px;
+        margin-right: 100px;
+        margin-top: 20px;
+        .titleBox {
+          width: 75%;
           display: flex;
           justify-content: center;
-          color: $grayColor;
-          font-size: 26px;
-          font-weight: 200;
-          font-family: $notoSans;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          .loginTitle {
+            display: flex;
+            color: #19348d;
+            font-size: 48px;
+            font-weight: 600;
+            font-family: $notoSans;
+          }
+
+          .subTitle {
+            display: flex;
+            justify-content: flex-start;
+            color: #19348d;
+            font-size: 14px;
+            font-weight: 300;
+            font-family: $notoSans;
+            padding: 20px;
+          }
+        }
+        .errorMessageWrap {
+          margin-top: 8px;
+          margin-left: 20px;
+          font-size: 12px;
+          color: $redColor;
+        }
+
+        .retryMessageWrap {
+          margin-top: 8px;
+          margin-left: 20px;
+          font-size: 12px;
+          color: $redColor;
+        }
+
+        .loginBtn {
+          width: 100%;
+          font-size: 16px;
+          font-weight: 400;
+          padding: 20px;
+          margin-top: 20px;
+          background-color: #5c7eec;
+          color: white;
+          border-radius: 10px;
+          border: none;
+          cursor: pointer;
+          text-decoration: none;
+          &:hover {
+            background-color: #4765c9;
+          }
         }
       }
-
-      .formTitle {
-        text-align: center;
-        color: $grayColor;
-        font-size: 24px;
-      }
-
-      .errorMessageWrap {
-        margin-top: 8px;
-        margin-left: 20px;
-        font-size: 12px;
-        color: $redColor;
-      }
-
-      .retryMessageWrap {
-        margin-top: 8px;
-        margin-left: 20px;
-        font-size: 12px;
-        color: $redColor;
-      }
-
-      .loginBtn {
+      .loginFooter {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         width: 100%;
-        font-size: 16px;
-        font-weight: 400;
-        padding: 20px;
-        margin-top: 20px;
-        background-color: $main-dark;
-        color: white;
-        border-radius: 10px;
-        border: none;
-        cursor: pointer;
-        text-decoration: none;
-        &:hover {
-          background-color: $blueColor;
+        margin-top: 10px;
+        .loginFooterText {
+          color: white;
+          font-size: 14px;
+          font-weight: 300;
+          font-family: $notoSans;
+          padding: 15px;
+          &.textRight {
+            margin-right: 100px;
+          }
         }
       }
     }
