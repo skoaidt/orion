@@ -20,31 +20,31 @@ const BarChartBox = () => {
         <div className="boxwrap">
           <div className="box regBox">
             <div className="title">등록</div>
-            <div className="cnt">234</div>
+            <div className="cnt">123</div>
           </div>
           <div className="box devBox">
             <div className="title">선정</div>
-            <div className="cnt">234</div>
+            <div className="cnt">245</div>
           </div>
           <div className="box devBox">
             <div className="title">Pilot</div>
-            <div className="cnt">234</div>
+            <div className="cnt">198</div>
           </div>
           <div className="box devBox">
             <div className="title">검증</div>
-            <div className="cnt">234</div>
+            <div className="cnt">312</div>
           </div>
           <div className="box devBox">
             <div className="title">개발심의</div>
-            <div className="cnt">234</div>
+            <div className="cnt">87</div>
           </div>
           <div className="box devBox">
             <div className="title">개발</div>
-            <div className="cnt">234</div>
+            <div className="cnt">256</div>
           </div>
           <div className="box compBox">
             <div className="title">완료</div>
-            <div className="cnt">234</div>
+            <div className="cnt">175</div>
           </div>
         </div>
       </div>
