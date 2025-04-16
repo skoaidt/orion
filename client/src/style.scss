@@ -153,15 +153,16 @@ body {
         justify-content: center;
         align-items: center;
         img {
-          width: 880px;
-          height: 640px;
+          width: 100vh;
+          height: 100%;
         }
       }
       .dadaBox {
         position: absolute;
         bottom: 0;
-        z-index: 10;
-        transform: translateX(-100%);
+        right: 0;
+        z-index: 1;
+        transform: translateX(100%);
         opacity: 0;
         transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out;
 
@@ -171,16 +172,66 @@ body {
         }
 
         img {
-          width: 50%;
-          height: 50%;
+          width: auto;
+          height: auto;
+          max-width: 600px;
+          max-height: 600px;
+        }
+        .dadaText {
+          width: 300px;
+          position: absolute;
+          background-color: #5c7eec;
+          bottom: 20px;
+          right: 400px;
+          z-index: 4;
+          color: white;
+          font-size: 16px;
+          font-weight: 400;
+          font-family: $notoSans;
+          border-radius: 5px;
+          padding: 10px;
+        }
+        .codingElf {
+          position: absolute;
+          top: 0px;
+          right: -50px;
+          z-index: 3;
+          transition: transform 0.5s ease-in-out 1s, opacity 1s ease-in-out 0.8s; // 지연 추가
+          opacity: 0;
+
+          &.show {
+            transform: translateX(0) rotate(15deg); // 회전 효과 추가
+            opacity: 1;
+          }
+          img {
+            width: 150px;
+            height: auto;
+          }
+        }
+        .elf {
+          position: absolute;
+          top: 50px;
+          right: 50px;
+          z-index: 2;
+          transition: transform 0.5s ease-in-out 1s, opacity 1s ease-in-out 0.8s; // 지연 추가
+          opacity: 0;
+
+          &.show {
+            transform: translateX(0) rotate(-15deg); // 회전 효과 추가
+            opacity: 1;
+          }
+          img {
+            width: 150px;
+            height: auto;
+          }
         }
       }
       .circle {
         position: absolute;
-        top: 50;
-        left: 60;
-        width: 50px;
-        height: 50px;
+        top: 50%;
+        left: 50%;
+        width: 40px;
+        height: 40px;
         background-color: #e05cb3;
         border-radius: 50%;
         cursor: pointer;
@@ -195,9 +246,8 @@ body {
       flex-direction: column;
 
       .logoBox {
-        margin-right: 100px;
         img {
-          height: 50px;
+          height: 37px;
         }
       }
 
@@ -206,19 +256,49 @@ body {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        background-color: #efedf3e8;
-        width: 560px;
-        height: 600px;
+        background-color: #efedf3f2;
+        width: 65%;
+        height: 50%;
         border-radius: 20px;
         padding: 40px;
-        margin-right: 100px;
+
         margin-top: 20px;
+
+        form {
+          width: 80%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+
+          /* Material-UI TextField 관련 스타일 */
+          .MuiTextField-root {
+            margin: 10px 0;
+            z-index: 1;
+
+            .MuiInputBase-root {
+              background-color: white;
+            }
+
+            .MuiOutlinedInput-root {
+              &.Mui-focused .MuiOutlinedInput-notchedOutline {
+                border-color: #5c7eec;
+              }
+            }
+
+            .MuiInputLabel-root {
+              &.Mui-focused {
+                color: #5c7eec;
+              }
+            }
+          }
+        }
+
         .titleBox {
-          width: 75%;
+          width: 80%;
           display: flex;
           justify-content: center;
           flex-direction: column;
-          align-items: center;
+          align-items: flex-start;
           gap: 10px;
           .loginTitle {
             display: flex;
@@ -235,7 +315,7 @@ body {
             font-size: 14px;
             font-weight: 300;
             font-family: $notoSans;
-            padding: 20px;
+            padding: 5px 5px;
           }
         }
         .errorMessageWrap {
@@ -275,15 +355,13 @@ body {
         align-items: center;
         width: 100%;
         margin-top: 10px;
+        width: 80%;
         .loginFooterText {
           color: white;
           font-size: 14px;
           font-weight: 300;
           font-family: $notoSans;
           padding: 15px;
-          &.textRight {
-            margin-right: 100px;
-          }
         }
       }
     }
