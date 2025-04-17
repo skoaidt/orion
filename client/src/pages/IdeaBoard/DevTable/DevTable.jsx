@@ -15,9 +15,10 @@ const DevTable = () => {
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
     { field: "idea_id", headerName: "아이디어 ID", width: 100 },
+    { field: "status", headerName: "상태", width: 100 },
     { field: "business_field", headerName: "사업유형", width: 120 },
     { field: "job_field", headerName: "업무분야", width: 120 },
-    { field: "title", headerName: "제목", width: 200, flex: 1 },
+    { field: "title", headerName: "제목", width: 180, flex: 1 },
     { field: "dev_team", headerName: "개발팀", width: 120 },
     { field: "dept_name", headerName: "제안팀", width: 120 },
     { field: "name", headerName: "작성자", width: 100 },
