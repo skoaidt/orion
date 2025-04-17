@@ -21,7 +21,9 @@ const SideBar = () => {
       <Link to="/ideaboard">
         <div className="menuNm">IDEA 등록</div>
       </Link>
-      <div className="menuNm">Dev. 관리</div>
+      <Link to="/ideaboard/devtable">
+        <div className="menuNm">Dev. 관리</div>
+      </Link>
     </div>
   );
 };
