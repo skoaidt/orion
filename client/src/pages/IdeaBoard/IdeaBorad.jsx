@@ -7,12 +7,14 @@ import SideBar from "./IdeaTable/SideBar";
 import IdeaNavbar from "./IdeaTable/IdeaNavbar";
 import DashBoard from "./DashBoard/DashBoard";
 import Kanban from "./Kanban/Kanban";
+import DevTable from "./DevTable/DevTable";
 
 const IdeaBorad = () => {
   const location = useLocation();
   const isDetailPage = location.pathname.includes("/detail/");
   const isKanbanPage = location.pathname.includes("/kanban/");
   const isDashBoardPage = location.pathname.includes("/dashboard");
+  const isDevTablePage = location.pathname.includes("/devtable");
 
   // 화면 초기화 설정
   useEffect(() => {
@@ -40,6 +42,8 @@ const IdeaBorad = () => {
       return <Kanban />;
     } else if (isDashBoardPage) {
       return <DashBoard />;
+    } else if (isDevTablePage) {
+      return <DevTable />;
     } else {
       // /ideaboard 경로일 때 IdeaTable 렌더링
       return <IdeaTable />;
