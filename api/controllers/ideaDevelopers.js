@@ -205,6 +205,8 @@ export const registerIdeaDevReview = (req, res) => {
     startDate, // 시작일자
     endDate, // 종료일자
     priority, // 우선순위
+    isUpdate, // 업데이트 여부
+    deleteBeforeInsert, // 기존 데이터 삭제 후 신규 등록 여부
   } = req.body;
 
   // 필드 이름 한글 매핑
@@ -258,74 +260,197 @@ export const registerIdeaDevReview = (req, res) => {
   }
 
   try {
-    // 프론트엔드에서 받은 개발자 정보를 그대로 DB에 저장
-    // 각 개발자에 대해 새로운 레코드 삽입 (id는 자동 증가)
-    const insertPromises = developers.map((developer) => {
-      return new Promise((resolve, reject) => {
-        // DB 구조에 맞게 수정
-        const insertReviewQuery = `
-          INSERT INTO special.ITAsset_ideaDevReview (
-            idea_id, 
-            n_id, 
-            name, 
-            team, 
-            headqt, 
-            devScheduleStart, 
-            devScheduleEnd, 
-            priority
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `;
+    // isUpdate와 deleteBeforeInsert가 true이면 기존 데이터 삭제 후 새로 등록
+    if (isUpdate && deleteBeforeInsert) {
+      console.log(
+        `아이디어 ID(${ideaID})에 대한 기존 개발심의 데이터를 삭제 후 새로 등록합니다.`
+      );
 
-        const reviewValues = [
-          ideaID, // ideaID를 DB의 idea_id 필드에 매핑
-          developer.no, // 프론트엔드에서 n_id는 'no'로 매핑됨
-          developer.name || "", // null이면 빈 문자열 사용
-          developer.team || "",
-          developer.headqt || "",
-          startDate,
-          endDate,
-          priority,
-        ];
+      // 트랜잭션 시작
+      db.beginTransaction((err) => {
+        if (err) {
+          console.error("트랜잭션 시작 오류:", err);
+          return res.status(500).json({ error: err.message });
+        }
 
-        db.query(insertReviewQuery, reviewValues, (err, result) => {
-          if (err) {
-            console.error(`개발자 심의 정보 등록 오류:`, err);
-            reject(err);
-          } else {
-            resolve(result);
+        // 1. 해당 아이디어 ID에 대한 기존 개발심의 데이터 모두 삭제
+        const deleteQuery =
+          "DELETE FROM special.ITAsset_ideaDevReview WHERE idea_id = ?";
+        db.query(deleteQuery, [ideaID], (deleteErr, deleteResult) => {
+          if (deleteErr) {
+            // 삭제 중 오류 발생 시 롤백
+            return db.rollback(() => {
+              console.error("기존 데이터 삭제 오류:", deleteErr);
+              res.status(500).json({ error: deleteErr.message });
+            });
           }
+
+          console.log(
+            `${deleteResult.affectedRows}개의 기존 개발심의 데이터가 삭제되었습니다.`
+          );
+
+          // 2. 새로운 개발자 데이터 등록
+          const insertPromises = developers.map((developer) => {
+            return new Promise((resolve, reject) => {
+              const insertReviewQuery = `
+                INSERT INTO special.ITAsset_ideaDevReview (
+                  idea_id, 
+                  n_id, 
+                  name, 
+                  team, 
+                  headqt, 
+                  devScheduleStart, 
+                  devScheduleEnd, 
+                  priority
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+              `;
+
+              const reviewValues = [
+                ideaID,
+                developer.no, // 프론트엔드에서 n_id는 'no'로 매핑됨
+                developer.name || "",
+                developer.team || "",
+                developer.headqt || "",
+                startDate,
+                endDate,
+                priority,
+              ];
+
+              db.query(
+                insertReviewQuery,
+                reviewValues,
+                (insertErr, insertResult) => {
+                  if (insertErr) {
+                    reject(insertErr);
+                  } else {
+                    resolve(insertResult);
+                  }
+                }
+              );
+            });
+          });
+
+          // 3. 모든 개발자 정보 등록 후
+          Promise.all(insertPromises)
+            .then((results) => {
+              // 아이디어 상태 업데이트 (개발심의 완료 상태로 변경)
+              const updateIdeaStatusQuery = `
+                UPDATE special.ITAsset_ideas 
+                SET status = '개발심의' 
+                WHERE id = ?
+              `;
+
+              db.query(
+                updateIdeaStatusQuery,
+                [ideaID],
+                (updateErr, updateData) => {
+                  if (updateErr) {
+                    // 상태 업데이트 실패 시 롤백
+                    return db.rollback(() => {
+                      console.error("아이디어 상태 업데이트 오류:", updateErr);
+                      res.status(500).json({ error: updateErr.message });
+                    });
+                  }
+
+                  // 모든 작업 성공 시 커밋
+                  db.commit((commitErr) => {
+                    if (commitErr) {
+                      return db.rollback(() => {
+                        console.error("커밋 오류:", commitErr);
+                        res.status(500).json({ error: commitErr.message });
+                      });
+                    }
+
+                    console.log("모든 작업이 성공적으로 완료되었습니다.");
+                    return res.status(200).json({
+                      message:
+                        "개발 심의 정보가 성공적으로 업데이트되었습니다.",
+                      ideaID: ideaID,
+                      developerCount: developers.length,
+                      status: "개발심의",
+                    });
+                  });
+                }
+              );
+            })
+            .catch((promiseErr) => {
+              // 개발자 정보 등록 중 오류 발생 시 롤백
+              return db.rollback(() => {
+                console.error("개발자 정보 등록 오류:", promiseErr);
+                res.status(500).json({ error: promiseErr.message });
+              });
+            });
         });
       });
-    });
+    } else {
+      // 기존 로직: 새로운 데이터 등록만 수행
+      const insertPromises = developers.map((developer) => {
+        return new Promise((resolve, reject) => {
+          // DB 구조에 맞게 수정
+          const insertReviewQuery = `
+            INSERT INTO special.ITAsset_ideaDevReview (
+              idea_id, 
+              n_id, 
+              name, 
+              team, 
+              headqt, 
+              devScheduleStart, 
+              devScheduleEnd, 
+              priority
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          `;
 
-    // 모든 개발자 정보 등록 후
-    Promise.all(insertPromises)
-      .then((results) => {
-        // 아이디어 상태 업데이트 (개발심의 완료 상태로 변경)
-        const updateIdeaStatusQuery = `
-          UPDATE special.ITAsset_ideas 
-          SET status = '개발심의' 
-          WHERE id = ?
-        `;
+          const reviewValues = [
+            ideaID, // ideaID를 DB의 idea_id 필드에 매핑
+            developer.no, // 프론트엔드에서 n_id는 'no'로 매핑됨
+            developer.name || "", // null이면 빈 문자열 사용
+            developer.team || "",
+            developer.headqt || "",
+            startDate,
+            endDate,
+            priority,
+          ];
 
-        db.query(updateIdeaStatusQuery, [ideaID], (updateErr, updateData) => {
-          if (updateErr) {
-            console.error("아이디어 상태 업데이트 오류:", updateErr);
-            // 상태 업데이트 실패해도 개발심의 데이터는 저장되었으므로 성공 응답
-          }
-
-          return res.status(200).json({
-            message: "개발 심의 정보가 성공적으로 등록되었습니다.",
-            ideaID: ideaID,
-            developerCount: developers.length,
-            status: "개발심의", // 상태도 함께 반환
+          db.query(insertReviewQuery, reviewValues, (err, result) => {
+            if (err) {
+              console.error(`개발자 심의 정보 등록 오류:`, err);
+              reject(err);
+            } else {
+              resolve(result);
+            }
           });
         });
-      })
-      .catch((err) => {
-        console.error("개발 심의 정보 등록 중 오류 발생:", err);
-        return res.status(500).json({ error: err.message });
       });
+
+      // 모든 개발자 정보 등록 후
+      Promise.all(insertPromises)
+        .then((results) => {
+          // 아이디어 상태 업데이트 (개발심의 완료 상태로 변경)
+          const updateIdeaStatusQuery = `
+            UPDATE special.ITAsset_ideas 
+            SET status = '개발심의' 
+            WHERE id = ?
+          `;
+
+          db.query(updateIdeaStatusQuery, [ideaID], (updateErr, updateData) => {
+            if (updateErr) {
+              console.error("아이디어 상태 업데이트 오류:", updateErr);
+              // 상태 업데이트 실패해도 개발심의 데이터는 저장되었으므로 성공 응답
+            }
+
+            return res.status(200).json({
+              message: "개발 심의 정보가 성공적으로 등록되었습니다.",
+              ideaID: ideaID,
+              developerCount: developers.length,
+              status: "개발심의", // 상태도 함께 반환
+            });
+          });
+        })
+        .catch((err) => {
+          console.error("개발 심의 정보 등록 중 오류 발생:", err);
+          return res.status(500).json({ error: err.message });
+        });
+    }
   } catch (err) {
     console.error("개발자 정보 처리 중 오류:", err);
     return res.status(500).json({ error: err.message });

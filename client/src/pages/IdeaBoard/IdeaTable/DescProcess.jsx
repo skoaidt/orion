@@ -394,7 +394,16 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
   };
 
   // 모달 닫기 및 데이터 새로고침 처리
-  const handleCloseModal = () => {
+  const handleCloseModal = (viewModeState) => {
+    // 현재 열린 모달이 ideaPiloted 일 때 viewMode 상태를 로컬 스토리지에 저장
+    if (openModal === "ideaPiloted" && viewModeState !== undefined) {
+      localStorage.setItem(
+        `ideaPilot_viewMode_${id}`,
+        viewModeState.toString()
+      );
+      console.log(`파일럿 viewMode 상태 저장: ${viewModeState}`);
+    }
+
     setOpenModal(null);
 
     // 모달이 닫힐 때 부모 컴포넌트에 상태 변경 알림

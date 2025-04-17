@@ -12,7 +12,7 @@ import Typography from "@mui/material/Typography";
 import Switch from "@mui/material/Switch";
 import axios from "axios";
 
-const IdeaVerify = ({ onClose, ideaId }) => {
+const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
   const [formData, setFormData] = useState({
     // 본사 선임부서 섹션
     development_collaboration: "",
@@ -33,6 +33,11 @@ const IdeaVerify = ({ onClose, ideaId }) => {
   const [rightLoading, setRightLoading] = useState(false);
   const [leftSubmitted, setLeftSubmitted] = useState(false);
   const [rightSubmitted, setRightSubmitted] = useState(false);
+  const [viewMode, setViewMode] = useState(isViewMode);
+  const [leftEditMode, setLeftEditMode] = useState(false);
+  const [rightEditMode, setRightEditMode] = useState(false);
+  const [viewData, setViewData] = useState(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   // 기존 데이터 불러오기
   useEffect(() => {
@@ -40,27 +45,40 @@ const IdeaVerify = ({ onClose, ideaId }) => {
       try {
         const response = await axios.get(`/api/ideas/verify/${ideaId}`);
         if (response.data) {
-          setFormData(response.data);
+          // 보존해야 할 데이터를 확실히 넣어주기
+          const initialData = {
+            // 기본값 설정
+            verification_status: true,
+            ai_verification_status: true,
+            ...response.data, // API 응답으로 덮어쓰기
+          };
+
+          setFormData(initialData);
+          setViewData(initialData);
 
           // 왼쪽/오른쪽 제출 상태 확인
           if (
-            response.data.development_collaboration &&
-            response.data.target_user &&
-            response.data.comment
+            initialData.development_collaboration &&
+            initialData.target_user &&
+            initialData.comment
           ) {
             setLeftSubmitted(true);
           }
 
           if (
-            response.data.ai_development_collaboration &&
-            response.data.feasibility &&
-            response.data.ai_comment
+            initialData.ai_development_collaboration &&
+            initialData.feasibility &&
+            initialData.ai_comment
           ) {
             setRightSubmitted(true);
           }
+
+          // 데이터 로드 완료 표시
+          setDataLoaded(true);
         }
       } catch (error) {
-        console.error("검증 데이터 불러오기 실패:", error);
+        // console.error("검증 데이터 불러오기 실패:", error);
+        setDataLoaded(true); // 에러 발생해도 데이터 로드 시도는 완료
       }
     };
 
@@ -68,6 +86,15 @@ const IdeaVerify = ({ onClose, ideaId }) => {
       fetchVerificationData();
     }
   }, [ideaId]);
+
+  // 읽기모드 변경 시 상태 설정
+  useEffect(() => {
+    setViewMode(isViewMode);
+    if (isViewMode) {
+      setLeftEditMode(false);
+      setRightEditMode(false);
+    }
+  }, [isViewMode]);
 
   const handleChange = (field) => (event) => {
     setFormData((prev) => ({
@@ -79,8 +106,51 @@ const IdeaVerify = ({ onClose, ideaId }) => {
   const handleSwitchChange = (field) => (event) => {
     setFormData((prev) => ({
       ...prev,
-      [field]: !prev[field],
+      [field]: event.target.checked,
     }));
+  };
+
+  // 편집 모드로 전환하는 함수 - 왼쪽(선임부서)
+  const handleLeftEdit = () => {
+    // 뷰 데이터가 있는 경우 해당 데이터로 폼 데이터를 복원
+    if (viewData) {
+      setFormData((prev) => ({
+        ...prev,
+        development_collaboration: viewData.development_collaboration || "",
+        target_user: viewData.target_user || "",
+        comment: viewData.comment || "",
+        verification_status:
+          viewData.verification_status !== undefined
+            ? viewData.verification_status
+            : true,
+      }));
+    }
+
+    setLeftEditMode(true);
+    // 전체 모달의 viewMode 상태는 변경하지 않음
+  };
+
+  // 편집 모드로 전환하는 함수 - 오른쪽(AI/DT)
+  const handleRightEdit = () => {
+    // 뷰 데이터가 있는 경우 해당 데이터로 폼 데이터를 복원
+    if (viewData) {
+      setFormData((prev) => ({
+        ...prev,
+        ai_development_collaboration:
+          viewData.ai_development_collaboration || "",
+        feasibility: viewData.feasibility || "",
+        ai_comment: viewData.ai_comment || "",
+        expected_personnel: viewData.expected_personnel || "",
+        expected_schedule: viewData.expected_schedule || "",
+        ai_verification_status:
+          viewData.ai_verification_status !== undefined
+            ? viewData.ai_verification_status
+            : true,
+      }));
+    }
+
+    setRightEditMode(true);
+    // 전체 모달의 viewMode 상태는 변경하지 않음
   };
 
   // 왼쪽(선임부서) 제출 핸들러
@@ -121,7 +191,7 @@ const IdeaVerify = ({ onClose, ideaId }) => {
         verification_status: formData.verification_status,
       };
 
-      console.log("등록할 선임부서 검증 데이터:", verifyData);
+      // console.log("등록할 선임부서 검증 데이터:", verifyData);
 
       // API 호출
       const response = await axios.post(
@@ -129,17 +199,24 @@ const IdeaVerify = ({ onClose, ideaId }) => {
         verifyData
       );
 
-      console.log("선임부서 검증 등록 성공:", response.data);
+      // console.log("선임부서 검증 등록 성공:", response.data);
 
-      // 응답 데이터로 폼 업데이트
+      // 응답 데이터로 폼 업데이트 - 기존 데이터 유지하면서 업데이트
       if (response.data) {
-        setFormData((prev) => ({
-          ...prev,
-          ...response.data,
-        }));
+        // 새로운 데이터에서 받은 값만 업데이트하되 verification_status는 폼 데이터 값 유지
+        const updatedData = {
+          ...formData, // 기존 폼 데이터 유지
+          ...response.data, // 새로운 응답 데이터로 업데이트
+          // 검증 상태 확실히 명시 - 현재 폼의 상태 유지
+          verification_status: formData.verification_status,
+        };
+
+        setFormData(updatedData);
+        setViewData(updatedData);
       }
 
       setLeftSubmitted(true);
+      setLeftEditMode(false);
 
       // 선임부서와 AI/DT 모두 등록되었는지 확인
       const bothSubmitted = true && rightSubmitted; // 현재 함수는 왼쪽(선임부서) 제출 핸들러이므로 성공 시 leftSubmitted는 true
@@ -181,8 +258,11 @@ const IdeaVerify = ({ onClose, ideaId }) => {
           `선임부서 검증 정보가 성공적으로 등록되었습니다.\n선임부서에서 "${selectionStatus}" 상태로 처리되었습니다.\n아직 AI/DT 검증이 완료되지 않았습니다. ${statusMessage}`
         );
       }
+
+      // 성공 후 읽기 모드로 전환
+      setLeftEditMode(false);
     } catch (error) {
-      console.error("선임부서 검증 등록 오류:", error);
+      // console.error("선임부서 검증 등록 오류:", error);
       handleApiError(error);
     } finally {
       setLeftLoading(false);
@@ -229,22 +309,29 @@ const IdeaVerify = ({ onClose, ideaId }) => {
         ai_verification_status: formData.ai_verification_status,
       };
 
-      console.log("등록할 AI/DT 검증 데이터:", verifyData);
+      // console.log("등록할 AI/DT 검증 데이터:", verifyData);
 
       // API 호출
       const response = await axios.post("/api/ideas/verify/ai", verifyData);
 
-      console.log("AI/DT 검증 등록 성공:", response.data);
+      // console.log("AI/DT 검증 등록 성공:", response.data);
 
-      // 응답 데이터로 폼 업데이트
+      // 응답 데이터로 폼 업데이트 - 기존 데이터 유지하면서 업데이트
       if (response.data) {
-        setFormData((prev) => ({
-          ...prev,
-          ...response.data,
-        }));
+        // 새로운 데이터에서 받은 값만 업데이트하되 ai_verification_status는 폼 데이터 값 유지
+        const updatedData = {
+          ...formData, // 기존 폼 데이터 유지
+          ...response.data, // 새로운 응답 데이터로 업데이트
+          // 검증 상태 확실히 명시 - 현재 폼의 상태 유지
+          ai_verification_status: formData.ai_verification_status,
+        };
+
+        setFormData(updatedData);
+        setViewData(updatedData);
       }
 
       setRightSubmitted(true);
+      setRightEditMode(false);
 
       // 선임부서와 AI/DT 모두 등록되었는지 확인
       const bothSubmitted = leftSubmitted && true; // 현재 함수는 오른쪽(AI/DT) 제출 핸들러이므로 성공 시 rightSubmitted는 true
@@ -288,8 +375,11 @@ const IdeaVerify = ({ onClose, ideaId }) => {
           `AI/DT 검증 정보가 성공적으로 등록되었습니다.\nAI/DT 부서에서 "${selectionStatus}" 상태로 처리되었습니다.\n아직 선임부서 검증이 완료되지 않았습니다. ${statusMessage}`
         );
       }
+
+      // 성공 후 읽기 모드로 전환
+      setRightEditMode(false);
     } catch (error) {
-      console.error("AI/DT 검증 등록 오류:", error);
+      // console.error("AI/DT 검증 등록 오류:", error);
       handleApiError(error);
     } finally {
       setRightLoading(false);
@@ -320,16 +410,39 @@ const IdeaVerify = ({ onClose, ideaId }) => {
     alert(errorMessage);
 
     // 콘솔에 에러 로깅 (선택사항)
-    console.error("API Error:", error);
+    // console.error("API Error:", error);
 
     // 필요한 경우 추가적인 에러 처리 로직을 여기에 작성할 수 있습니다.
   };
+
+  // 렌더링 직전에 상태 확인
+  useEffect(() => {
+    // console.log("현재 상태:", {
+    //   viewMode,
+    //   leftSubmitted,
+    //   rightSubmitted,
+    //   leftEditMode,
+    //   rightEditMode,
+    //   isViewMode,
+    //   formData,
+    //   ideaId,
+    // });
+  }, [
+    viewMode,
+    leftSubmitted,
+    rightSubmitted,
+    leftEditMode,
+    rightEditMode,
+    isViewMode,
+    formData,
+    ideaId,
+  ]);
 
   return (
     <div className="verifyModalOverlay">
       <div className="verifyModalContent">
         <div className="titleBox">
-          <h2>선임부서 과제 검증</h2>
+          <h2>{viewMode ? "아이디어 검증" : "아이디어 검증"}</h2>
           <CloseIcon className="closeIcon" onClick={onClose} />
         </div>
         <hr className="titleUnderline" />
@@ -354,21 +467,33 @@ const IdeaVerify = ({ onClose, ideaId }) => {
                 className="radioGroup"
                 value={formData.development_collaboration}
                 onChange={handleChange("development_collaboration")}
-                disabled={leftSubmitted}
+                disabled={!leftEditMode && (leftSubmitted || viewMode)}
               >
                 <FormControlLabel
                   value="전사"
-                  control={<Radio disabled={leftSubmitted} />}
+                  control={
+                    <Radio
+                      disabled={!leftEditMode && (leftSubmitted || viewMode)}
+                    />
+                  }
                   label="전사"
                 />
                 <FormControlLabel
                   value="협업"
-                  control={<Radio disabled={leftSubmitted} />}
+                  control={
+                    <Radio
+                      disabled={!leftEditMode && (leftSubmitted || viewMode)}
+                    />
+                  }
                   label="협업"
                 />
                 <FormControlLabel
                   value="자체"
-                  control={<Radio disabled={leftSubmitted} />}
+                  control={
+                    <Radio
+                      disabled={!leftEditMode && (leftSubmitted || viewMode)}
+                    />
+                  }
                   label="자체"
                 />
               </RadioGroup>
@@ -385,31 +510,51 @@ const IdeaVerify = ({ onClose, ideaId }) => {
                 className="radioGroup"
                 value={formData.target_user}
                 onChange={handleChange("target_user")}
-                disabled={leftSubmitted}
+                disabled={!leftEditMode && (leftSubmitted || viewMode)}
               >
                 <FormControlLabel
                   value="본부"
-                  control={<Radio disabled={leftSubmitted} />}
+                  control={
+                    <Radio
+                      disabled={!leftEditMode && (leftSubmitted || viewMode)}
+                    />
+                  }
                   label="본부"
                 />
                 <FormControlLabel
                   value="팀"
-                  control={<Radio disabled={leftSubmitted} />}
+                  control={
+                    <Radio
+                      disabled={!leftEditMode && (leftSubmitted || viewMode)}
+                    />
+                  }
                   label="팀"
                 />
                 <FormControlLabel
                   value="담당자"
-                  control={<Radio disabled={leftSubmitted} />}
+                  control={
+                    <Radio
+                      disabled={!leftEditMode && (leftSubmitted || viewMode)}
+                    />
+                  }
                   label="담당자"
                 />
                 <FormControlLabel
                   value="Vendor"
-                  control={<Radio disabled={leftSubmitted} />}
+                  control={
+                    <Radio
+                      disabled={!leftEditMode && (leftSubmitted || viewMode)}
+                    />
+                  }
                   label="Vendor"
                 />
                 <FormControlLabel
                   value="대외기관"
-                  control={<Radio disabled={leftSubmitted} />}
+                  control={
+                    <Radio
+                      disabled={!leftEditMode && (leftSubmitted || viewMode)}
+                    />
+                  }
                   label="대외기관"
                 />
               </RadioGroup>
@@ -429,7 +574,7 @@ const IdeaVerify = ({ onClose, ideaId }) => {
                 fullWidth
                 value={formData.comment}
                 onChange={handleChange("comment")}
-                disabled={leftSubmitted}
+                disabled={!leftEditMode && (leftSubmitted || viewMode)}
               />
             </FormControl>
           </div>
@@ -444,25 +589,55 @@ const IdeaVerify = ({ onClose, ideaId }) => {
                   checked={formData.verification_status}
                   onChange={handleSwitchChange("verification_status")}
                   inputProps={{ "aria-label": "verification status switch" }}
-                  disabled={leftSubmitted}
+                  disabled={!leftEditMode && (leftSubmitted || viewMode)}
                 />
                 <Typography>검증</Typography>
               </Stack>
             </FormGroup>
           </div>
 
-          {/* 왼쪽 등록 버튼 */}
-          {!leftSubmitted && (
-            <div className="buttonContainer leftButtonContainer">
+          {/* 왼쪽 버튼 컨테이너 */}
+          <div className="buttonContainer leftButtonContainer">
+            {leftEditMode ? (
+              // 편집 모드: 취소/등록 버튼
+              <>
+                <button
+                  className="cancelButton"
+                  onClick={() => {
+                    setLeftEditMode(false);
+                  }}
+                  disabled={leftLoading}
+                >
+                  취소
+                </button>
+                <button
+                  className="registerButton"
+                  onClick={handleLeftSubmit}
+                  disabled={leftLoading}
+                >
+                  {leftLoading ? "등록 중..." : "선임부서 의견 등록"}
+                </button>
+              </>
+            ) : leftSubmitted ? (
+              // 제출됨: 수정 버튼 표시 (모든 사용자에게 보이도록 수정)
               <button
-                className="registerButton"
-                onClick={handleLeftSubmit}
+                className="cancelButton"
+                onClick={handleLeftEdit}
                 disabled={leftLoading}
               >
-                {leftLoading ? "등록 중..." : "선임부서 의견 등록"}
+                수정
               </button>
-            </div>
-          )}
+            ) : !leftSubmitted ? (
+              // 미제출: 등록 버튼 표시
+              <button
+                className="registerButton"
+                onClick={handleLeftEdit}
+                disabled={leftLoading}
+              >
+                등록
+              </button>
+            ) : null}
+          </div>
         </div>
 
         <div className="right">
@@ -485,21 +660,33 @@ const IdeaVerify = ({ onClose, ideaId }) => {
                 className="radioGroup"
                 value={formData.ai_development_collaboration}
                 onChange={handleChange("ai_development_collaboration")}
-                disabled={rightSubmitted}
+                disabled={!rightEditMode && (rightSubmitted || viewMode)}
               >
                 <FormControlLabel
                   value="전사"
-                  control={<Radio disabled={rightSubmitted} />}
+                  control={
+                    <Radio
+                      disabled={!rightEditMode && (rightSubmitted || viewMode)}
+                    />
+                  }
                   label="전사"
                 />
                 <FormControlLabel
                   value="협업"
-                  control={<Radio disabled={rightSubmitted} />}
+                  control={
+                    <Radio
+                      disabled={!rightEditMode && (rightSubmitted || viewMode)}
+                    />
+                  }
                   label="협업"
                 />
                 <FormControlLabel
                   value="자체"
-                  control={<Radio disabled={rightSubmitted} />}
+                  control={
+                    <Radio
+                      disabled={!rightEditMode && (rightSubmitted || viewMode)}
+                    />
+                  }
                   label="자체"
                 />
               </RadioGroup>
@@ -516,16 +703,24 @@ const IdeaVerify = ({ onClose, ideaId }) => {
                 className="radioGroup"
                 value={formData.feasibility}
                 onChange={handleChange("feasibility")}
-                disabled={rightSubmitted}
+                disabled={!rightEditMode && (rightSubmitted || viewMode)}
               >
                 <FormControlLabel
                   value="가능"
-                  control={<Radio disabled={rightSubmitted} />}
+                  control={
+                    <Radio
+                      disabled={!rightEditMode && (rightSubmitted || viewMode)}
+                    />
+                  }
                   label="가능"
                 />
                 <FormControlLabel
                   value="불가능"
-                  control={<Radio disabled={rightSubmitted} />}
+                  control={
+                    <Radio
+                      disabled={!rightEditMode && (rightSubmitted || viewMode)}
+                    />
+                  }
                   label="불가능"
                 />
               </RadioGroup>
@@ -545,7 +740,7 @@ const IdeaVerify = ({ onClose, ideaId }) => {
                 fullWidth
                 value={formData.ai_comment}
                 onChange={handleChange("ai_comment")}
-                disabled={rightSubmitted}
+                disabled={!rightEditMode && (rightSubmitted || viewMode)}
               />
             </FormControl>
           </div>
@@ -562,7 +757,7 @@ const IdeaVerify = ({ onClose, ideaId }) => {
                   rows={1}
                   value={formData.expected_personnel}
                   onChange={handleChange("expected_personnel")}
-                  disabled={rightSubmitted}
+                  disabled={!rightEditMode && (rightSubmitted || viewMode)}
                 />
                 <span className="inputUnit">명</span>
               </div>
@@ -581,7 +776,7 @@ const IdeaVerify = ({ onClose, ideaId }) => {
                   rows={1}
                   value={formData.expected_schedule}
                   onChange={handleChange("expected_schedule")}
-                  disabled={rightSubmitted}
+                  disabled={!rightEditMode && (rightSubmitted || viewMode)}
                 />
                 <span className="inputUnit">개월</span>
               </div>
@@ -598,29 +793,59 @@ const IdeaVerify = ({ onClose, ideaId }) => {
                   checked={formData.ai_verification_status}
                   onChange={handleSwitchChange("ai_verification_status")}
                   inputProps={{ "aria-label": "ai verification status switch" }}
-                  disabled={rightSubmitted}
+                  disabled={!rightEditMode && (rightSubmitted || viewMode)}
                 />
                 <Typography>검증</Typography>
               </Stack>
             </FormGroup>
           </div>
 
-          {/* 오른쪽 등록 버튼 */}
-          {!rightSubmitted && (
-            <div className="buttonContainer rightButtonContainer">
+          {/* 오른쪽 버튼 컨테이너 */}
+          <div className="buttonContainer rightButtonContainer">
+            {rightEditMode ? (
+              // 편집 모드: 취소/등록 버튼
+              <>
+                <button
+                  className="cancelButton"
+                  onClick={() => {
+                    setRightEditMode(false);
+                  }}
+                  disabled={rightLoading}
+                >
+                  취소
+                </button>
+                <button
+                  className="registerButton"
+                  onClick={handleRightSubmit}
+                  disabled={rightLoading}
+                >
+                  {rightLoading ? "등록 중..." : "AI/DT 의견 등록"}
+                </button>
+              </>
+            ) : rightSubmitted ? (
+              // 제출됨: 수정 버튼 표시 (모든 사용자에게 보이도록 수정)
               <button
-                className="registerButton"
-                onClick={handleRightSubmit}
+                className="cancelButton"
+                onClick={handleRightEdit}
                 disabled={rightLoading}
               >
-                {rightLoading ? "등록 중..." : "AI/DT 의견 등록"}
+                수정
               </button>
-            </div>
-          )}
+            ) : !rightSubmitted ? (
+              // 미제출: 등록 버튼 표시
+              <button
+                className="registerButton"
+                onClick={handleRightEdit}
+                disabled={rightLoading}
+              >
+                등록
+              </button>
+            ) : null}
+          </div>
         </div>
 
-        {/* 닫기 버튼 컨테이너 */}
-        <div className="buttonContainer closeButtonContainer">
+        {/* 하단 버튼 컨테이너 (일반 닫기 버튼) */}
+        <div className="buttonContainer">
           <button className="cancelButton" onClick={onClose}>
             닫기
           </button>
