@@ -272,29 +272,52 @@
           margin-left: 10px;
         }
       }
-    }
 
-    .verifyDepartmentContainer {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      margin-left: 10px;
-      color: #565656;
+      // 검증 부서 컨테이너 스타일 수정
+      .verifyDepartmentContainer {
+        width: auto; // 너비를 자동으로 설정
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        flex: 1;
+        color: #565656;
+        //gap: 10px;
+        max-width: 340px; // 중복여부 컨테이너와 동일한 최대 너비 설정
 
-      .selectedDepartmentInfo {
-        margin-top: 10px;
-        padding: 8px;
-        background-color: #f5f5f5;
-        border-radius: 4px;
+        .selectedDepartmentInfo {
+          width: 100%; // 전체 너비 사용
 
-        p {
-          margin: 0;
-          font-size: 12px;
-          color: #2e7d32;
+          p {
+            margin: 0;
+            font-size: 14px;
+            color: #2e7d32;
+            white-space: nowrap;
+            overflow: hidden;
+            font-weight: 600;
+            text-overflow: ellipsis; // 텍스트가 너무 길면 생략 부호로 표시
+          }
+        }
+
+        .selectorsRow {
+          display: flex;
+          flex-direction: row;
+          gap: 10px;
+          width: 100%; // 전체 너비 사용
+          min-height: 40px; // 최소 높이 설정으로 위치 고정
+
+          .selectContainer {
+            flex: 1; // 동일한 비율로 공간 차지
+            width: calc(50% - 5px); // 간격을 고려한 너비 계산
+
+            .MuiInputBase-root {
+              font-size: 12px !important;
+              width: 100%;
+            }
+          }
         }
       }
 
-      // 부서 선택 관련 스타일 추가
+      // 부서 선택 관련 스타일 유지
       .selectorsRow {
         display: flex;
         flex-direction: column;
@@ -397,64 +420,6 @@
         text-align: center;
         font-style: italic;
         font-size: 13px;
-      }
-
-      // 팝업 컨테이너
-      .department-select-popup {
-        z-index: 1500; // 더 높은 z-index로 수정
-        position: absolute;
-        top: calc(100% + 4px); // 버튼과 간격 조정
-        left: 0;
-        right: 0;
-        margin-top: 0;
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        overflow: visible; // 오버플로우 설정 변경
-        color: #565656;
-        max-height: 300px; // 최대 높이 설정
-        display: block; // 명시적으로 블록으로 표시
-      }
-
-      // 부서 선택 필드
-      .department-select {
-        min-width: 160px;
-        position: relative;
-        width: 100%;
-        margin-bottom: 5px;
-      }
-
-      // 드롭다운 메뉴
-      .department-select-listbox {
-        margin: 0;
-        padding: 0;
-        border-radius: 0 0 4px 4px;
-        background-color: #fff;
-        max-height: 230px; // 팝업 내 스크롤 공간 확보
-        overflow-y: auto;
-        color: #565656;
-        box-shadow: none;
-        position: relative; // 상대적 위치 설정
-        z-index: 10; // 지정된 z-index
-
-        &::-webkit-scrollbar {
-          width: 6px;
-          height: 6px;
-        }
-
-        &::-webkit-scrollbar-track {
-          background: #f9f9f9;
-        }
-
-        &::-webkit-scrollbar-thumb {
-          background: #ddd;
-          border-radius: 3px;
-        }
-
-        &::-webkit-scrollbar-thumb:hover {
-          background: #ccc;
-        }
       }
     }
   }

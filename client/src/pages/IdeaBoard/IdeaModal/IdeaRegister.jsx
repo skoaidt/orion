@@ -82,10 +82,14 @@ const IdeaRegister = ({
 
       // 검증 부서 설정
       if (ideaData.VerifyDepartment) {
+        // 여기서는 팀 정보만 있으므로 본부 정보는 초기화될 때까지 비워둡니다
         setVerifyDepartment({
           team: ideaData.VerifyDepartment,
           fullPath: ideaData.VerifyDepartment,
         });
+
+        // 초기화 후 다른 useEffect에서 처리되도록 별도 상태 설정
+        // setSelectedTeam(ideaData.VerifyDepartment);
       }
     }
   }, [editMode, ideaData]);
@@ -174,7 +178,7 @@ const IdeaRegister = ({
       if (!ref.current) return;
 
       const observer = new MutationObserver((mutations) => {
-        console.log(`${name} 에디터 내부 DOM 변화 감지됨`, mutations);
+        // console.log(`${name} 에디터 내부 DOM 변화 감지됨`, mutations);
       });
 
       const config = {
@@ -239,7 +243,7 @@ const IdeaRegister = ({
   const handleUpdate = (e) => {
     if (e) e.preventDefault();
     // 실제 업데이트 로직 여기에 추가
-    console.log("폼이 제출되었습니다");
+    // console.log("폼이 제출되었습니다");
   };
 
   const handleUsePeriodChange = (event) => {
@@ -273,40 +277,58 @@ const IdeaRegister = ({
         // 본부 목록 추출
         const headqtArray = Object.keys(teamData);
 
-        console.log("API에서 가져온 본부 및 팀 데이터:", teamData);
-        console.log("추출된 본부 목록:", headqtArray);
+        // console.log("API에서 가져온 본부 및 팀 데이터:", teamData);
+        // console.log("추출된 본부 목록:", headqtArray);
 
         setHeadqtList(headqtArray);
         setTeamsByHeadqt(teamData);
         setTeamsLoading(false);
+
+        // 수정 모드인 경우 VerifyDepartment 팀에 해당하는 본부 찾기
+        if (editMode && ideaData && ideaData.VerifyDepartment) {
+          const team = ideaData.VerifyDepartment;
+
+          // 각 본부를 순회하면서 팀이 속한 본부 찾기
+          for (const headqt of headqtArray) {
+            if (teamData[headqt] && teamData[headqt].includes(team)) {
+              // console.log(`${team}이 속한 본부 찾음: ${headqt}`);
+              setSelectedHeadqt(headqt);
+              setSelectedTeam(team);
+              setTeams(teamData[headqt]);
+              break;
+            }
+          }
+        }
       } catch (error) {
-        console.error("본부 및 팀 데이터 로드 오류:", error);
+        // console.error("본부 및 팀 데이터 로드 오류:", error);
         setTeamsLoading(false);
       }
     };
 
     fetchTeams();
-  }, []);
+  }, [editMode, ideaData]);
 
   // 본부 선택 시
-  const handleHeadqtChange = (event, newValue) => {
-    console.log("본부 선택 이벤트:", event);
-    console.log("선택된 본부:", newValue);
+  const handleHeadqtChange = (event) => {
+    const newValue = event.target.value;
+    // console.log("본부 선택 이벤트:", event);
+    // console.log("선택된 본부:", newValue);
     setSelectedHeadqt(newValue);
     setSelectedTeam("");
 
     if (newValue && teamsByHeadqt[newValue]) {
       const teamsArray = teamsByHeadqt[newValue];
-      console.log(`선택된 본부(${newValue})의 팀 목록:`, teamsArray);
+      // console.log(`선택된 본부(${newValue})의 팀 목록:`, teamsArray);
       setTeams(teamsArray);
     } else {
-      console.log("선택된 본부가 없거나 해당 본부의 팀 목록이 비어있습니다.");
+      // console.log("선택된 본부가 없거나 해당 본부의 팀 목록이 비어있습니다.");
       setTeams([]);
     }
   };
 
   // 팀 선택 시
-  const handleTeamChange = (event, newValue) => {
+  const handleTeamChange = (event) => {
+    const newValue = event.target.value;
     setSelectedTeam(newValue);
 
     // 선택된 부서 정보 상태 업데이트
@@ -370,14 +392,14 @@ const IdeaRegister = ({
         VerifyDepartment: verifyDepartment ? verifyDepartment.team : "",
       };
 
-      console.log(`${editMode ? "수정" : "등록"}할 아이디어 데이터:`, formData);
+      // console.log(`${editMode ? "수정" : "등록"}할 아이디어 데이터:`, formData);
 
       let response;
 
       if (editMode) {
         // 수정 모드: PUT 요청으로 업데이트
         response = await axios.put(`/api/ideas/${ideaData.id}`, formData);
-        console.log("아이디어 수정 성공:", response.data);
+        // console.log("아이디어 수정 성공:", response.data);
 
         // 데이터 업데이트 콜백 호출 (제공된 경우)
         if (typeof onUpdate === "function") {
@@ -388,7 +410,7 @@ const IdeaRegister = ({
       } else {
         // 등록 모드: POST 요청으로 새로 등록
         response = await axios.post("/api/ideas/register", formData);
-        console.log("아이디어 등록 성공:", response.data);
+        // console.log("아이디어 등록 성공:", response.data);
 
         // 데이터 업데이트 콜백 호출 (제공된 경우)
         if (typeof onUpdate === "function") {
@@ -401,7 +423,7 @@ const IdeaRegister = ({
       // 모달 닫기
       onClose();
     } catch (error) {
-      console.error(`아이디어 ${editMode ? "수정" : "등록"} 오류:`, error);
+      // console.error(`아이디어 ${editMode ? "수정" : "등록"} 오류:`, error);
 
       // 서버에서 반환된 오류 메시지 표시 - 개선된 오류 처리
       if (error.response) {
@@ -810,9 +832,13 @@ const IdeaRegister = ({
             <div className="projectCategory">
               <span className="fieldLabel">검증 부서</span>
               <div className="verifyDepartmentContainer">
-                {verifyDepartment && (
+                {verifyDepartment ? (
                   <div className="selectedDepartmentInfo">
                     <p>선택된 검증 부서: {verifyDepartment.fullPath}</p>
+                  </div>
+                ) : (
+                  <div className="selectedDepartmentInfo">
+                    {/* 공간 유지를 위한 빈 div */}
                   </div>
                 )}
                 <div className="selectorsRow">
@@ -820,11 +846,26 @@ const IdeaRegister = ({
                     <Select
                       value={selectedHeadqt}
                       onChange={handleHeadqtChange}
-                      placeholder={
-                        teamsLoading ? "로딩 중..." : "본부를 선택하세요"
-                      }
+                      displayEmpty
+                      renderValue={(selected) => {
+                        if (!selected) {
+                          return (
+                            <em>
+                              {teamsLoading
+                                ? "로딩 중..."
+                                : "본부를 선택하세요"}
+                            </em>
+                          );
+                        }
+                        return selected;
+                      }}
                       disabled={teamsLoading}
                     >
+                      <MenuItem disabled value="">
+                        <em>
+                          {teamsLoading ? "로딩 중..." : "본부를 선택하세요"}
+                        </em>
+                      </MenuItem>
                       {headqtList.map((headqt) => (
                         <MenuItem key={headqt} value={headqt}>
                           {headqt}
@@ -837,9 +878,18 @@ const IdeaRegister = ({
                     <Select
                       value={selectedTeam}
                       onChange={handleTeamChange}
-                      placeholder="팀을 선택하세요"
+                      displayEmpty
+                      renderValue={(selected) => {
+                        if (!selected) {
+                          return <em>팀을 선택하세요</em>;
+                        }
+                        return selected;
+                      }}
                       disabled={!selectedHeadqt || teams.length === 0}
                     >
+                      <MenuItem disabled value="">
+                        <em>팀을 선택하세요</em>
+                      </MenuItem>
                       {teams.map((team) => (
                         <MenuItem key={team} value={team}>
                           {team}

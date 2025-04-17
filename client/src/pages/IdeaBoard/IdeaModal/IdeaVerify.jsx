@@ -77,7 +77,7 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
           setDataLoaded(true);
         }
       } catch (error) {
-        console.error("검증 데이터 불러오기 실패:", error);
+        // console.error("검증 데이터 불러오기 실패:", error);
         setDataLoaded(true); // 에러 발생해도 데이터 로드 시도는 완료
       }
     };
@@ -112,7 +112,6 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
 
   // 편집 모드로 전환하는 함수 - 왼쪽(선임부서)
   const handleLeftEdit = () => {
-    console.log("왼쪽 수정 버튼 클릭 - 전환 전 leftEditMode:", leftEditMode);
     // 뷰 데이터가 있는 경우 해당 데이터로 폼 데이터를 복원
     if (viewData) {
       setFormData((prev) => ({
@@ -128,17 +127,11 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
     }
 
     setLeftEditMode(true);
-    setRightEditMode(false);
-    setViewMode(false);
-    console.log("왼쪽 수정 버튼 클릭 - 전환 후 leftEditMode:", true);
+    // 전체 모달의 viewMode 상태는 변경하지 않음
   };
 
   // 편집 모드로 전환하는 함수 - 오른쪽(AI/DT)
   const handleRightEdit = () => {
-    console.log(
-      "오른쪽 수정 버튼 클릭 - 전환 전 rightEditMode:",
-      rightEditMode
-    );
     // 뷰 데이터가 있는 경우 해당 데이터로 폼 데이터를 복원
     if (viewData) {
       setFormData((prev) => ({
@@ -157,9 +150,7 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
     }
 
     setRightEditMode(true);
-    setLeftEditMode(false);
-    setViewMode(false);
-    console.log("오른쪽 수정 버튼 클릭 - 전환 후 rightEditMode:", true);
+    // 전체 모달의 viewMode 상태는 변경하지 않음
   };
 
   // 왼쪽(선임부서) 제출 핸들러
@@ -200,7 +191,7 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
         verification_status: formData.verification_status,
       };
 
-      console.log("등록할 선임부서 검증 데이터:", verifyData);
+      // console.log("등록할 선임부서 검증 데이터:", verifyData);
 
       // API 호출
       const response = await axios.post(
@@ -208,19 +199,16 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
         verifyData
       );
 
-      console.log("선임부서 검증 등록 성공:", response.data);
+      // console.log("선임부서 검증 등록 성공:", response.data);
 
       // 응답 데이터로 폼 업데이트 - 기존 데이터 유지하면서 업데이트
       if (response.data) {
-        // 새로운 데이터에서 받은 값만 업데이트
+        // 새로운 데이터에서 받은 값만 업데이트하되 verification_status는 폼 데이터 값 유지
         const updatedData = {
           ...formData, // 기존 폼 데이터 유지
           ...response.data, // 새로운 응답 데이터로 업데이트
-          // 검증 상태 확실히 명시
-          verification_status:
-            response.data.verification_status !== undefined
-              ? response.data.verification_status
-              : formData.verification_status,
+          // 검증 상태 확실히 명시 - 현재 폼의 상태 유지
+          verification_status: formData.verification_status,
         };
 
         setFormData(updatedData);
@@ -272,11 +260,9 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
       }
 
       // 성공 후 읽기 모드로 전환
-      if (!rightEditMode) {
-        setViewMode(true);
-      }
+      setLeftEditMode(false);
     } catch (error) {
-      console.error("선임부서 검증 등록 오류:", error);
+      // console.error("선임부서 검증 등록 오류:", error);
       handleApiError(error);
     } finally {
       setLeftLoading(false);
@@ -323,24 +309,21 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
         ai_verification_status: formData.ai_verification_status,
       };
 
-      console.log("등록할 AI/DT 검증 데이터:", verifyData);
+      // console.log("등록할 AI/DT 검증 데이터:", verifyData);
 
       // API 호출
       const response = await axios.post("/api/ideas/verify/ai", verifyData);
 
-      console.log("AI/DT 검증 등록 성공:", response.data);
+      // console.log("AI/DT 검증 등록 성공:", response.data);
 
       // 응답 데이터로 폼 업데이트 - 기존 데이터 유지하면서 업데이트
       if (response.data) {
-        // 새로운 데이터에서 받은 값만 업데이트
+        // 새로운 데이터에서 받은 값만 업데이트하되 ai_verification_status는 폼 데이터 값 유지
         const updatedData = {
           ...formData, // 기존 폼 데이터 유지
           ...response.data, // 새로운 응답 데이터로 업데이트
-          // 검증 상태 확실히 명시
-          ai_verification_status:
-            response.data.ai_verification_status !== undefined
-              ? response.data.ai_verification_status
-              : formData.ai_verification_status,
+          // 검증 상태 확실히 명시 - 현재 폼의 상태 유지
+          ai_verification_status: formData.ai_verification_status,
         };
 
         setFormData(updatedData);
@@ -394,11 +377,9 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
       }
 
       // 성공 후 읽기 모드로 전환
-      if (!leftEditMode) {
-        setViewMode(true);
-      }
+      setRightEditMode(false);
     } catch (error) {
-      console.error("AI/DT 검증 등록 오류:", error);
+      // console.error("AI/DT 검증 등록 오류:", error);
       handleApiError(error);
     } finally {
       setRightLoading(false);
@@ -429,23 +410,23 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
     alert(errorMessage);
 
     // 콘솔에 에러 로깅 (선택사항)
-    console.error("API Error:", error);
+    // console.error("API Error:", error);
 
     // 필요한 경우 추가적인 에러 처리 로직을 여기에 작성할 수 있습니다.
   };
 
   // 렌더링 직전에 상태 확인
   useEffect(() => {
-    console.log("현재 상태:", {
-      viewMode,
-      leftSubmitted,
-      rightSubmitted,
-      leftEditMode,
-      rightEditMode,
-      isViewMode,
-      formData,
-      ideaId,
-    });
+    // console.log("현재 상태:", {
+    //   viewMode,
+    //   leftSubmitted,
+    //   rightSubmitted,
+    //   leftEditMode,
+    //   rightEditMode,
+    //   isViewMode,
+    //   formData,
+    //   ideaId,
+    // });
   }, [
     viewMode,
     leftSubmitted,
@@ -617,23 +598,13 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
 
           {/* 왼쪽 버튼 컨테이너 */}
           <div className="buttonContainer leftButtonContainer">
-            {!leftEditMode ? (
-              // 읽기 모드: 수정 버튼 표시
-              <button
-                className="cancelButton"
-                onClick={handleLeftEdit}
-                disabled={leftLoading}
-              >
-                수정
-              </button>
-            ) : (
+            {leftEditMode ? (
               // 편집 모드: 취소/등록 버튼
               <>
                 <button
                   className="cancelButton"
                   onClick={() => {
                     setLeftEditMode(false);
-                    setViewMode(true);
                   }}
                   disabled={leftLoading}
                 >
@@ -647,6 +618,24 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
                   {leftLoading ? "등록 중..." : "선임부서 의견 등록"}
                 </button>
               </>
+            ) : leftSubmitted ? (
+              // 제출됨: 수정 버튼 표시
+              <button
+                className="cancelButton"
+                onClick={handleLeftEdit}
+                disabled={leftLoading}
+              >
+                수정
+              </button>
+            ) : (
+              // 미제출: 등록 버튼 표시
+              <button
+                className="registerButton"
+                onClick={handleLeftEdit}
+                disabled={leftLoading}
+              >
+                등록
+              </button>
             )}
           </div>
         </div>
@@ -813,23 +802,13 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
 
           {/* 오른쪽 버튼 컨테이너 */}
           <div className="buttonContainer rightButtonContainer">
-            {!rightEditMode ? (
-              // 읽기 모드: 수정 버튼 표시
-              <button
-                className="cancelButton"
-                onClick={handleRightEdit}
-                disabled={rightLoading}
-              >
-                수정
-              </button>
-            ) : (
+            {rightEditMode ? (
               // 편집 모드: 취소/등록 버튼
               <>
                 <button
                   className="cancelButton"
                   onClick={() => {
                     setRightEditMode(false);
-                    setViewMode(true);
                   }}
                   disabled={rightLoading}
                 >
@@ -843,6 +822,24 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
                   {rightLoading ? "등록 중..." : "AI/DT 의견 등록"}
                 </button>
               </>
+            ) : rightSubmitted ? (
+              // 제출됨: 수정 버튼 표시
+              <button
+                className="cancelButton"
+                onClick={handleRightEdit}
+                disabled={rightLoading}
+              >
+                수정
+              </button>
+            ) : (
+              // 미제출: 등록 버튼 표시
+              <button
+                className="registerButton"
+                onClick={handleRightEdit}
+                disabled={rightLoading}
+              >
+                등록
+              </button>
             )}
           </div>
         </div>
