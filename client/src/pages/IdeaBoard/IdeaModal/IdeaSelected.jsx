@@ -333,13 +333,15 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
               {viewMode ? (
                 // 읽기 모드: 왼쪽 버튼 = 수정, 오른쪽 버튼 = 닫기
                 <>
-                  <button
-                    className="cancelButton"
-                    onClick={handleEdit}
-                    disabled={loading}
-                  >
-                    수정
-                  </button>
+                  {viewData && (
+                    <button
+                      className="cancelButton"
+                      onClick={handleEdit}
+                      disabled={loading}
+                    >
+                      수정
+                    </button>
+                  )}
                   <button
                     className="registerButton"
                     onClick={onClose}

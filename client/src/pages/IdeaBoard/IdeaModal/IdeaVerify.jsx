@@ -619,7 +619,7 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
                 </button>
               </>
             ) : leftSubmitted ? (
-              // 제출됨: 수정 버튼 표시
+              // 제출됨: 수정 버튼 표시 (모든 사용자에게 보이도록 수정)
               <button
                 className="cancelButton"
                 onClick={handleLeftEdit}
@@ -627,7 +627,7 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
               >
                 수정
               </button>
-            ) : (
+            ) : !leftSubmitted ? (
               // 미제출: 등록 버튼 표시
               <button
                 className="registerButton"
@@ -636,7 +636,7 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
               >
                 등록
               </button>
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -823,7 +823,7 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
                 </button>
               </>
             ) : rightSubmitted ? (
-              // 제출됨: 수정 버튼 표시
+              // 제출됨: 수정 버튼 표시 (모든 사용자에게 보이도록 수정)
               <button
                 className="cancelButton"
                 onClick={handleRightEdit}
@@ -831,7 +831,7 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
               >
                 수정
               </button>
-            ) : (
+            ) : !rightSubmitted ? (
               // 미제출: 등록 버튼 표시
               <button
                 className="registerButton"
@@ -840,7 +840,7 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
               >
                 등록
               </button>
-            )}
+            ) : null}
           </div>
         </div>
 
