@@ -187,9 +187,9 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
         <hr className="titleUnderline" />
 
         {/* 로딩 메시지 표시 */}
-        {loading && (
+        {/* {loading && (
           <div className="loadingMessage">데이터를 불러오는 중입니다...</div>
-        )}
+        )} */}
 
         {/* 오류 메시지 표시 */}
         {error && <div className="errorMessage">{error}</div>}

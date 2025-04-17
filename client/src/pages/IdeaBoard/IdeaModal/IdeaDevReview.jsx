@@ -84,7 +84,7 @@ const TransferList = ({
 
         setError("");
       } catch (error) {
-        console.error("개발자 목록 가져오기 오류:", error);
+        // console.error("개발자 목록 가져오기 오류:", error);
         setError("개발자 목록을 불러오는데 실패했습니다.");
       } finally {
         setLoading(false);
@@ -297,7 +297,7 @@ const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
   const [initialSelectedDevelopers, setInitialSelectedDevelopers] = useState(
     []
   );
-  const [viewMode, setViewMode] = useState(isViewMode); // 읽기모드 상태 추가
+  const [viewMode, setViewMode] = useState(isViewMode); // 읽기모드 상태 초기화
 
   // 개발심의 데이터 가져오기
   useEffect(() => {
@@ -311,6 +311,9 @@ const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
         // 데이터가 있으면 상태 업데이트
         if (response.data) {
           setDevReviewData(response.data);
+
+          // 데이터가 있으면 읽기 모드로 설정
+          setViewMode(true);
 
           // 폼에 데이터 설정
           if (response.data.developers && response.data.developers.length > 0) {
@@ -349,13 +352,20 @@ const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
               setPriority(response.data.schedule.priority);
             }
           }
+        } else {
+          // 데이터가 없으면 isViewMode 값에 따라 초기 설정
+          setViewMode(isViewMode);
         }
       } catch (error) {
-        console.error("개발심의 데이터 조회 오류:", error);
+        // console.error("개발심의 데이터 조회 오류:", error);
         if (error.response && error.response.status === 404) {
           // 404 오류는 데이터가 없는 정상적인 상황일 수 있음
+          // 데이터가 없으면 isViewMode 값에 따라 초기 설정
+          setViewMode(isViewMode);
         } else {
           setError("개발심의 데이터를 불러올 수 없습니다.");
+          // 에러가 발생했지만 데이터가 없는 경우 isViewMode 값에 따라 초기 설정
+          setViewMode(isViewMode);
         }
       } finally {
         setLoading(false);
@@ -363,12 +373,15 @@ const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
     };
 
     fetchDevReviewData();
-  }, [ideaId]);
+  }, [ideaId, isViewMode]);
 
-  // 읽기모드 변경 시 상태 설정
+  // 읽기모드 변경 시 상태 설정 (props가 변경될 때만 적용)
   useEffect(() => {
-    setViewMode(isViewMode);
-  }, [isViewMode]);
+    // 데이터가 있는 경우 viewMode를 true로 유지
+    if (!devReviewData) {
+      setViewMode(isViewMode);
+    }
+  }, [isViewMode, devReviewData]);
 
   // 우선순위 변경 핸들러
   const handlePriorityChange = (event) => {
@@ -441,6 +454,8 @@ const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
         deleteBeforeInsert: true, // 백엔드에서 처리하도록 플래그 전달
       };
 
+      // console.log("개발 심의 등록 데이터:", reviewData);
+
       // 단일 POST 요청으로 처리 (백엔드에서 deleteBeforeInsert 플래그를 확인하여 처리)
       const response = await axios.post("/api/ideas/devreview", reviewData);
 
@@ -464,7 +479,7 @@ const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
         onRegister(response.data);
       }
     } catch (error) {
-      console.error("개발 심의 등록 오류:", error);
+      // console.error("개발 심의 등록 오류:", error);
 
       // 서버에서 반환된 오류 메시지 표시
       if (error.response) {
