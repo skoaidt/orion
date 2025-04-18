@@ -588,7 +588,7 @@ const IdeaRegister = ({
             </div>
 
             <div className="projectCategory">
-              <span className="fieldLabel">사용 대상</span>
+              <span className="fieldLabel">수행 주체</span>
               <FormControl>
                 <RadioGroup
                   row
@@ -610,11 +610,6 @@ const IdeaRegister = ({
                     value="자체"
                     control={<Radio />}
                     label="자체"
-                  />
-                  <FormControlLabel
-                    value="TBOH"
-                    control={<Radio />}
-                    label="TBOH"
                   />
                 </RadioGroup>
               </FormControl>
