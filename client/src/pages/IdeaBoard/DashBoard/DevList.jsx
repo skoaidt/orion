@@ -15,6 +15,30 @@ const columns = [
     align: "left",
   },
   {
+    field: "status",
+    headerName: "상태",
+    width: 80,
+    editable: false,
+    headerAlign: "center",
+    align: "center",
+    renderCell: (params) => {
+      const status = params.value;
+      return (
+        <span
+          style={{
+            color:
+              status === "완료" || status === "completed"
+                ? "#5A6ACF"
+                : "#CB0047",
+            fontWeight: "bold",
+          }}
+        >
+          {status}
+        </span>
+      );
+    },
+  },
+  {
     field: "dday",
     headerName: "D-day",
     width: 100,
@@ -63,14 +87,18 @@ const DevList = () => {
         // 아이디어 목록 가져오기
         const response = await axios.get("/api/ideas");
 
-        // "개발중" 상태인 아이디어만 필터링
-        const developingIdeas = response.data.filter(
-          (idea) => idea.status === "개발중" || idea.status === "developing"
+        // "개발중" 또는 "완료" 상태인 아이디어 필터링
+        const filteredIdeas = response.data.filter(
+          (idea) =>
+            idea.status === "개발중" ||
+            idea.status === "developing" ||
+            idea.status === "완료" ||
+            idea.status === "completed"
         );
 
         // 각 아이디어에 대해 개발심의 데이터 가져오기
         const processedData = await Promise.all(
-          developingIdeas.map(async (idea, index) => {
+          filteredIdeas.map(async (idea, index) => {
             try {
               // 개발심의 데이터 가져오기
               const devReviewResponse = await axios.get(
@@ -112,6 +140,7 @@ const DevList = () => {
                 id: index + 1,
                 idea_id: idea.idea_id || idea.id,
                 title: idea.title || "-",
+                status: idea.status || "-",
                 dday: dday,
                 raw_endDate: endDate, // 정렬을 위해 원본 날짜도 저장
               };
@@ -127,6 +156,7 @@ const DevList = () => {
                 id: index + 1,
                 idea_id: idea.idea_id || idea.id,
                 title: idea.title || "-",
+                status: idea.status || "-",
                 dday: null,
                 raw_endDate: null,
               };
@@ -134,8 +164,19 @@ const DevList = () => {
           })
         );
 
-        // D-day 기준으로 정렬 (null 값은 뒤로)
+        // 상태와 D-day 기준으로 정렬
+        // 1. 개발중인 항목을 먼저 표시
+        // 2. 각 상태 내에서는 D-day 오름차순으로 정렬
         const sortedData = processedData.sort((a, b) => {
+          // 개발중 상태가 완료 상태보다 먼저
+          const statusA =
+            a.status === "개발중" || a.status === "developing" ? 0 : 1;
+          const statusB =
+            b.status === "개발중" || b.status === "developing" ? 0 : 1;
+
+          if (statusA !== statusB) return statusA - statusB;
+
+          // 같은 상태 내에서는 D-day로 정렬
           if (a.dday === null) return 1;
           if (b.dday === null) return -1;
           return a.dday - b.dday;
@@ -145,7 +186,7 @@ const DevList = () => {
         setLoading(false);
       } catch (err) {
         console.error(
-          "개발 중인 아이디어 데이터를 가져오는 중 오류 발생:",
+          "개발 및 완료 상태 아이디어 데이터를 가져오는 중 오류 발생:",
           err
         );
         setError(`데이터 로딩 오류: ${err.message}`);
@@ -165,7 +206,7 @@ const DevList = () => {
   return (
     <div className="devList">
       <div className="header">
-        <p>개발진행 과제</p>
+        <p>개발진행/완료 과제</p>
       </div>
       <div className="list">
         {loading ? (
@@ -176,7 +217,7 @@ const DevList = () => {
         ) : error ? (
           <div className="error-message">{error}</div>
         ) : devData.length === 0 ? (
-          <p>현재 개발이 진행되는 과제가 없습니다.</p>
+          <p>현재 개발 또는 완료 상태인 과제가 없습니다.</p>
         ) : (
           <DataTable
             slug="dev"

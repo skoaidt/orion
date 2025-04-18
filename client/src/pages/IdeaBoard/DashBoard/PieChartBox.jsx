@@ -30,7 +30,7 @@ const colors = {
 // IdeaRegister.jsx에서 가져온 정적 범례 데이터
 const allLegendItems = {
   // 개발 유형 범례
-  devType: ["신규개발", "고도화"],
+  devType: ["신규개발", "고도화", "내재화"],
 
   // 사업 유형 범례
   bizType: [

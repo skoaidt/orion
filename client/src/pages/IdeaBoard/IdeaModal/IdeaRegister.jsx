@@ -583,6 +583,11 @@ const IdeaRegister = ({
                     control={<Radio />}
                     label="고도화"
                   />
+                  <FormControlLabel
+                    value="내재화"
+                    control={<Radio />}
+                    label="내재화"
+                  />
                 </RadioGroup>
               </FormControl>
             </div>
