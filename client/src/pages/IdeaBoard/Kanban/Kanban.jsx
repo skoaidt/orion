@@ -528,7 +528,7 @@ const Kanban = () => {
               <div className="kanban-column" key={column.id}>
                 <h2 className="column-title">{column.title}</h2>
 
-                {column.id === "todo" && (
+                {column.id === "todo" && isDevInProgressStatus && (
                   <div className="add-task-section">
                     {!showForm ? (
                       <button
@@ -553,6 +553,12 @@ const Kanban = () => {
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {column.id === "todo" && !isDevInProgressStatus && (
+                  <div className="add-task-info">
+                    <p>개발시작 후 "새 작업 추가"가 가능합니다.</p>
                   </div>
                 )}
 
