@@ -41,7 +41,11 @@ const Kanban = () => {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [ideaData, setIdeaData] = useState({ title: "", project_type: "" });
+  const [ideaData, setIdeaData] = useState({
+    title: "",
+    project_type: "",
+    status: "",
+  });
   const [devReviewData, setDevReviewData] = useState({
     developers: [],
     schedule: { startDate: null, endDate: null, priority: "" },
@@ -325,6 +329,32 @@ const Kanban = () => {
     setShowDevStartModal(false);
   };
 
+  // 개발 상태 업데이트 함수 추가
+  const updateIdeaStatus = async (newStatus) => {
+    try {
+      // API 호출하여 상태 업데이트
+      await axios.put(`/api/ideas/status/${id}`, {
+        status: newStatus,
+      });
+
+      // 로컬 상태 업데이트
+      setIdeaData((prev) => ({
+        ...prev,
+        status: newStatus,
+      }));
+
+      console.log(`아이디어 상태가 "${newStatus}"로 업데이트 되었습니다.`);
+    } catch (error) {
+      console.error("아이디어 상태 업데이트 오류:", error);
+    }
+  };
+
+  // DevStart 모달에서 "개발중" 상태로 변경하는 함수
+  const handleStartDevelopment = async () => {
+    await updateIdeaStatus("개발중");
+    setShowDevStartModal(false);
+  };
+
   if (loading) return <div className="loading">로딩 중...</div>;
   if (error) return <div className="error">{error}</div>;
 
@@ -358,14 +388,20 @@ const Kanban = () => {
     );
   };
 
-  // 개발 완료 버튼 표시 여부
-  const showCompleteButton = isCurrentUserDeveloper();
+  // 개발 버튼 표시 여부
+  const isDeveloper = isCurrentUserDeveloper();
+  const isDevReviewStatus = ideaData.status === "개발심의";
+  const isDevInProgressStatus = ideaData.status === "개발중";
 
   return (
     <div className="kanban">
       {showDevelopModal && <IdeaDevelop onClose={handleCloseModal} id={id} />}
       {showDevStartModal && (
-        <DevStart onClose={handleCloseDevStartModal} id={id} />
+        <DevStart
+          onClose={handleCloseDevStartModal}
+          onStartDevelopment={handleStartDevelopment}
+          id={id}
+        />
       )}
       <div className="kanban-header">
         <div className="header">
@@ -393,18 +429,18 @@ const Kanban = () => {
               )}
           </div>
           <div className="right">
-            {showCompleteButton && (
+            {isDeveloper && isDevInProgressStatus && (
               <button className="developing">
                 <GitHubIcon /> &nbsp;개발중
               </button>
             )}
 
-            {showCompleteButton && (
+            {isDeveloper && isDevReviewStatus && (
               <button className="devStart" onClick={handleDevStart}>
                 <CodeIcon /> &nbsp;Start
               </button>
             )}
-            {showCompleteButton && (
+            {isDeveloper && (
               <button
                 className="completedButton"
                 onClick={handleDevelopComplete}

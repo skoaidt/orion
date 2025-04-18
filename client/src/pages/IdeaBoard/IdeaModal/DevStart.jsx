@@ -4,7 +4,7 @@ import "./devStart.scss";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
 
-const DevStart = ({ onClose, id }) => {
+const DevStart = ({ onClose, id, onStartDevelopment }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -18,20 +18,24 @@ const DevStart = ({ onClose, id }) => {
         setError("아이디어 ID가 없습니다.");
         return;
       }
-      // 아이디어 상태를 "개발중"으로 업데이트
-      const response = await axios.put(`/api/ideas/status/${id}`, {
-        status: "개발중",
-      });
 
-      console.log("API 응답:", response.data);
+      if (onStartDevelopment) {
+        // 부모 컴포넌트에서 전달받은 함수가 있으면 사용
+        await onStartDevelopment();
+      } else {
+        // 기존 방식으로 상태 업데이트
+        await axios.put(`/api/ideas/status/${id}`, {
+          status: "개발중",
+        });
+
+        // 필요한 경우 페이지 리로드
+        window.location.reload();
+      }
 
       // 성공적으로 업데이트 후 모달 닫기
       setLoading(false);
       alert("개발 상태가 변경되었습니다.");
       onClose();
-
-      // 필요한 경우 페이지 리로드 또는 상태 업데이트
-      window.location.reload();
     } catch (error) {
       console.error("[개발시작] 오류:", error);
       setLoading(false);
