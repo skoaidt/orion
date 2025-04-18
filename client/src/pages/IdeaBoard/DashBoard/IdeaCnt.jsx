@@ -41,7 +41,11 @@ const IdeaCnt = () => {
 
         // 완료 상태 카운트
         const completedCount = response.data.filter(
-          (idea) => idea.status === "완료" || idea.status === "completed"
+          (idea) =>
+            idea.status === "완료" ||
+            idea.status === "completed" ||
+            idea.status === "개발완료" ||
+            idea.status === "developmentCompleted"
         ).length;
 
         setCounts({

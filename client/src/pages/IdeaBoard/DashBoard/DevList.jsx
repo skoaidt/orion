@@ -93,7 +93,9 @@ const DevList = () => {
             idea.status === "개발중" ||
             idea.status === "developing" ||
             idea.status === "완료" ||
-            idea.status === "completed"
+            idea.status === "completed" ||
+            idea.status === "개발완료" ||
+            idea.status === "developmentcompleted"
         );
 
         // 각 아이디어에 대해 개발심의 데이터 가져오기
