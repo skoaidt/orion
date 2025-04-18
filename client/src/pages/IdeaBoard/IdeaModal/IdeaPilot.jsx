@@ -98,6 +98,7 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
   const handleRegister = async () => {
     try {
       setLoading(true);
+      setError(""); // 오류 상태 초기화
 
       // 필수 필드 검증 (문자열이 아닌 경우에 대한 처리 추가)
       const productivityStr = String(productivity || "");
@@ -158,7 +159,6 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
       );
 
       console.log("파일럿 데이터 등록 성공:", response.data);
-      // 결과에서 idea_id 확인 (기존에는 pilotId를 확인했을 수 있음)
       console.log("결과 - 아이디어 ID:", response.data.idea_id);
 
       alert("파일럿 결과가 성공적으로 등록되었습니다.");
@@ -166,6 +166,9 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
       // 등록 완료 후 데이터 업데이트하고 읽기 모드로 전환
       setPilotData(response.data);
       setViewMode(true);
+
+      // 등록 완료 후 모달 닫기
+      onClose();
     } catch (error) {
       console.error("파일럿 데이터 등록 오류:", error);
       alert(

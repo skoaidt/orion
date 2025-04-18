@@ -65,7 +65,7 @@ const IdeaCompleted = ({ onClose }) => {
     <div className="completedModalOverlay">
       <div className="completedModalContent">
         <div className="titleBox">
-          <h2>완료</h2>
+          <h2>완료 : Solution 등록</h2>
           <CloseIcon className="closeIcon" onClick={onClose} />
         </div>
         <hr className="titleUnderline" />
@@ -74,7 +74,7 @@ const IdeaCompleted = ({ onClose }) => {
           <TextField
             className="commentTextfield"
             variant="outlined"
-            placeholder="Solution Name*"
+            placeholder="[영문명] Solution Name*"
             multiline
             fullWidth
           />
@@ -84,7 +84,7 @@ const IdeaCompleted = ({ onClose }) => {
           <TextField
             className="commentTextfield"
             variant="outlined"
-            placeholder="Solution Full Name"
+            placeholder="[영문명] Solution Full Name"
             multiline
             fullWidth
           />
@@ -94,7 +94,7 @@ const IdeaCompleted = ({ onClose }) => {
           <TextField
             className="commentTextfield"
             variant="outlined"
-            placeholder="한글 명칭"
+            placeholder="[한글명] 솔루션 명칭"
             multiline
             fullWidth
           />
@@ -106,7 +106,7 @@ const IdeaCompleted = ({ onClose }) => {
               <TextField
                 className="commentTextfield"
                 variant="outlined"
-                placeholder="개발자 사번*"
+                placeholder="[N사번] 개발자 사번*"
                 multiline
                 fullWidth
               />
@@ -115,7 +115,7 @@ const IdeaCompleted = ({ onClose }) => {
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   className="datePicker"
-                  label="개발일자"
+                  label="개발 완료일"
                   value={selectedDate}
                   onChange={(newValue) => setSelectedDate(newValue)}
                   format="YYYY.MM.DD"
@@ -132,7 +132,7 @@ const IdeaCompleted = ({ onClose }) => {
           <TextField
             className="commentTextfield"
             variant="outlined"
-            placeholder="시스템 바로가기 Link"
+            placeholder="Solution 바로가기 Link"
             multiline
             fullWidth
           />

@@ -12,7 +12,7 @@ import Typography from "@mui/material/Typography";
 import Switch from "@mui/material/Switch";
 import axios from "axios";
 
-const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
+const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
   // 상태 변수 정의
   const [duplication, setDuplication] = useState("");
   const [scope, setScope] = useState("");
@@ -32,10 +32,9 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
       try {
         setLoading(true);
         const response = await axios.get(`/api/ideas/selection/${ideaId}`);
-        console.log("선정 데이터 조회 결과:", response.data);
 
         // 데이터가 있으면 상태 업데이트
-        if (response.data) {
+        if (response.data && Object.keys(response.data).length > 0) {
           setViewData(response.data);
           // 폼에도 데이터 설정
           setDuplication(response.data.duplication || "");
@@ -46,6 +45,12 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
               ? response.data.is_selected
               : true
           );
+
+          // 데이터가 있으면 viewMode를 true로 설정
+          setViewMode(true);
+        } else {
+          // 데이터가 없으면 isViewMode 프롭에 따라 viewMode 설정
+          setViewMode(isViewMode);
         }
       } catch (error) {
         console.error("선정 데이터 조회 오류:", error);
@@ -59,12 +64,21 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
     };
 
     fetchSelectionData();
-  }, [ideaId, viewMode]);
+  }, [ideaId, isViewMode]);
 
   // 읽기모드 변경 시 상태 설정
   useEffect(() => {
-    setViewMode(isViewMode);
-  }, [isViewMode]);
+    // 데이터 로딩이 아직 완료되지 않았을 때만 isViewMode에 따라 viewMode 설정
+    // 데이터 로딩 후에는 데이터 존재 여부에 따라 viewMode가 설정됨
+    if (!dataLoaded) {
+      setViewMode(isViewMode);
+    }
+  }, [isViewMode, dataLoaded]);
+
+  // viewMode 상태 변경 감지
+  useEffect(() => {
+    console.log("viewMode state 변경됨:", viewMode);
+  }, [viewMode]);
 
   // 과제중복 라디오 버튼 변경 핸들러
   const handleDuplicationChange = (event) => {
@@ -160,6 +174,9 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
       // 등록 성공 후 데이터 업데이트 및 읽기 모드로 전환
       setViewData(response.data);
       setViewMode(true);
+
+      // 등록 성공 후 모달 닫기 (viewMode 상태 전달)
+      onClose(true);
     } catch (error) {
       console.error("과제 선정 등록 오류:", error);
 
@@ -335,21 +352,19 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
 
             {/* 버튼 컨테이너 */}
             <div className="buttonContainer">
-              {viewMode ? (
+              {viewMode === true ? (
                 // 읽기 모드: 왼쪽 버튼 = 수정, 오른쪽 버튼 = 닫기
                 <>
-                  {viewData && (
-                    <button
-                      className="cancelButton"
-                      onClick={handleEdit}
-                      disabled={loading}
-                    >
-                      수정
-                    </button>
-                  )}
+                  <button
+                    className="cancelButton"
+                    onClick={handleEdit}
+                    disabled={loading}
+                  >
+                    수정
+                  </button>
                   <button
                     className="registerButton"
-                    onClick={onClose}
+                    onClick={() => onClose(true)}
                     disabled={loading}
                   >
                     닫기
@@ -360,7 +375,7 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
                 <>
                   <button
                     className="cancelButton"
-                    onClick={onClose}
+                    onClick={() => onClose(false)}
                     disabled={loading}
                   >
                     취소
