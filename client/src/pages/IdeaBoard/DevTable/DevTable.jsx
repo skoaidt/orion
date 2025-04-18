@@ -254,8 +254,8 @@ const DevTable = () => {
     <div className="devTable">
       {/* IdeaTable 스타일의 타이틀 헤더 */}
       <div className="titleHeader">
-        <GitHubIcon />
-        <h1>개발 관리 목록</h1>
+        <GitHubIcon style={{ fontSize: "30px", color: "#565656" }} />
+        <h1>개발 과제 목록</h1>
       </div>
 
       {/* 개수 표시하는 헤더 행 */}
