@@ -636,9 +636,11 @@ const IdeaRegister = ({
                     <MenuItem value="Infra설비">Infra설비</MenuItem>
                     <MenuItem value="SO">SO</MenuItem>
                     <MenuItem value="기업문화">기업문화</MenuItem>
+                    <MenuItem value="경영지원">경영지원</MenuItem>
                     <MenuItem value="안전보건">안전보건</MenuItem>
                     <MenuItem value="자산">자산</MenuItem>
                     <MenuItem value="전송">전송</MenuItem>
+                    <MenuItem value="공통">공통</MenuItem>
                   </Select>
                 </FormControl>
                 <span className="fieldLabel">업무분야</span>
@@ -656,6 +658,10 @@ const IdeaRegister = ({
                     <MenuItem value="CE">CE</MenuItem>
                     <MenuItem value="사무">사무</MenuItem>
                     <MenuItem value="Biz">Biz</MenuItem>
+                    <MenuItem value="서버">서버</MenuItem>
+                    <MenuItem value="교육">교육</MenuItem>
+                    <MenuItem value="자산">자산</MenuItem>
+                    <MenuItem value="안전">안전</MenuItem>
                     <MenuItem value="기타">기타</MenuItem>
                   </Select>
                 </FormControl>
