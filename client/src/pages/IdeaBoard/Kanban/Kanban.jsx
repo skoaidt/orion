@@ -6,10 +6,14 @@ import axios from "axios";
 import "./kanban.scss";
 
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import CodeIcon from "@mui/icons-material/Code";
+import GitHubIcon from "@mui/icons-material/GitHub";
 import { Tooltip, IconButton } from "@mui/material";
 
 import { AuthContext } from "../../../context/authContext";
 import IdeaDevelop from "../IdeaModal/IdeaDevelop";
+import DevStart from "../IdeaModal/DevStart";
+
 // StrictMode와 함께 사용할 수 있는 Droppable 래퍼
 const StrictModeDroppable = ({ children, ...props }) => {
   const [enabled, setEnabled] = useState(false);
@@ -44,7 +48,7 @@ const Kanban = () => {
     rawData: [],
   });
   const [showDevelopModal, setShowDevelopModal] = useState(false);
-
+  const [showDevStartModal, setShowDevStartModal] = useState(false);
   // 초기 데이터 상태
   const [columns, setColumns] = useState({
     todo: {
@@ -308,8 +312,17 @@ const Kanban = () => {
     setShowDevelopModal(true);
   };
 
+  const handleDevStart = () => {
+    console.log("개발 시작 버튼 클릭, 현재 아이디어 ID:", id);
+    setShowDevStartModal(true);
+  };
+
   const handleCloseModal = () => {
     setShowDevelopModal(false);
+  };
+
+  const handleCloseDevStartModal = () => {
+    setShowDevStartModal(false);
   };
 
   if (loading) return <div className="loading">로딩 중...</div>;
@@ -351,6 +364,9 @@ const Kanban = () => {
   return (
     <div className="kanban">
       {showDevelopModal && <IdeaDevelop onClose={handleCloseModal} id={id} />}
+      {showDevStartModal && (
+        <DevStart onClose={handleCloseDevStartModal} id={id} />
+      )}
       <div className="kanban-header">
         <div className="header">
           <div className="left">
@@ -378,6 +394,17 @@ const Kanban = () => {
           </div>
           <div className="right">
             {showCompleteButton && (
+              <button className="developing">
+                <GitHubIcon /> &nbsp;개발중
+              </button>
+            )}
+
+            {showCompleteButton && (
+              <button className="devStart" onClick={handleDevStart}>
+                <CodeIcon /> &nbsp;Start
+              </button>
+            )}
+            {showCompleteButton && (
               <button
                 className="completedButton"
                 onClick={handleDevelopComplete}
@@ -385,7 +412,7 @@ const Kanban = () => {
                 개발 완료
               </button>
             )}
-            <button className="back-button" onClick={handleBackClick}>
+            <button className="backButton" onClick={handleBackClick}>
               돌아가기
             </button>
           </div>

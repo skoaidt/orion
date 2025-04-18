@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import "./ideaDevelop.scss";
 import CloseIcon from "@mui/icons-material/Close";
+import "./devStart.scss";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
 
-const IdeaDevelop = ({ onClose, id }) => {
+const DevStart = ({ onClose, id }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -12,17 +12,15 @@ const IdeaDevelop = ({ onClose, id }) => {
     try {
       setLoading(true);
       setError(null);
-
       // id가 없으면 에러 처리
       if (!id) {
         setLoading(false);
         setError("아이디어 ID가 없습니다.");
         return;
       }
-
       // 아이디어 상태를 "개발중"으로 업데이트
       const response = await axios.put(`/api/ideas/status/${id}`, {
-        status: "개발완료",
+        status: "개발중",
       });
 
       console.log("API 응답:", response.data);
@@ -35,26 +33,28 @@ const IdeaDevelop = ({ onClose, id }) => {
       // 필요한 경우 페이지 리로드 또는 상태 업데이트
       window.location.reload();
     } catch (error) {
-      console.error("개발 상태 업데이트 오류:", error);
+      console.error("[개발시작] 오류:", error);
       setLoading(false);
-      setError(`개발 상태 업데이트 중 오류가 발생했습니다: ${error.message}`);
+      setError(
+        `[개발시작] 상태 업데이트 중 오류가 발생했습니다: ${error.message}`
+      );
     }
   };
 
   return (
     <div
-      className="developModalOverlay"
+      className="devStartModal"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="modalContent">
         <div className="titleBox">
-          <h2>개발 완료</h2>
+          <h2>개발 시작</h2>
           <CloseIcon className="closeIcon" onClick={onClose} />
         </div>
 
         <div className="containerBox">
           <div className="textBox">
-            <p>과제 개발을 완료하시겠습니까?</p>
+            <p>개발과제를 시작하겠습니까?</p>
           </div>
           <div className="idNo">
             <span>ID - </span>
@@ -79,7 +79,7 @@ const IdeaDevelop = ({ onClose, id }) => {
               {loading ? (
                 <CircularProgress size={20} color="inherit" />
               ) : (
-                "완료"
+                "개발 시작"
               )}
             </button>
           </div>
@@ -89,4 +89,4 @@ const IdeaDevelop = ({ onClose, id }) => {
   );
 };
 
-export default IdeaDevelop;
+export default DevStart;
