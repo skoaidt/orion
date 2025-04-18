@@ -150,7 +150,12 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
       // 결과에서 idea_id 확인 (기존에는 selectionId를 확인했을 수 있음)
       console.log("결과 - 아이디어 ID:", response.data.idea_id);
 
-      alert("과제 선정 정보가 성공적으로 등록되었습니다.");
+      // 선정 여부에 따라 다른 알림 메시지 표시
+      if (isSelected) {
+        alert("과제 선정 정보가 성공적으로 등록되었습니다.");
+      } else {
+        alert("과제 선정 단계에서 Drop 되었습니다.");
+      }
 
       // 등록 성공 후 데이터 업데이트 및 읽기 모드로 전환
       setViewData(response.data);

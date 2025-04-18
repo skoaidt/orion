@@ -34,8 +34,12 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
   const [leftSubmitted, setLeftSubmitted] = useState(false);
   const [rightSubmitted, setRightSubmitted] = useState(false);
   const [viewMode, setViewMode] = useState(isViewMode);
-  const [leftEditMode, setLeftEditMode] = useState(false);
-  const [rightEditMode, setRightEditMode] = useState(false);
+  const [leftEditMode, setLeftEditMode] = useState(
+    !leftSubmitted && !isViewMode
+  );
+  const [rightEditMode, setRightEditMode] = useState(
+    !rightSubmitted && !isViewMode
+  );
   const [viewData, setViewData] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
 
@@ -43,8 +47,12 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
   useEffect(() => {
     const fetchVerificationData = async () => {
       try {
+        console.log("검증 데이터 불러오기 시작 - ideaId:", ideaId);
         const response = await axios.get(`/api/ideas/verify/${ideaId}`);
+
         if (response.data) {
+          console.log("검증 데이터 로드 성공:", response.data);
+
           // 보존해야 할 데이터를 확실히 넣어주기
           const initialData = {
             // 기본값 설정
@@ -56,28 +64,74 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
           setFormData(initialData);
           setViewData(initialData);
 
-          // 왼쪽/오른쪽 제출 상태 확인
-          if (
+          // 왼쪽/오른쪽 제출 상태 확인 (더 명확한 조건으로 수정)
+          const hasLeftData =
             initialData.development_collaboration &&
             initialData.target_user &&
-            initialData.comment
-          ) {
-            setLeftSubmitted(true);
-          }
+            initialData.comment &&
+            initialData.comment.trim() !== "";
 
-          if (
+          const hasRightData =
             initialData.ai_development_collaboration &&
             initialData.feasibility &&
+            initialData.ai_comment &&
+            initialData.ai_comment.trim() !== "";
+
+          console.log(
+            "왼쪽 제출 상태 확인:",
+            hasLeftData,
+            initialData.development_collaboration,
+            initialData.target_user,
+            initialData.comment
+          );
+          console.log(
+            "오른쪽 제출 상태 확인:",
+            hasRightData,
+            initialData.ai_development_collaboration,
+            initialData.feasibility,
             initialData.ai_comment
-          ) {
+          );
+
+          if (hasLeftData) {
+            setLeftSubmitted(true);
+            console.log("왼쪽(선임부서) 제출 상태 설정: true");
+          } else {
+            setLeftSubmitted(false);
+            console.log("왼쪽(선임부서) 제출 상태 설정: false");
+          }
+
+          if (hasRightData) {
             setRightSubmitted(true);
+            console.log("오른쪽(AI/DT) 제출 상태 설정: true");
+          } else {
+            setRightSubmitted(false);
+            console.log("오른쪽(AI/DT) 제출 상태 설정: false");
+          }
+
+          // 편집 모드 상태 설정 추가
+          if (!isViewMode) {
+            setLeftEditMode(!hasLeftData);
+            setRightEditMode(!hasRightData);
+            console.log(
+              "편집 모드 상태 설정 - 왼쪽:",
+              !hasLeftData,
+              "오른쪽:",
+              !hasRightData
+            );
+          } else {
+            setLeftEditMode(false);
+            setRightEditMode(false);
+            console.log("뷰 모드로 설정되어 편집 모드 비활성화");
           }
 
           // 데이터 로드 완료 표시
           setDataLoaded(true);
+        } else {
+          console.log("검증 데이터 없음");
+          setDataLoaded(true);
         }
       } catch (error) {
-        // console.error("검증 데이터 불러오기 실패:", error);
+        console.error("검증 데이터 불러오기 실패:", error);
         setDataLoaded(true); // 에러 발생해도 데이터 로드 시도는 완료
       }
     };
@@ -89,12 +143,44 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
 
   // 읽기모드 변경 시 상태 설정
   useEffect(() => {
+    console.log(
+      "읽기 모드 변경 감지 - isViewMode:",
+      isViewMode,
+      "leftSubmitted:",
+      leftSubmitted,
+      "rightSubmitted:",
+      rightSubmitted
+    );
+
     setViewMode(isViewMode);
+
     if (isViewMode) {
+      // 뷰 모드일 때는 항상 편집 모드 비활성화
       setLeftEditMode(false);
       setRightEditMode(false);
+      console.log("뷰 모드로 설정되어 모든 편집 모드 비활성화");
+    } else {
+      // 편집 모드 설정 - 이미 제출된 섹션은 편집 모드 비활성화, 미제출 섹션은 활성화
+      if (dataLoaded) {
+        // 데이터 로딩이 완료된 경우에만 처리
+        if (!leftSubmitted) {
+          setLeftEditMode(true);
+          console.log("왼쪽(선임부서) 미제출 상태로 편집 모드 활성화");
+        } else {
+          setLeftEditMode(false);
+          console.log("왼쪽(선임부서) 제출 상태로 편집 모드 비활성화");
+        }
+
+        if (!rightSubmitted) {
+          setRightEditMode(true);
+          console.log("오른쪽(AI/DT) 미제출 상태로 편집 모드 활성화");
+        } else {
+          setRightEditMode(false);
+          console.log("오른쪽(AI/DT) 제출 상태로 편집 모드 비활성화");
+        }
+      }
     }
-  }, [isViewMode]);
+  }, [isViewMode, leftSubmitted, rightSubmitted, dataLoaded]);
 
   const handleChange = (field) => (event) => {
     setFormData((prev) => ({
@@ -246,7 +332,7 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
         }
 
         alert(
-          `선임부서 검증 정보가 성공적으로 등록되었습니다.\n양쪽 모두 검증이 완료되어 ${finalStatus}되었습니다. ${statusMessage}`
+          `선임부서 검증 정보가 성공적으로 등록되었습니다.\n양쪽 모두 검증 완료 결과 ${finalStatus}되었습니다. ${statusMessage}`
         );
 
         // 잠시 대기 후 모달 닫기
@@ -361,7 +447,7 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
         }
 
         alert(
-          `AI/DT 검증 정보가 성공적으로 등록되었습니다.\n양쪽 모두 검증이 완료되어 ${finalStatus}되었습니다. ${statusMessage}`
+          `AI/DT 검증 정보가 성공적으로 등록되었습니다.\n양쪽 모두 검증 완료 결과 ${finalStatus}되었습니다. ${statusMessage}`
         );
 
         // 잠시 대기 후 모달 닫기
@@ -619,15 +705,20 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
                 </button>
               </>
             ) : leftSubmitted ? (
-              // 제출됨: 수정 버튼 표시 (모든 사용자에게 보이도록 수정)
-              <button
-                className="cancelButton"
-                onClick={handleLeftEdit}
-                disabled={leftLoading}
-              >
-                수정
-              </button>
-            ) : !leftSubmitted ? (
+              // 제출됨: 수정/닫기 버튼 표시
+              <>
+                <button
+                  className="cancelButton"
+                  onClick={handleLeftEdit}
+                  disabled={leftLoading}
+                >
+                  수정
+                </button>
+                <button className="registerButton" onClick={onClose}>
+                  닫기
+                </button>
+              </>
+            ) : (
               // 미제출: 등록 버튼 표시
               <button
                 className="registerButton"
@@ -636,7 +727,7 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
               >
                 등록
               </button>
-            ) : null}
+            )}
           </div>
         </div>
 
@@ -823,15 +914,20 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
                 </button>
               </>
             ) : rightSubmitted ? (
-              // 제출됨: 수정 버튼 표시 (모든 사용자에게 보이도록 수정)
-              <button
-                className="cancelButton"
-                onClick={handleRightEdit}
-                disabled={rightLoading}
-              >
-                수정
-              </button>
-            ) : !rightSubmitted ? (
+              // 제출됨: 수정/닫기 버튼 표시
+              <>
+                <button
+                  className="cancelButton"
+                  onClick={handleRightEdit}
+                  disabled={rightLoading}
+                >
+                  수정
+                </button>
+                <button className="registerButton" onClick={onClose}>
+                  닫기
+                </button>
+              </>
+            ) : (
               // 미제출: 등록 버튼 표시
               <button
                 className="registerButton"
@@ -840,7 +936,7 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
               >
                 등록
               </button>
-            ) : null}
+            )}
           </div>
         </div>
 

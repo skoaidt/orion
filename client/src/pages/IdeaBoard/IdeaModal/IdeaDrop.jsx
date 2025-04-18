@@ -10,6 +10,7 @@ const IdeaDrop = ({ onClose, ideaId }) => {
   const [verifyData, setVerifyData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dropStage, setDropStage] = useState(null); // Drop이 발생한 단계 (1: 선정, 2: 선임부서, 3: AI/DT)
 
   // ideaId 디버깅
   console.log("IdeaDrop 컴포넌트 - 현재 참조 중인 ideaId:", ideaId);
@@ -35,16 +36,48 @@ const IdeaDrop = ({ onClose, ideaId }) => {
         console.log("IdeaDrop - 아이디어 기본 정보 가져오기 성공");
 
         // 선정 정보 가져오기
-        const selectionResponse = await axios.get(
-          `/api/ideas/selection/${ideaId}`
-        );
-        setSelectionData(selectionResponse.data);
-        console.log("IdeaDrop - 선정 정보 가져오기 성공");
+        try {
+          const selectionResponse = await axios.get(
+            `/api/ideas/selection/${ideaId}`
+          );
+          setSelectionData(selectionResponse.data);
+          console.log("IdeaDrop - 선정 정보 가져오기 성공");
 
-        // 검증 정보 가져오기
-        const verifyResponse = await axios.get(`/api/ideas/verify/${ideaId}`);
-        setVerifyData(verifyResponse.data);
-        console.log("IdeaDrop - 검증 정보 가져오기 성공");
+          // 선정 단계에서 Drop 확인
+          if (
+            selectionResponse.data &&
+            selectionResponse.data.is_selected === false
+          ) {
+            setDropStage(1);
+          }
+        } catch (selectionError) {
+          console.error("선정 정보 가져오기 오류:", selectionError);
+          // 선정 정보가 없더라도 계속 진행
+        }
+
+        // 선정 단계에서 Drop된 경우 검증 정보는 조회하지 않음
+        if (dropStage !== 1) {
+          // 검증 정보 가져오기
+          try {
+            const verifyResponse = await axios.get(
+              `/api/ideas/verify/${ideaId}`
+            );
+            setVerifyData(verifyResponse.data);
+            console.log("IdeaDrop - 검증 정보 가져오기 성공");
+
+            // 검증 단계에서 Drop 확인
+            if (verifyResponse.data) {
+              if (verifyResponse.data.verification_status === false) {
+                setDropStage(2); // 선임부서에서 Drop
+              } else if (verifyResponse.data.ai_verification_status === false) {
+                setDropStage(3); // AI/DT 부서에서 Drop
+              }
+            }
+          } catch (verifyError) {
+            console.error("검증 정보 가져오기 오류:", verifyError);
+            // 검증 정보가 없더라도 계속 진행
+          }
+        }
       } catch (error) {
         console.error("데이터 로딩 오류:", error);
         setError("데이터를 불러오는 중 오류가 발생했습니다.");
@@ -81,6 +114,7 @@ const IdeaDrop = ({ onClose, ideaId }) => {
   console.log("verifyData가 null인가?", verifyData === null);
 
   console.log("현재 참조 중인 ideaId:", ideaId);
+  console.log("Drop 단계:", dropStage);
 
   // 온점(.) 기준으로 텍스트 줄바꿈 처리 함수
   const formatTextWithLineBreaks = (text) => {
@@ -118,17 +152,25 @@ const IdeaDrop = ({ onClose, ideaId }) => {
                 <p>
                   <strong>의견:</strong>
                   <span className="commentText">
-                    {formatTextWithLineBreaks(
-                      selectionData?.comment || mockSelectionData.comment
-                    )}
+                    {selectionData
+                      ? formatTextWithLineBreaks(selectionData.comment)
+                      : "-"}
                   </span>
                 </p>
                 <p>
                   <strong>선정여부:</strong>
                   <span
-                    className={!selectionData?.is_selected ? "dropStatus" : ""}
+                    className={
+                      selectionData && !selectionData.is_selected
+                        ? "dropStatus"
+                        : ""
+                    }
                   >
-                    {selectionData?.is_selected ? "선정" : "Drop"}
+                    {selectionData
+                      ? selectionData.is_selected
+                        ? "선정"
+                        : "Drop"
+                      : "-"}
                   </span>
                 </p>
               </div>
@@ -138,30 +180,59 @@ const IdeaDrop = ({ onClose, ideaId }) => {
             <div className="sectionContainer">
               <h3 className="sectionTitle">2. 본사 선임부서 검증</h3>
               <div className="contentBox">
-                <p>
-                  <strong>의견:</strong>
-                  <span className="commentText">
-                    {formatTextWithLineBreaks(
-                      verifyData?.comment || mockVerifyData.comment
-                    )}
-                  </span>
-                </p>
-                <p>
-                  <strong>검증여부:</strong>
-                  <span
-                    className={
-                      !verifyData?.verification_status ? "dropStatus" : ""
-                    }
-                  >
-                    {verifyData?.verification_status ? "검증완료" : "Drop"}
-                  </span>
-                </p>
-                <p>
-                  <strong>검증부서:</strong>
-                  <span className="departmentText">
-                    {verifyData?.department || mockVerifyData.department}
-                  </span>
-                </p>
+                {dropStage === 1 ? (
+                  // 선정 단계에서 Drop된 경우 "-" 표시
+                  <>
+                    <p>
+                      <strong>의견:</strong>
+                      <span className="commentText">-</span>
+                    </p>
+                    <p>
+                      <strong>검증여부:</strong>
+                      <span>-</span>
+                    </p>
+                    <p>
+                      <strong>검증부서:</strong>
+                      <span className="departmentText">-</span>
+                    </p>
+                  </>
+                ) : (
+                  // 그 외 정상 표시
+                  <>
+                    <p>
+                      <strong>의견:</strong>
+                      <span className="commentText">
+                        {verifyData
+                          ? formatTextWithLineBreaks(verifyData.comment)
+                          : "-"}
+                      </span>
+                    </p>
+                    <p>
+                      <strong>검증여부:</strong>
+                      <span
+                        className={
+                          verifyData && !verifyData.verification_status
+                            ? "dropStatus"
+                            : ""
+                        }
+                      >
+                        {verifyData
+                          ? verifyData.verification_status
+                            ? "검증완료"
+                            : "Drop"
+                          : "-"}
+                      </span>
+                    </p>
+                    <p>
+                      <strong>검증부서:</strong>
+                      <span className="departmentText">
+                        {verifyData && verifyData.department
+                          ? verifyData.department
+                          : "-"}
+                      </span>
+                    </p>
+                  </>
+                )}
               </div>
             </div>
 
@@ -169,24 +240,47 @@ const IdeaDrop = ({ onClose, ideaId }) => {
             <div className="sectionContainer">
               <h3 className="sectionTitle">3. AI/DT부서 검증</h3>
               <div className="contentBox">
-                <p>
-                  <strong>의견:</strong>
-                  <span className="commentText">
-                    {formatTextWithLineBreaks(
-                      verifyData?.ai_comment || mockVerifyData.ai_comment
-                    )}
-                  </span>
-                </p>
-                <p>
-                  <strong>검증여부:</strong>
-                  <span
-                    className={
-                      !verifyData?.ai_verification_status ? "dropStatus" : ""
-                    }
-                  >
-                    {verifyData?.ai_verification_status ? "검증완료" : "Drop"}
-                  </span>
-                </p>
+                {dropStage === 1 || dropStage === 2 ? (
+                  // 선정 또는 선임부서 단계에서 Drop된 경우 "-" 표시
+                  <>
+                    <p>
+                      <strong>의견:</strong>
+                      <span className="commentText">-</span>
+                    </p>
+                    <p>
+                      <strong>검증여부:</strong>
+                      <span>-</span>
+                    </p>
+                  </>
+                ) : (
+                  // 그 외 정상 표시
+                  <>
+                    <p>
+                      <strong>의견:</strong>
+                      <span className="commentText">
+                        {verifyData
+                          ? formatTextWithLineBreaks(verifyData.ai_comment)
+                          : "-"}
+                      </span>
+                    </p>
+                    <p>
+                      <strong>검증여부:</strong>
+                      <span
+                        className={
+                          verifyData && !verifyData.ai_verification_status
+                            ? "dropStatus"
+                            : ""
+                        }
+                      >
+                        {verifyData
+                          ? verifyData.ai_verification_status
+                            ? "검증완료"
+                            : "Drop"
+                          : "-"}
+                      </span>
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </>

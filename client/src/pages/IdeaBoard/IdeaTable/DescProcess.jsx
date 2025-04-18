@@ -41,7 +41,7 @@ const STAGES = {
   DEV_REVIEW: "devReviewed", // 개발자 검토 완료
   DEVELOPING: "developing", // 개발 진행 중
   COMPLETED: "completed", // 완료
-  DROP: "drop", // Drop 상태
+  DROP: "Drop", // Drop 상태 (첫 글자 대문자로 수정)
 };
 
 // 단계 순서 정의 (인덱스가 작을수록 먼저 진행되는 단계)
@@ -683,9 +683,21 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
         </div>
       </div>
       <hr style={{ margin: "20px 0", color: "#8c8c8c" }} />
+      {console.log("현재 상태:", ideaData.status)}
+      {console.log("STAGES.DROP 값:", STAGES.DROP)}
+      {console.log("상태 비교 결과:", ideaData.status === STAGES.DROP)}
       <div className="processBox">
         <div className="processItem" onClick={() => handleBoxClick("ideaDrop")}>
-          <div className="processItemTitle">Drop</div>
+          <div
+            className={`processItemTitle ${
+              ideaData.status &&
+              ideaData.status.toLowerCase() === STAGES.DROP.toLowerCase()
+                ? "active"
+                : ""
+            }`}
+          >
+            Drop
+          </div>
           <div className="lineBox dropLineBox">
             <div className="line dropLine">
               <div className="circle">
@@ -693,7 +705,14 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
               </div>
             </div>
           </div>
-          <div className="processItemContent">
+          <div
+            className={`processItemContent ${
+              ideaData.status &&
+              ideaData.status.toLowerCase() === STAGES.DROP.toLowerCase()
+                ? "active"
+                : ""
+            }`}
+          >
             <div className="itemcontentWrap">
               <div className="left">
                 <div className="userInfo">
