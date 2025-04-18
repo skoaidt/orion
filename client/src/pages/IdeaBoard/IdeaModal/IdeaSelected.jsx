@@ -22,6 +22,7 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
   const [error, setError] = useState("");
   const [viewData, setViewData] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [viewMode, setViewMode] = useState(isViewMode); // 읽기모드 상태 추가
 
   // 이미 완료된 단계인 경우 데이터 조회
   useEffect(() => {
@@ -48,7 +49,7 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
         }
       } catch (error) {
         console.error("선정 데이터 조회 오류:", error);
-        if (isViewMode) {
+        if (viewMode) {
           setError("저장된 선정 데이터를 불러올 수 없습니다.");
         }
       } finally {
@@ -58,7 +59,12 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
     };
 
     fetchSelectionData();
-  }, [ideaId, isViewMode]);
+  }, [ideaId, viewMode]);
+
+  // 읽기모드 변경 시 상태 설정
+  useEffect(() => {
+    setViewMode(isViewMode);
+  }, [isViewMode]);
 
   // 과제중복 라디오 버튼 변경 핸들러
   const handleDuplicationChange = (event) => {
@@ -78,6 +84,11 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
   // 선정여부 스위치 변경 핸들러
   const handleSelectionChange = (event) => {
     setIsSelected(event.target.checked);
+  };
+
+  // 편집 모드로 전환하는 함수
+  const handleEdit = () => {
+    setViewMode(false);
   };
 
   // 등록 버튼 클릭 핸들러
@@ -139,10 +150,16 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
       // 결과에서 idea_id 확인 (기존에는 selectionId를 확인했을 수 있음)
       console.log("결과 - 아이디어 ID:", response.data.idea_id);
 
-      alert("과제 선정 정보가 성공적으로 등록되었습니다.");
+      // 선정 여부에 따라 다른 알림 메시지 표시
+      if (isSelected) {
+        alert("과제 선정 정보가 성공적으로 등록되었습니다.");
+      } else {
+        alert("과제 선정 단계에서 Drop 되었습니다.");
+      }
 
-      // 성공 후 모달 닫기
-      onClose();
+      // 등록 성공 후 데이터 업데이트 및 읽기 모드로 전환
+      setViewData(response.data);
+      setViewMode(true);
     } catch (error) {
       console.error("과제 선정 등록 오류:", error);
 
@@ -184,25 +201,25 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
     <div className="selectedModalOverlay">
       <div className="selectedModalContent">
         <div className="titleBox">
-          <h2>{isViewMode ? "과제 선정 정보" : "과제 선정"}</h2>
+          <h2>{viewMode ? "과제 선정" : "과제 선정"}</h2>
           <CloseIcon className="closeIcon" onClick={onClose} />
         </div>
         <hr className="titleUnderline" />
 
         {/* 로딩 메시지 표시 */}
-        {loading && (
+        {/* {loading && (
           <div className="loadingMessage">데이터를 불러오는 중입니다...</div>
-        )}
+        )} */}
 
         {/* 오류 메시지 표시 */}
         {error && <div className="errorMessage">{error}</div>}
 
         {/* 데이터가 없는 경우 메시지 표시 (읽기 모드일 때만) */}
-        {isViewMode && dataLoaded && !viewData && !loading && (
+        {viewMode && dataLoaded && !viewData && !loading && (
           <div className="noDataMessage">저장된 선정 데이터가 없습니다.</div>
         )}
 
-        {(!isViewMode || (isViewMode && dataLoaded && viewData)) && (
+        {(!viewMode || (viewMode && dataLoaded && viewData)) && (
           <>
             {/* 중복 (duplication) */}
             <div className="rowContainer">
@@ -214,26 +231,26 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
                   className="radioGroup"
                   value={duplication}
                   onChange={handleDuplicationChange}
-                  disabled={isViewMode}
+                  disabled={viewMode}
                 >
                   <FormControlLabel
                     value="신규"
-                    control={<Radio disabled={isViewMode} />}
+                    control={<Radio disabled={viewMode} />}
                     label="신규"
                   />
                   <FormControlLabel
                     value="기존 시스템 고도화"
-                    control={<Radio disabled={isViewMode} />}
+                    control={<Radio disabled={viewMode} />}
                     label="기존 시스템 고도화"
                   />
                   <FormControlLabel
                     value="기존 시스템 기능추가"
-                    control={<Radio disabled={isViewMode} />}
+                    control={<Radio disabled={viewMode} />}
                     label="기존 시스템 기능추가"
                   />
                   <FormControlLabel
                     value="타 시스템 중복"
-                    control={<Radio disabled={isViewMode} />}
+                    control={<Radio disabled={viewMode} />}
                     label="타 시스템 중복"
                   />
                 </RadioGroup>
@@ -250,26 +267,26 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
                   className="radioGroup"
                   value={scope}
                   onChange={handleScopeChange}
-                  disabled={isViewMode}
+                  disabled={viewMode}
                 >
                   <FormControlLabel
                     value="TBOH"
-                    control={<Radio disabled={isViewMode} />}
+                    control={<Radio disabled={viewMode} />}
                     label="TBOH"
                   />
                   <FormControlLabel
                     value="TO"
-                    control={<Radio disabled={isViewMode} />}
+                    control={<Radio disabled={viewMode} />}
                     label="TO"
                   />
                   <FormControlLabel
                     value="OBH"
-                    control={<Radio disabled={isViewMode} />}
+                    control={<Radio disabled={viewMode} />}
                     label="OBH"
                   />
                   <FormControlLabel
                     value="자체사용"
-                    control={<Radio disabled={isViewMode} />}
+                    control={<Radio disabled={viewMode} />}
                     label="자체사용"
                   />
                 </RadioGroup>
@@ -288,9 +305,9 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
                 fullWidth
                 value={comment}
                 onChange={handleCommentChange}
-                disabled={isViewMode}
+                disabled={viewMode}
                 InputProps={{
-                  readOnly: isViewMode,
+                  readOnly: viewMode,
                 }}
               />
             </div>
@@ -309,30 +326,53 @@ const IdeaSelected = ({ onClose, ideaId, ideaData, isViewMode }) => {
                     checked={isSelected}
                     onChange={handleSelectionChange}
                     inputProps={{ "aria-label": "selection switch" }}
-                    disabled={isViewMode}
+                    disabled={viewMode}
                   />
                   <Typography>선정</Typography>
                 </Stack>
               </FormGroup>
             </div>
 
-            {/* 버튼 컨테이너 - 읽기 모드에서는 취소(닫기) 버튼만 표시 */}
+            {/* 버튼 컨테이너 */}
             <div className="buttonContainer">
-              <button
-                className="cancelButton"
-                onClick={onClose}
-                disabled={loading}
-              >
-                {isViewMode ? "닫기" : "취소"}
-              </button>
-              {!isViewMode && (
-                <button
-                  className="registerButton"
-                  onClick={handleSubmit}
-                  disabled={loading}
-                >
-                  등록
-                </button>
+              {viewMode ? (
+                // 읽기 모드: 왼쪽 버튼 = 수정, 오른쪽 버튼 = 닫기
+                <>
+                  {viewData && (
+                    <button
+                      className="cancelButton"
+                      onClick={handleEdit}
+                      disabled={loading}
+                    >
+                      수정
+                    </button>
+                  )}
+                  <button
+                    className="registerButton"
+                    onClick={onClose}
+                    disabled={loading}
+                  >
+                    닫기
+                  </button>
+                </>
+              ) : (
+                // 편집 모드: 왼쪽 버튼 = 취소, 오른쪽 버튼 = 등록
+                <>
+                  <button
+                    className="cancelButton"
+                    onClick={onClose}
+                    disabled={loading}
+                  >
+                    취소
+                  </button>
+                  <button
+                    className="registerButton"
+                    onClick={handleSubmit}
+                    disabled={loading}
+                  >
+                    등록
+                  </button>
+                </>
               )}
             </div>
           </>

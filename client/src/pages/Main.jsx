@@ -19,6 +19,7 @@ import SolMgmt from "./SolMgmt/SolMgmt";
 import Portfolio from "./Portfolio/Portfolio";
 import TypingMain from "./Typing/TypingMain/TypingMain";
 import TypingHome from "./Typing/TypingHome/TypingHome";
+import DevTable from "./IdeaBoard/DevTable/DevTable";
 
 export const Main = () => {
   const [getDevelopers, setGetDevelopers] = useState([]);
@@ -30,6 +31,7 @@ export const Main = () => {
   const isTypingPage = location.pathname.startsWith("/typing");
   const isIdeaBoardPage = location.pathname.startsWith("/ideaboard");
   const isDashboardPage = location.pathname.startsWith("/dashboard");
+  const isDevTablePage = location.pathname.startsWith("/devtable");
 
   ////////////////////////
   // 개발자 목록 가져오기
@@ -66,7 +68,8 @@ export const Main = () => {
         {!isPortfolioPage &&
           !isTypingPage &&
           !isIdeaBoardPage &&
-          !isDashboardPage && <MainNavBar />}
+          !isDashboardPage &&
+          !isDevTablePage && <MainNavBar />}
         <Routes>
           <Route path="/typingMain" element={<TypingMain />}></Route>
           <Route path="/typingHome" element={<TypingHome />}></Route>
@@ -90,6 +93,7 @@ export const Main = () => {
           <Route path="/ideaboard" element={<IdeaBorad />} />
           <Route path="/ideaboard/detail/:id" element={<IdeaBorad />} />
           <Route path="/ideaboard/kanban/:id" element={<IdeaBorad />} />
+          <Route path="/ideaboard/devtable" element={<IdeaBorad />} />
           <Route path="/dashboard" element={<IdeaBorad />} />
           <Route path="/solmgmt" element={<SolMgmt />} />
         </Routes>
@@ -100,7 +104,8 @@ export const Main = () => {
         isPortfolioPage ||
         isTypingPage ||
         isIdeaBoardPage ||
-        isDashboardPage
+        isDashboardPage ||
+        isDevTablePage
       ) && <Footer />}
     </>
   );

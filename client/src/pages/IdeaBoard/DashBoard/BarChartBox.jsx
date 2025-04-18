@@ -39,7 +39,7 @@ const BarChartBox = () => {
             <div className="cnt">234</div>
           </div>
           <div className="box devBox">
-            <div className="title">개발</div>
+            <div className="title">개발중</div>
             <div className="cnt">234</div>
           </div>
           <div className="box compBox">

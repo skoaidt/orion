@@ -30,7 +30,7 @@ const columns = [
   { field: "reg_date", headerName: "등록일", width: 100, editable: true },
   { field: "views", headerName: "조회수", width: 80, editable: true },
   // { field: "likes", headerName: "Like", width: 80, editable: true },
-  { field: "Dday", headerName: "D-day", width: 80, editable: true },
+  // { field: "Dday", headerName: "D-day", width: 80, editable: true },
 ];
 
 const filterOptions = {
