@@ -553,52 +553,94 @@ export const registerIdeaVerify = (req, res) => {
         return res.status(500).json({ error: err.message });
       }
 
-      // 아이디어 상태 업데이트
-      const updateIdeaStatusQuery = `
-        UPDATE special.ITAsset_ideas 
-        SET status = ? 
-        WHERE id = ?
-      `;
-
-      // 검증 상태에 따라 아이디어 상태 업데이트
-      // 검증 상태가 두 부서 모두 true일 때만 "검증", 하나라도 false이면 Drop
-      let newStatus = "검증";
-
-      // verification_status가 false이거나 ai_verification_status가 false일 때만 Drop으로 설정
+      // 두 검증 모두 완료된 경우 아이디어 상태 업데이트
       if (
-        verification_status === false ||
-        verification_status === "false" ||
-        ai_verification_status === false ||
-        ai_verification_status === "false"
+        checkData.length > 0 &&
+        checkData[0].verification_status !== null &&
+        checkData[0].target_user &&
+        checkData[0].comment
       ) {
-        newStatus = "Drop";
-        console.log("검증 단계에서 Drop 처리됨:", {
-          선임부서_검증상태: verification_status,
-          AI부서_검증상태: ai_verification_status,
-        });
-      } else {
-        console.log("검증 단계 완료:", {
-          선임부서_검증상태: verification_status,
-          AI부서_검증상태: ai_verification_status,
-        });
-      }
+        const verificationStatus = checkData[0].verification_status === 1;
+        const aiVerificationStatus =
+          ai_verification_status === true || ai_verification_status === "true"
+            ? true
+            : false;
 
-      db.query(
-        updateIdeaStatusQuery,
-        [newStatus, idea_id],
-        (updateErr, updateData) => {
-          if (updateErr) {
-            console.error("아이디어 상태 업데이트 오류:", updateErr);
-            // 상태 업데이트 실패해도 검증 데이터는 저장되었으므로 성공 응답
-          }
+        // 검증 상태에 따라 아이디어 상태 업데이트
+        // 두 부서 중 하나라도 false면 "Drop", 둘 다 true면 "검증"
+        let newStatus = "검증";
 
-          return res.status(200).json({
-            message: "과제 검증 정보가 성공적으로 등록되었습니다.",
-            idea_id: idea_id,
-            status: newStatus,
+        // 선임부서 또는 AI/DT 부서 중 하나라도 명시적으로 false인 경우에 "Drop"
+        if (verificationStatus === false || aiVerificationStatus === false) {
+          newStatus = "Drop";
+          console.log("두 부서 검증 완료, 결과는 Drop 처리:", {
+            선임부서_검증상태: verificationStatus,
+            AI부서_검증상태: aiVerificationStatus,
+          });
+        } else {
+          console.log("두 부서 검증 완료, 결과는 검증:", {
+            선임부서_검증상태: verificationStatus,
+            AI부서_검증상태: aiVerificationStatus,
           });
         }
-      );
+
+        const updateIdeaStatusQuery = `
+          UPDATE special.ITAsset_ideas 
+          SET status = ? 
+          WHERE id = ?
+        `;
+
+        db.query(
+          updateIdeaStatusQuery,
+          [newStatus, idea_id],
+          (updateErr, updateData) => {
+            if (updateErr) {
+              console.error("아이디어 상태 업데이트 오류:", updateErr);
+              // 상태 업데이트 실패해도 검증 데이터는 저장되었으므로 성공 응답
+            }
+          }
+        );
+      } else {
+        // 선임부서 검증이 아직 완료되지 않은 경우에도 AI/DT 검증이 false면 바로 Drop으로 처리
+        const aiVerificationStatus =
+          ai_verification_status === true || ai_verification_status === "true"
+            ? true
+            : false;
+
+        if (aiVerificationStatus === false) {
+          console.log(
+            "AI/DT 검증 결과가 Drop, 선임부서 검증 상태와 무관하게 Drop으로 처리"
+          );
+
+          const updateIdeaStatusQuery = `
+            UPDATE special.ITAsset_ideas 
+            SET status = ? 
+            WHERE id = ?
+          `;
+
+          db.query(
+            updateIdeaStatusQuery,
+            ["Drop", idea_id],
+            (updateErr, updateData) => {
+              if (updateErr) {
+                console.error("아이디어 상태 업데이트 오류:", updateErr);
+              }
+            }
+          );
+        }
+      }
+
+      return res.status(200).json({
+        message: "과제 검증 정보가 성공적으로 등록되었습니다.",
+        idea_id,
+        development_collaboration,
+        target_user,
+        comment,
+        verification_status:
+          verification_status === true || verification_status === "true"
+            ? true
+            : false,
+      });
     });
   });
 };
@@ -728,6 +770,86 @@ export const registerDepartmentVerify = (req, res) => {
       if (err) {
         console.error("선임부서 검증 정보 등록 오류:", err);
         return res.status(500).json({ error: err.message });
+      }
+
+      // 두 검증 모두 완료된 경우 아이디어 상태 업데이트
+      if (
+        selectData.length > 0 &&
+        selectData[0].ai_verification_status !== null &&
+        selectData[0].ai_development_collaboration &&
+        selectData[0].ai_comment
+      ) {
+        const departmentVerificationStatus =
+          verification_status === true || verification_status === "true"
+            ? true
+            : false;
+        const aiVerificationStatus = selectData[0].ai_verification_status === 1;
+
+        // 검증 상태에 따라 아이디어 상태 업데이트
+        // 두 부서 중 하나라도 false면 "Drop", 둘 다 true면 "검증"
+        let newStatus = "검증";
+
+        // 선임부서 또는 AI/DT 부서 중 하나라도 명시적으로 false인 경우에 "Drop"
+        if (
+          departmentVerificationStatus === false ||
+          aiVerificationStatus === false
+        ) {
+          newStatus = "Drop";
+          console.log("두 부서 모두 검증 완료, 결과는 Drop 처리:", {
+            선임부서_검증상태: departmentVerificationStatus,
+            AI부서_검증상태: aiVerificationStatus,
+          });
+        } else {
+          console.log("두 부서 모두 검증 완료, 결과는 검증:", {
+            선임부서_검증상태: departmentVerificationStatus,
+            AI부서_검증상태: aiVerificationStatus,
+          });
+        }
+
+        const updateIdeaStatusQuery = `
+          UPDATE special.ITAsset_ideas 
+          SET status = ? 
+          WHERE id = ?
+        `;
+
+        db.query(
+          updateIdeaStatusQuery,
+          [newStatus, idea_id],
+          (updateErr, updateData) => {
+            if (updateErr) {
+              console.error("아이디어 상태 업데이트 오류:", updateErr);
+              // 상태 업데이트 실패해도 검증 데이터는 저장되었으므로 성공 응답
+            }
+          }
+        );
+      } else {
+        // AI/DT 검증이 아직 완료되지 않은 경우에도 선임부서 검증이 false면 바로 Drop으로 처리
+        const departmentVerificationStatus =
+          verification_status === true || verification_status === "true"
+            ? true
+            : false;
+
+        if (departmentVerificationStatus === false) {
+          console.log(
+            "선임부서 검증 결과가 Drop, AI/DT 검증 상태와 무관하게 Drop으로 처리"
+          );
+
+          const updateIdeaStatusQuery = `
+            UPDATE special.ITAsset_ideas 
+            SET status = ? 
+            WHERE id = ?
+          `;
+
+          db.query(
+            updateIdeaStatusQuery,
+            ["Drop", idea_id],
+            (updateErr, updateData) => {
+              if (updateErr) {
+                console.error("아이디어 상태 업데이트 오류:", updateErr);
+              }
+            }
+          );
+        }
       }
 
       return res.status(200).json({
@@ -889,15 +1011,15 @@ export const registerAIVerify = (req, res) => {
         // 두 부서 중 하나라도 false면 "Drop", 둘 다 true면 "검증"
         let newStatus = "검증";
 
-        // 선임부서 또는 AI/DT 부서 중 하나라도 명시적으로 false인 경우에만 "Drop"
+        // 선임부서 또는 AI/DT 부서 중 하나라도 명시적으로 false인 경우에 "Drop"
         if (verificationStatus === false || aiVerificationStatus === false) {
           newStatus = "Drop";
-          console.log("AI/DT 검증 단계에서 Drop 처리됨:", {
+          console.log("두 부서 모두 검증 완료, 결과는 Drop 처리:", {
             선임부서_검증상태: verificationStatus,
             AI부서_검증상태: aiVerificationStatus,
           });
         } else {
-          console.log("AI/DT 검증 단계 완료:", {
+          console.log("두 부서 모두 검증 완료, 결과는 검증:", {
             선임부서_검증상태: verificationStatus,
             AI부서_검증상태: aiVerificationStatus,
           });
@@ -919,6 +1041,34 @@ export const registerAIVerify = (req, res) => {
             }
           }
         );
+      } else {
+        // 선임부서 검증이 아직 완료되지 않은 경우에도 AI/DT 검증이 false면 바로 Drop으로 처리
+        const aiVerificationStatus =
+          ai_verification_status === true || ai_verification_status === "true"
+            ? true
+            : false;
+
+        if (aiVerificationStatus === false) {
+          console.log(
+            "AI/DT 검증 결과가 Drop, 선임부서 검증 상태와 무관하게 Drop으로 처리"
+          );
+
+          const updateIdeaStatusQuery = `
+            UPDATE special.ITAsset_ideas 
+            SET status = ? 
+            WHERE id = ?
+          `;
+
+          db.query(
+            updateIdeaStatusQuery,
+            ["Drop", idea_id],
+            (updateErr, updateData) => {
+              if (updateErr) {
+                console.error("아이디어 상태 업데이트 오류:", updateErr);
+              }
+            }
+          );
+        }
       }
 
       return res.status(200).json({

@@ -40,7 +40,8 @@ const STAGES = {
   VERIFY: "verified", // 검증 완료
   DEV_REVIEW: "devReviewed", // 개발자 검토 완료
   DEVELOPING: "developing", // 개발 진행 중
-  COMPLETED: "completed", // 완료
+  DEV_COMPLETE: "devComplete", // 개발 완료
+  COMPLETED: "sol등록완료", // 완료
   DROP: "Drop", // Drop 상태 (첫 글자 대문자로 수정)
 };
 
@@ -52,7 +53,8 @@ const STAGE_ORDER = {
   verified: 3,
   devReviewed: 4,
   developing: 5,
-  completed: 6,
+  devComplete: 6,
+  sol등록완료: 7,
 };
 
 const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
@@ -103,7 +105,8 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       검증: 3,
       개발심의: 4,
       개발중: 5,
-      완료: 6,
+      개발완료: 6,
+      sol등록완료: 7,
       Drop: -1,
       // 이전 영문 상태값도 호환성을 위해 유지
       selected: 1,
@@ -111,7 +114,8 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       verified: 3,
       devReviewed: 4,
       developing: 5,
-      complete: 6,
+      devComplete: 6,
+      complete: 7,
     };
 
     if (statusStageMap[status] !== undefined) {
@@ -128,8 +132,10 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       return 4;
     } else if (status && /develop/i.test(status)) {
       return 5;
-    } else if (status && /complete/i.test(status)) {
+    } else if (status && /devComplete/i.test(status)) {
       return 6;
+    } else if (status && /sol/i.test(status)) {
+      return 7;
     }
 
     return -1; // 알 수 없는 상태
@@ -139,13 +145,6 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
   const handleBoxClick = (modalType) => {
     if (!ideaData) return;
 
-    console.log(
-      "handleBoxClick 호출:",
-      modalType,
-      "현재 상태:",
-      ideaData.status
-    );
-
     // STAGES 상수에서 정의한 상태값과 모달 타입 매핑
     const modalToStageMap = {
       ideaSelected: "선정",
@@ -153,7 +152,8 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       ideaVerify: "verified",
       ideaDevReview: "devReviewed",
       ideaDeveloping: "developing",
-      ideaCompleted: "completed",
+      ideaDevComplete: "devComplete",
+      ideaCompleted: "sol등록완료",
       ideaDrop: "drop",
     };
 
@@ -166,56 +166,51 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
 
     // 이미 완료된 단계인 경우 모달을 바로 열어 저장된 값 확인
     if (isCompletedStage) {
-      console.log(`${modalType} 단계는 이미 완료된 단계입니다. 모달을 엽니다.`);
       setOpenModal(modalType);
       return;
     }
 
     // 특별 처리: 선정 단계는 언제든지 접근 가능
     if (modalType === "ideaSelected") {
-      console.log("선정 단계는 언제든지 접근 가능합니다.");
       setOpenModal(modalType);
       return;
     }
 
     // 특별 처리: Pilot 단계 접근 - 선정 단계 이상
     if (modalType === "ideaPiloted" && getStageIndex(ideaData.status) >= 1) {
-      console.log("Pilot 단계 접근: 선정 단계 이상이므로 진행 허용");
       setOpenModal(modalType);
       return;
     }
 
     // 특별 처리: 검증 단계 접근 - Pilot 단계 이상
     if (modalType === "ideaVerify" && getStageIndex(ideaData.status) >= 2) {
-      console.log("검증 단계 접근: Pilot 단계 이상이므로 진행 허용");
       setOpenModal(modalType);
       return;
     }
 
     // 특별 처리: 개발심의 단계 접근 - 검증 단계 이상
     if (modalType === "ideaDevReview" && getStageIndex(ideaData.status) >= 3) {
-      console.log("개발심의 단계 접근: 검증 단계 이상이므로 진행 허용");
       setOpenModal(modalType);
       return;
     }
 
     // 특별 처리: 개발중 단계 접근 - 개발심의 단계 이상
     if (modalType === "ideaDeveloping" && getStageIndex(ideaData.status) >= 4) {
-      console.log("개발중 단계 접근: 개발심의 단계 이상이므로 진행 허용");
       setOpenModal(modalType);
       return;
     }
 
     // 특별 처리: 완료 단계 접근 - 개발중 단계 이상
-    if (modalType === "ideaCompleted" && getStageIndex(ideaData.status) >= 5) {
-      console.log("완료 단계 접근: 개발중 단계 이상이므로 진행 허용");
+    if (
+      (modalType === "ideaDevComplete" || modalType === "ideaCompleted") &&
+      getStageIndex(ideaData.status) >= 5
+    ) {
       setOpenModal(modalType);
       return;
     }
 
     // 특별 처리: Drop 단계는 언제든지 접근 가능
     if (modalType === "ideaDrop") {
-      console.log("Drop 단계는 언제든지 접근 가능합니다.");
       setOpenModal(modalType);
       return;
     }
@@ -227,8 +222,6 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
           "해당 아이디어는 Drop 상태입니다. 다음 단계로 진행할 수 없습니다."
         );
       } else {
-        // 현재 단계와 요청된 단계를 로그에 남겨 디버깅하기 쉽게 함
-        console.log(`진행 불가: 현재=${ideaData.status}, 요청=${modalType}`);
         alert(
           "이전 단계가 완료되지 않았습니다. 단계별로 순차적으로 진행해야 합니다."
         );
@@ -244,15 +237,40 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
     // 필요한 데이터가 없을 경우 진행 불가
     if (!ideaData) return false;
 
-    // Drop 상태인 경우, 어떤 단계도 진행 불가
+    // Drop 상태인 경우, 특별 처리
     if (ideaData.status === STAGES.DROP) {
-      console.log("Drop 상태이므로 진행 불가");
+      // Drop 단계는 항상 접근 가능
+      if (stage === "ideaDrop") return true;
+
+      // 이전 단계를 로컬 스토리지에서 가져오기
+      const dropStageIndex = parseInt(
+        localStorage.getItem("dropStageIndex") || "0"
+      );
+
+      // STAGES 상수에서 정의한 상태값과 모달 타입 매핑
+      const modalToStageMap = {
+        ideaSelected: 1, // 선정
+        ideaPiloted: 2, // pilot
+        ideaVerify: 3, // 검증
+        ideaDevReview: 4, // 개발심의
+        ideaDeveloping: 5, // 개발중
+        ideaDevComplete: 6, // 개발완료
+        ideaCompleted: 7, // 최종완료
+      };
+
+      // 요청된 단계의 인덱스
+      const requestedStageIndex = modalToStageMap[stage];
+
+      // Drop 이전 단계까지만 접근 가능
+      if (requestedStageIndex && requestedStageIndex <= dropStageIndex) {
+        return true;
+      }
       return false;
     }
 
     // 현재 상태의 단계 인덱스 구하기
     const currentStageIndex = getStageIndex(ideaData.status);
-    console.log("현재 단계 인덱스:", currentStageIndex);
+    // console.log("현재 단계 인덱스:", currentStageIndex);
 
     // 각 단계별 진행 가능 조건 정의
     switch (stage) {
@@ -276,9 +294,13 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
         // 개발 심의 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
         return currentStageIndex >= 4; // 개발심의 이상
 
-      case "ideaCompleted": // 완료 단계
+      case "ideaDevComplete": // 개발완료 단계
         // 개발중 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
         return currentStageIndex >= 5; // 개발중 이상
+
+      case "ideaCompleted": // 최종 완료 단계
+        // 개발중 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
+        return currentStageIndex >= 6; // 개발완료 이상
 
       case "ideaDrop": // Drop 단계
         return true; // Drop은 언제든지 가능
@@ -292,25 +314,35 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
   const getStageClass = (stage) => {
     if (!ideaData) return "";
 
-    console.log("현재 아이디어 상태:", ideaData.status, "요청 단계:", stage);
-
-    // 아이디어가 Drop 상태인 경우
-    if (ideaData.status === STAGES.DROP) {
-      return "disabled";
-    }
-
-    // 현재 단계의 인덱스 (0-6)
+    // 현재 단계의 인덱스 (0-7)
     const currentStageIndex = getStageIndex(ideaData.status);
 
-    // 요청된 단계의 인덱스 (0-6)
+    // 요청된 단계의 인덱스 (0-7)
     const requestedStageIndex = STAGE_ORDER[stage];
 
-    console.log(
-      "현재 단계 인덱스:",
-      currentStageIndex,
-      "요청된 단계 인덱스:",
-      requestedStageIndex
-    );
+    // Drop 상태일 때 특별 처리
+    if (ideaData.status === STAGES.DROP) {
+      // 이전 단계 정보 가져오기
+      const dropStageIndex = parseInt(
+        localStorage.getItem("dropStageIndex") || "0"
+      );
+
+      // Drop 단계는 항상 활성화
+      if (stage === "drop") {
+        return "active";
+      }
+
+      // Drop 이전 단계까지는 활성화
+      if (
+        requestedStageIndex !== undefined &&
+        requestedStageIndex <= dropStageIndex
+      ) {
+        return "active";
+      }
+
+      // Drop 이후 단계는 비활성화
+      return "disabled";
+    }
 
     // 이미 완료된 단계 (현재 단계보다 이전 단계)
     if (
@@ -356,11 +388,40 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
   const getVerifyStatusText = (stage, stageText) => {
     if (!ideaData) return "";
 
-    // 개발중과 완료 단계는 항상 "-" 표시
-    if (stage === "developing" || stage === "completed") {
-      return "-";
+    // 특별 단계에 대한 처리 (개발심의, 개발중, 개발완료, 최종완료)
+    if (stage === "devReviewed") {
+      const currentStageIndex = getStageIndex(ideaData.status);
+      if (currentStageIndex >= STAGE_ORDER["devReviewed"]) {
+        return "개발 심의 완료";
+      } else {
+        return "개발 심의 필요";
+      }
     }
 
+    if (stage === "developing") {
+      const currentStageIndex = getStageIndex(ideaData.status);
+      if (currentStageIndex >= STAGE_ORDER["developing"]) {
+        if (currentStageIndex >= STAGE_ORDER["devComplete"]) {
+          return "개발 완료";
+        }
+        return "개발 진행중";
+      } else {
+        return "개발 대기중";
+      }
+    }
+
+    if (stage === "completed") {
+      const currentStageIndex = getStageIndex(ideaData.status);
+      if (currentStageIndex >= STAGE_ORDER["sol등록완료"]) {
+        return "Solution 등록 완료";
+      } else if (currentStageIndex >= STAGE_ORDER["devComplete"]) {
+        return "Solution 등록 필요";
+      } else {
+        return "개발 완료된 Solution 등록필요";
+      }
+    }
+
+    // 나머지 단계들에 대한 기존 처리 로직
     const currentStageIndex = getStageIndex(ideaData.status);
     const stageIndex = STAGE_ORDER[stage];
 
@@ -401,7 +462,18 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
         `ideaPilot_viewMode_${id}`,
         viewModeState.toString()
       );
-      console.log(`파일럿 viewMode 상태 저장: ${viewModeState}`);
+      // console.log(`파일럿 viewMode 상태 저장: ${viewModeState}`);
+    }
+
+    // Drop 모달이 닫힐 때 이전 단계 정보 저장
+    if (openModal === "ideaDrop") {
+      // 아이디어가 Drop 상태로 변경되기 전의 상태 단계 저장
+      const currentStageIndex = getStageIndex(ideaData.status);
+      if (currentStageIndex >= 0) {
+        // -1이 아닌 경우만 저장 (이미 Drop이 아닌 경우만)
+        localStorage.setItem("dropStageIndex", currentStageIndex.toString());
+        console.log("Drop 전 단계 저장:", currentStageIndex);
+      }
     }
 
     setOpenModal(null);
@@ -626,7 +698,7 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       <div className="processBox">
         <div className="processItem" onClick={handleKanbanNavigate}>
           <div className={`processItemTitle ${getStageClass("developing")}`}>
-            개발중
+            {getStageIndex(ideaData.status) >= 6 ? "개발완료" : "개발중"}
           </div>
           <div className="lineBox">
             <div className="line">
@@ -657,7 +729,7 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
           onClick={() => handleBoxClick("ideaCompleted")}
         >
           <div className={`processItemTitle ${getStageClass("completed")}`}>
-            완료
+            최종완료
           </div>
           <div className="lineBox">
             <div className="line">
@@ -683,9 +755,6 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
         </div>
       </div>
       <hr style={{ margin: "20px 0", color: "#8c8c8c" }} />
-      {console.log("현재 상태:", ideaData.status)}
-      {console.log("STAGES.DROP 값:", STAGES.DROP)}
-      {console.log("상태 비교 결과:", ideaData.status === STAGES.DROP)}
       <div className="processBox">
         <div className="processItem" onClick={() => handleBoxClick("ideaDrop")}>
           <div
@@ -720,7 +789,10 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
                     className="processItemContentTitle"
                     style={{ fontSize: "13px", fontWeight: "300" }}
                   >
-                    -
+                    {ideaData.status &&
+                    ideaData.status.toLowerCase() === STAGES.DROP.toLowerCase()
+                      ? "Drop 사유를 확인하세요"
+                      : "-"}
                   </div>
                 </div>
               </div>
