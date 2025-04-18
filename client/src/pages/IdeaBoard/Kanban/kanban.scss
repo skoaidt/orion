@@ -113,6 +113,33 @@
         align-items: center;
         justify-content: center;
         gap: 10px;
+
+        .developing {
+          background-color: white;
+          border: 1px solid #e65d5d;
+          border-radius: 4px;
+          padding: 6px 12px;
+          cursor: pointer;
+          font-size: 14px;
+          color: #e65d5d;
+          &:hover {
+            background-color: #e65d5d;
+            color: white;
+          }
+        }
+        .devStart {
+          background-color: #b1b1b1;
+          border: none;
+          border-radius: 4px;
+          padding: 6px 12px;
+          cursor: pointer;
+          font-size: 14px;
+          color: #fff;
+          &:hover {
+            background-color: #2d2a82;
+          }
+        }
+
         .completedButton {
           background-color: #4945b3;
           border: none;

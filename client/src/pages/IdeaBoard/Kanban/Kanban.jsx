@@ -6,10 +6,14 @@ import axios from "axios";
 import "./kanban.scss";
 
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import CodeIcon from "@mui/icons-material/Code";
+import GitHubIcon from "@mui/icons-material/GitHub";
 import { Tooltip, IconButton } from "@mui/material";
 
 import { AuthContext } from "../../../context/authContext";
 import IdeaDevelop from "../IdeaModal/IdeaDevelop";
+import DevStart from "../IdeaModal/DevStart";
+
 // StrictMode와 함께 사용할 수 있는 Droppable 래퍼
 const StrictModeDroppable = ({ children, ...props }) => {
   const [enabled, setEnabled] = useState(false);
@@ -37,14 +41,18 @@ const Kanban = () => {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [ideaData, setIdeaData] = useState({ title: "", project_type: "" });
+  const [ideaData, setIdeaData] = useState({
+    title: "",
+    project_type: "",
+    status: "",
+  });
   const [devReviewData, setDevReviewData] = useState({
     developers: [],
     schedule: { startDate: null, endDate: null, priority: "" },
     rawData: [],
   });
   const [showDevelopModal, setShowDevelopModal] = useState(false);
-
+  const [showDevStartModal, setShowDevStartModal] = useState(false);
   // 초기 데이터 상태
   const [columns, setColumns] = useState({
     todo: {
@@ -308,8 +316,43 @@ const Kanban = () => {
     setShowDevelopModal(true);
   };
 
+  const handleDevStart = () => {
+    console.log("개발 시작 버튼 클릭, 현재 아이디어 ID:", id);
+    setShowDevStartModal(true);
+  };
+
   const handleCloseModal = () => {
     setShowDevelopModal(false);
+  };
+
+  const handleCloseDevStartModal = () => {
+    setShowDevStartModal(false);
+  };
+
+  // 개발 상태 업데이트 함수 추가
+  const updateIdeaStatus = async (newStatus) => {
+    try {
+      // API 호출하여 상태 업데이트
+      await axios.put(`/api/ideas/status/${id}`, {
+        status: newStatus,
+      });
+
+      // 로컬 상태 업데이트
+      setIdeaData((prev) => ({
+        ...prev,
+        status: newStatus,
+      }));
+
+      console.log(`아이디어 상태가 "${newStatus}"로 업데이트 되었습니다.`);
+    } catch (error) {
+      console.error("아이디어 상태 업데이트 오류:", error);
+    }
+  };
+
+  // DevStart 모달에서 "개발중" 상태로 변경하는 함수
+  const handleStartDevelopment = async () => {
+    await updateIdeaStatus("개발중");
+    setShowDevStartModal(false);
   };
 
   if (loading) return <div className="loading">로딩 중...</div>;
@@ -345,12 +388,21 @@ const Kanban = () => {
     );
   };
 
-  // 개발 완료 버튼 표시 여부
-  const showCompleteButton = isCurrentUserDeveloper();
+  // 개발 버튼 표시 여부
+  const isDeveloper = isCurrentUserDeveloper();
+  const isDevReviewStatus = ideaData.status === "개발심의";
+  const isDevInProgressStatus = ideaData.status === "개발중";
 
   return (
     <div className="kanban">
       {showDevelopModal && <IdeaDevelop onClose={handleCloseModal} id={id} />}
+      {showDevStartModal && (
+        <DevStart
+          onClose={handleCloseDevStartModal}
+          onStartDevelopment={handleStartDevelopment}
+          id={id}
+        />
+      )}
       <div className="kanban-header">
         <div className="header">
           <div className="left">
@@ -377,7 +429,18 @@ const Kanban = () => {
               )}
           </div>
           <div className="right">
-            {showCompleteButton && (
+            {isDeveloper && isDevInProgressStatus && (
+              <button className="developing">
+                <GitHubIcon /> &nbsp;개발중
+              </button>
+            )}
+
+            {isDeveloper && isDevReviewStatus && (
+              <button className="devStart" onClick={handleDevStart}>
+                <CodeIcon /> &nbsp;Start
+              </button>
+            )}
+            {isDeveloper && (
               <button
                 className="completedButton"
                 onClick={handleDevelopComplete}
@@ -385,7 +448,7 @@ const Kanban = () => {
                 개발 완료
               </button>
             )}
-            <button className="back-button" onClick={handleBackClick}>
+            <button className="backButton" onClick={handleBackClick}>
               돌아가기
             </button>
           </div>
