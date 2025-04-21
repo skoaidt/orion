@@ -8,7 +8,16 @@ import "./kanban.scss";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import CodeIcon from "@mui/icons-material/Code";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import { Tooltip, IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  Tooltip,
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Button,
+} from "@mui/material";
 
 import { AuthContext } from "../../../context/authContext";
 import IdeaDevelop from "../IdeaModal/IdeaDevelop";
@@ -355,6 +364,61 @@ const Kanban = () => {
     setShowDevStartModal(false);
   };
 
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState({
+    id: null,
+    columnId: null,
+  });
+
+  // 태스크 삭제 처리 함수
+  const handleDeleteTask = async (taskId, columnId) => {
+    try {
+      // 서버에 삭제 요청
+      await axios.delete(`/api/kanbans/${id}/tasks/${taskId}`);
+
+      // 로컬 상태 업데이트
+      const column = columns[columnId];
+      const newTasks = column.tasks.filter((task) => task.id !== taskId);
+      const newTaskIds = column.taskIds.filter((id) => id !== taskId);
+
+      const newColumn = {
+        ...column,
+        tasks: newTasks,
+        taskIds: newTaskIds,
+      };
+
+      setColumns({
+        ...columns,
+        [columnId]: newColumn,
+      });
+
+      console.log("작업이 삭제되었습니다.");
+      setDeleteModalOpen(false);
+    } catch (err) {
+      console.error("작업 삭제 오류:", err);
+      setDeleteModalOpen(false);
+    }
+  };
+
+  // 삭제 모달 열기
+  const openDeleteModal = (taskId, columnId) => {
+    setTaskToDelete({ id: taskId, columnId });
+    setDeleteModalOpen(true);
+  };
+
+  // 삭제 모달 닫기
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setTaskToDelete({ id: null, columnId: null });
+  };
+
+  // 삭제 확인
+  const confirmDelete = () => {
+    if (taskToDelete.id) {
+      handleDeleteTask(taskToDelete.id, taskToDelete.columnId);
+    }
+  };
+
   if (loading) return <div className="loading">로딩 중...</div>;
   if (error) return <div className="error">{error}</div>;
 
@@ -403,6 +467,30 @@ const Kanban = () => {
           id={id}
         />
       )}
+
+      {/* 삭제 확인 모달 */}
+      <Dialog
+        open={deleteModalOpen}
+        onClose={closeDeleteModal}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Task 지우기</DialogTitle>
+        <DialogContent>
+          <p style={{ fontSize: "16px", color: "tomato" }}>
+            해당 Task를 삭제하겠습니까?
+          </p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeDeleteModal} color="primary">
+            취소
+          </Button>
+          <Button onClick={confirmDelete} color="error" autoFocus>
+            지우기
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <div className="kanban-header">
         <div className="header">
           <div className="left">
@@ -589,6 +677,17 @@ const Kanban = () => {
                                     task.createdAt
                                   ).toLocaleDateString()}
                                 </small>
+                                <Tooltip title="지우기" arrow placement="top">
+                                  <div
+                                    className="icon"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openDeleteModal(task.id, column.id);
+                                    }}
+                                  >
+                                    <DeleteIcon style={{ fontSize: "20px" }} />
+                                  </div>
+                                </Tooltip>
                               </div>
                             </div>
                           )}
