@@ -1,6 +1,8 @@
 @import "../../../style.scss";
 
 .ideaNavbar {
+  position: sticky;
+  top: 0;
   display: flex;
   justify-content: flex-end; // 전체 너비에 걸쳐 배치
   align-items: center;
@@ -8,7 +10,7 @@
   background-color: #333333;
   border-bottom: 2px solid #ddd;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
+  z-index: 1000;
   .controls {
     display: flex;
     align-items: center;
@@ -63,27 +65,24 @@
       align-items: flex-start;
       justify-content: flex-start;
       color: white;
-      padding: 10px;
+      // padding: 10px;
       z-index: 1000;
 
       .header {
+        position: sticky;
         top: 0;
-        height: 50px;
-        width: 100%;
-        background-color: #565656;
+        height: 100%;
+        background-color: $purpleIdea;
         padding-top: 5px;
-        z-index: 2;
-        font-size: 14px;
-        font-weight: bold;
-        margin: 0 0 5px 10px;
-      }
-
-      hr {
-        top: 25px;
-        width: 95%;
-        border: 1px solid rgb(145, 145, 145);
-        z-index: 2;
-        background-color: rgb(145, 145, 145);
+        z-index: 1002;
+        margin: 0 0;
+        width: 100%;
+        padding: 10px 20px;
+        border-bottom: 1px solid #cbcbcb;
+        .title {
+          font-size: 14px;
+          font-weight: bold;
+        }
       }
 
       .content {
@@ -92,6 +91,7 @@
         align-items: flex-start;
         justify-content: center;
         margin: 5px 10px;
+        padding: 10px;
         .item {
           width: 100%;
           display: flex;
@@ -104,7 +104,8 @@
           transition: background-color 0.2s ease;
 
           &:hover {
-            background-color: #666666;
+            background-color: $greenColor;
+            color: #262626;
           }
           .profile {
             flex: 2;
@@ -156,6 +157,35 @@
       border-radius: 50%;
       &:hover {
         background-color: #565656;
+      }
+    }
+    .personDetail {
+      position: absolute;
+      top: 40px;
+      right: 80px;
+      width: auto;
+      max-width: 400px;
+      height: auto;
+      max-height: 500px;
+      background-color: $purpleIdeaLight;
+      border-radius: 5px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      z-index: 1000;
+      .name {
+        font-size: 20px;
+        font-weight: 500;
+      }
+      .nameDetail {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .dept {
+          font-size: 12px;
+          font-weight: 300;
+        }
       }
     }
 

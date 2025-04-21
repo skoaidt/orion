@@ -83,8 +83,6 @@ const IdeaNavbar = () => {
 
   // 아이템 클릭 시 디테일 페이지로 이동
   const handleRowClick = (id) => {
-    setShowNotiDetail(false);
-    setActiveNotiIcon(false);
     navigate(`/ideaboard/detail/${id}`);
   };
 
@@ -124,9 +122,8 @@ const IdeaNavbar = () => {
 
         {showNotiDetail && (
           <div className="notiDetail" ref={notiDetailRef}>
-            <div className="header">
-              <div className="title">이번주 신규 과제</div>
-            </div>
+            <div className="header">이번주 신규 과제</div>
+            <hr />
             <div className="content">
               {recentIdeas.length > 0 ? (
                 recentIdeas.map((idea) => (
@@ -154,14 +151,6 @@ const IdeaNavbar = () => {
         )}
         <div className="person">
           <AccountCircleIcon />
-        </div>
-        <div className="personDetail">
-          <div className="name">{currentUser.name}</div>
-
-          <div className="nameDetail">
-            <div className="dept">{currentUser.deptName}</div>
-            <div className="dept">{currentUser.prntDeptName}</div>
-          </div>
         </div>
       </div>
     </div>
