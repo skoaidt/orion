@@ -4,6 +4,7 @@ import { AuthContext } from "../../../context/authContext";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 import "./ideaNavbar.scss"; // SCSS 파일 import
 import axios from "axios";
@@ -13,17 +14,17 @@ const IdeaNavbar = () => {
   const [recentIdeas, setRecentIdeas] = useState([]);
   const [showNotiDetail, setShowNotiDetail] = useState(false);
   const [activeNotiIcon, setActiveNotiIcon] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [showPersonDetail, setShowPersonDetail] = useState(false);
   const notiDetailRef = useRef(null);
   const notiIconRef = useRef(null);
+  const personDetailRef = useRef(null);
+  const personIconRef = useRef(null);
   const navigate = useNavigate();
 
   // 최근 7일 이내의 아이디어만 가져오기
   useEffect(() => {
     const fetchRecentIdeas = async () => {
       try {
-        setLoading(true);
         const response = await axios.get("/api/ideas");
 
         // 최근 7일 이내의 아이디어만 필터링
@@ -46,11 +47,8 @@ const IdeaNavbar = () => {
           }));
 
         setRecentIdeas(filteredIdeas);
-        setLoading(false);
       } catch (err) {
         console.error("최근 아이디어 가져오기 오류:", err);
-        setError("아이디어 정보를 불러올 수 없습니다.");
-        setLoading(false);
       }
     };
 
@@ -79,6 +77,17 @@ const IdeaNavbar = () => {
   const handleNotiClick = () => {
     setShowNotiDetail(!showNotiDetail);
     setActiveNotiIcon(!activeNotiIcon);
+    // 알림 아이콘 클릭 시 사용자 정보 창 닫기
+    if (showPersonDetail) setShowPersonDetail(false);
+  };
+
+  const handlePersonClick = () => {
+    setShowPersonDetail(!showPersonDetail);
+    // 사용자 아이콘 클릭 시 알림 창 닫기
+    if (showNotiDetail) {
+      setShowNotiDetail(false);
+      setActiveNotiIcon(false);
+    }
   };
 
   // 아이템 클릭 시 디테일 페이지로 이동
@@ -88,10 +97,12 @@ const IdeaNavbar = () => {
     navigate(`/ideaboard/detail/${id}`);
   };
 
-  // 외부 클릭 감지하여 알림 상세 창 닫기
+  // 외부 클릭 감지하여 알림 및 사용자 상세 창 닫기
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // 알림 관련 외부 클릭 처리
       if (
+        showNotiDetail &&
         notiDetailRef.current &&
         !notiDetailRef.current.contains(event.target) &&
         notiIconRef.current &&
@@ -100,13 +111,24 @@ const IdeaNavbar = () => {
         setShowNotiDetail(false);
         setActiveNotiIcon(false);
       }
+
+      // 사용자 정보 관련 외부 클릭 처리
+      if (
+        showPersonDetail &&
+        personDetailRef.current &&
+        !personDetailRef.current.contains(event.target) &&
+        personIconRef.current &&
+        !personIconRef.current.contains(event.target)
+      ) {
+        setShowPersonDetail(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [showNotiDetail, showPersonDetail]);
 
   return (
     <div className="ideaNavbar">
@@ -152,17 +174,27 @@ const IdeaNavbar = () => {
             </div>
           </div>
         )}
-        <div className="person">
+        <div className="person" onClick={handlePersonClick} ref={personIconRef}>
           <AccountCircleIcon />
         </div>
-        <div className="personDetail">
-          <div className="name">{currentUser.name}</div>
+        {showPersonDetail && (
+          <div className="personDetail" ref={personDetailRef}>
+            <div className="personInfo">
+              <div className="name">{currentUser.name}</div>
+              <div className="nameDetail">
+                <div className="dept">{currentUser.prntDeptName}</div>
+                <div className="dept">{currentUser.deptName}</div>
+              </div>
+            </div>
 
-          <div className="nameDetail">
-            <div className="dept">{currentUser.deptName}</div>
-            <div className="dept">{currentUser.prntDeptName}</div>
+            <div className="logout">
+              <button onClick={logout}>
+                <LogoutIcon />
+                LOGOUT
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

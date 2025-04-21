@@ -162,7 +162,7 @@
     .personDetail {
       position: absolute;
       top: 40px;
-      right: 80px;
+      right: 30px;
       width: auto;
       max-width: 400px;
       height: auto;
@@ -173,18 +173,49 @@
       flex-direction: column;
       align-items: flex-start;
       justify-content: flex-start;
+      gap: 10px;
       z-index: 1000;
-      .name {
-        font-size: 20px;
-        font-weight: 500;
+      padding: 20px;
+
+      .personInfo {
+        .name {
+          font-size: 20px;
+          font-weight: 600;
+          color: white;
+        }
+        .nameDetail {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: $purpleIdea;
+          gap: 10px;
+          border-bottom: 1px solid #cbcbcb;
+          padding-bottom: 10px;
+          .dept {
+            font-size: 12px;
+            font-weight: 300;
+          }
+        }
       }
-      .nameDetail {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        .dept {
-          font-size: 12px;
-          font-weight: 300;
+      .logout {
+        width: 100%;
+        font-size: 12px;
+        margin-right: 30px;
+        cursor: pointer;
+        button {
+          width: 100%;
+          background-color: $purpleIdea;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+
+          &:hover {
+            background-color: $main-dark;
+          }
         }
       }
     }

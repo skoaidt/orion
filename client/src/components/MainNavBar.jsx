@@ -1,21 +1,46 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { BsLockFill } from "react-icons/bs";
 import { LuClipboardEdit } from "react-icons/lu";
-// import { BsClipboardData } from "react-icons/bs";
-// import { AiOutlineDashboard } from "react-icons/ai";
+
 import { FaCode } from "react-icons/fa6";
+import LogoutIcon from "@mui/icons-material/Logout";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-// import KeyboardIcon from "@mui/icons-material/Keyboard";
+
 import { AuthContext } from "../context/authContext";
 
 export const MainNavBar = () => {
   const { currentUser, logout } = useContext(AuthContext);
   const [scrolled, setScrolled] = useState(false);
-
+  const [showPersonDetail, setShowPersonDetail] = useState(false);
+  const personDetailRef = useRef(null);
+  const personIconRef = useRef(null);
   const [logoImage, setLogoImage] = useState(
     `${process.env.PUBLIC_URL}/image/logo/OrionLogoWhite.png`
   );
+
+  const handlePersonClick = () => {
+    setShowPersonDetail(!showPersonDetail);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        showPersonDetail &&
+        personDetailRef.current &&
+        !personDetailRef.current.contains(event.target) &&
+        personIconRef.current &&
+        !personIconRef.current.contains(event.target)
+      ) {
+        setShowPersonDetail(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showPersonDetail]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,33 +71,38 @@ export const MainNavBar = () => {
             <LuClipboardEdit size={24} />
             <span>Idea 등록</span>
           </Link>
-          {/* <Link to="/solmgmt" className="menu regLink">
-            <BsClipboardData size={24} />
-            <span>Sol Mgmt</span>
-          </Link>
-          <Link to="/dashboard" className="menu regLink">
-            <AiOutlineDashboard size={24} />
-            <span>DashBoard</span>
-          </Link> */}
-          {/* <Link to="/typingMain" className="menu regLink">
-            <KeyboardIcon size={24} />
-            <span>타자 연습</span>
-          </Link> */}
           <Link to="/portfolio" className="menu regLink">
             <FaCode size={24} />
             <span>Working Group</span>
           </Link>
-          {currentUser.isAdmin && ( // currentUser.isAdmin을 사용하여 조건부 렌더링
+          {currentUser.isAdmin && (
             <Link to="/controlpanel" className="menu regLink">
               <AppRegistrationIcon size={24} />
               <span>Admin 관리</span>
             </Link>
           )}
 
-          <div className="menu" onClick={logout}>
-            <BsLockFill size={24} />
-            <span>{currentUser.name}님 Logout</span>
+          <div className="menu" onClick={handlePersonClick} ref={personIconRef}>
+            <AccountCircleIcon size={24} />
+            <span>Profile</span>
           </div>
+          {showPersonDetail && (
+            <div className="personDetail" ref={personDetailRef}>
+              <div className="personInfo">
+                <div className="name">{currentUser.name}</div>
+                <div className="nameDetail">
+                  <div className="dept">{currentUser.prntDeptName}</div>
+                  <div className="dept">{currentUser.deptName}</div>
+                </div>
+              </div>
+              <div className="logout">
+                <button onClick={logout}>
+                  <LogoutIcon />
+                  LOGOUT
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
