@@ -43,7 +43,7 @@ export const Login = ({ onLogin }) => {
         </div>
         <div className={`dadaBox ${showDadaBox ? "show" : ""}`}>
           <img
-            src={`${process.env.PUBLIC_URL}/image/login/dada.png`}
+            src={`${process.env.PUBLIC_URL}/image/login/dada2.png`}
             alt="loginBG"
           />
           <p className="dadaText">Coding 요정은 언제나 당신의 곁에 있습니다.</p>
@@ -56,7 +56,7 @@ export const Login = ({ onLogin }) => {
           <div className={`elf ${showDadaBox ? "show" : ""}`}>
             <img
               className="animation-updown"
-              src={`${process.env.PUBLIC_URL}/image/login/elf.png`}
+              src={`${process.env.PUBLIC_URL}/image/login/min2.png`}
               alt="elf"
             />
           </div>
