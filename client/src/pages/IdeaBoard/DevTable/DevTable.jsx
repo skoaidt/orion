@@ -73,8 +73,10 @@ const DevTable = () => {
           (idea) =>
             idea.status === "개발중" ||
             idea.status === "완료" ||
+            idea.status === "개발완료" ||
             idea.status === "developing" ||
-            idea.status === "completed"
+            idea.status === "completed" ||
+            idea.status === "developmentCompleted"
         );
         console.log("필터링된 아이디어 수:", developingIdeas.length);
 
