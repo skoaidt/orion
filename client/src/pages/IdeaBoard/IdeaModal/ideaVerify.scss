@@ -1,0 +1,427 @@
+@import "../../../style.scss";
+
+.verifyModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+
+  .verifyModalContent {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    width: 1150px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+
+    .titleBox {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 10px;
+
+      h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .closeIcon {
+        cursor: pointer;
+        font-size: 24px;
+      }
+    }
+
+    .titleUnderline {
+      width: 100%;
+      border: none;
+      border-top: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+
+    .titleWrap {
+      margin-bottom: 15px;
+
+      .subTitle {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .subTitleDesc {
+          font-size: 11px;
+          font-weight: normal;
+          color: #999;
+          margin-left: 5px;
+        }
+      }
+
+      .subTitleUnderline {
+        width: 100%;
+        border: none;
+        border-top: 1px solid #eee;
+        margin-top: 8px;
+        margin-bottom: 15px;
+      }
+    }
+
+    .rowContainer {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 25px;
+      background-color: white;
+      gap: 10px;
+      margin-bottom: 10px;
+
+      .fieldLabel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 2;
+        font-size: 14px;
+        color: white;
+        background: #565656;
+        width: 40px;
+        height: 100%;
+        padding: 0px;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+
+      .fromControl {
+        flex: 8;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        border-radius: 5px;
+
+        .MuiTypography-root {
+          font-size: 12px;
+          padding: 5px;
+        }
+
+        .radioGroup {
+          background-color: rgba(255, 255, 255, 0);
+          padding: 5px;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          flex-wrap: nowrap;
+
+          .MuiFormControlLabel-root {
+            margin-right: 0;
+            padding: 0 2px;
+            white-space: nowrap;
+          }
+
+          .MuiFormControlLabel-label {
+            font-size: 12px;
+            white-space: nowrap;
+          }
+
+          .MuiRadio-root {
+            color: #565656;
+            padding: 4px;
+
+            &.Mui-checked {
+              color: #493d9e;
+            }
+            svg {
+              font-size: 15px;
+            }
+          }
+        }
+
+        .inputWithUnit {
+          display: flex;
+          align-items: center;
+          width: 100%;
+          height: 100%;
+
+          .shortTextField {
+            width: 100px;
+            margin-right: 5px;
+
+            .MuiInputBase-root {
+              height: 25px;
+              font-size: 12px;
+              padding: 0 5px;
+
+              .MuiOutlinedInput-input {
+                padding: 5px;
+              }
+            }
+          }
+
+          .inputUnit {
+            font-size: 12px;
+            color: #565656;
+            margin-left: 5px;
+          }
+        }
+      }
+    }
+
+    .rowContainerComment {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: white;
+      width: 100%;
+      height: 172px;
+      gap: 10px;
+      margin-bottom: 10px;
+
+      .fieldLabel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 2;
+        font-size: 14px;
+        color: white;
+        background: #565656;
+        width: 90px;
+        height: 100%;
+        padding: 0px;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+
+      .fromControl {
+        flex: 8;
+        width: 100%;
+        height: 100%;
+
+        .commentTextfield {
+          width: 100%;
+          height: 100%;
+          border-radius: 5px;
+          display: flex;
+
+          .MuiInputBase-root {
+            font-size: 12px;
+            height: 100%;
+            align-items: flex-start;
+
+            textarea {
+              padding-left: 2px;
+              font-size: 12px;
+
+              &::placeholder {
+                font-size: 12px;
+                color: #413e3e;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .left {
+      flex: 1;
+      padding-right: 15px;
+      box-sizing: border-box;
+      min-width: 380px;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 1px;
+        background-color: #ddd;
+      }
+
+      .rowContainer {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        height: 25px;
+        background-color: white;
+        gap: 10px;
+        margin-bottom: 10px;
+
+        .fieldLabel {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex: 2;
+          font-size: 14px;
+          color: white;
+          background: #565656;
+          width: 40px;
+          height: 100%;
+          padding: 0px;
+          border-radius: 5px;
+          box-sizing: border-box;
+        }
+
+        .fromControl {
+          flex: 8;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          border-radius: 5px;
+
+          .MuiTypography-root {
+            font-size: 12px;
+            padding: 5px;
+          }
+
+          .radioGroup {
+            background-color: rgba(255, 255, 255, 0);
+            padding: 5px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: nowrap;
+
+            .MuiFormControlLabel-root {
+              margin-right: 0;
+              padding: 0 2px;
+              white-space: nowrap;
+            }
+
+            .MuiFormControlLabel-label {
+              font-size: 12px;
+              white-space: nowrap;
+            }
+
+            .MuiRadio-root {
+              color: #565656;
+              padding: 4px;
+
+              &.Mui-checked {
+                color: #493d9e;
+              }
+              svg {
+                font-size: 15px;
+              }
+            }
+          }
+        }
+      }
+
+      .rowContainerComment {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: white;
+        width: 100%;
+        height: 172px;
+        gap: 10px;
+        margin-bottom: 10px;
+
+        .fieldLabel {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex: 2;
+          font-size: 14px;
+          color: white;
+          background: #565656;
+          width: 90px;
+          height: 100%;
+          padding: 0px;
+          border-radius: 5px;
+          box-sizing: border-box;
+        }
+
+        .fromControl {
+          flex: 8;
+          width: 100%;
+          height: 100%;
+
+          .commentTextfield {
+            width: 100%;
+            height: 100%;
+            border-radius: 5px;
+            display: flex;
+
+            .MuiInputBase-root {
+              font-size: 12px;
+              height: 100%;
+              align-items: flex-start;
+
+              textarea {
+                padding-left: 2px;
+                font-size: 12px;
+
+                &::placeholder {
+                  font-size: 12px;
+                  color: #413e3e;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .right {
+      flex: 1;
+      padding-left: 15px;
+      box-sizing: border-box;
+      min-width: 380px;
+    }
+
+    .buttonContainer {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      margin-top: 20px;
+
+      button {
+        padding: 5px 15px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        min-width: 80px;
+
+        &:hover {
+          transform: scale(1.05);
+          background-color: #666;
+        }
+
+        &:active {
+          transform: scale(0.95);
+          background-color: #444;
+        }
+      }
+
+      .registerButton {
+        background-color: #565656;
+        color: white;
+        min-width: 150px;
+      }
+
+      .cancelButton {
+        background-color: #999;
+        color: white;
+      }
+    }
+  }
+}

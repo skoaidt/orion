@@ -1,0 +1,160 @@
+@import "../../../style.scss";
+
+.completedModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+
+  .completedModalContent {
+    color: #565656;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 600px;
+    height: 800px;
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+    .titleBox {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      h2 {
+        text-indent: 10px; //요만큼 띄워서 시작
+      }
+      .closeIcon {
+        cursor: pointer;
+        color: #565656;
+        &:hover {
+          color: #000;
+        }
+      }
+    }
+    .titleUnderline {
+      border: 0;
+      height: 1px;
+      background-color: #565656;
+      margin: 0;
+    }
+    .rowContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      // width: 700px;
+      background-color: white;
+      // gap: 10px;
+
+      .fieldLabel {
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+        width: 100%;
+        // padding: 0px;
+        margin-bottom: 8px;
+        box-sizing: border-box;
+      }
+
+      .fromControl {
+        width: 100%;
+      }
+
+      .radioGroup {
+        .MuiFormGroup-root {
+          display: flex;
+          flex-wrap: wrap;
+        }
+      }
+    }
+
+    .rowContainerComment {
+      .MuiGrid-container {
+        width: 100%;
+      }
+    }
+  }
+
+  .fileAttachContainer {
+    margin-bottom: 0;
+
+    .fileInputWrapper {
+      position: relative;
+      width: 100%;
+
+      .fileInput {
+        .MuiOutlinedInput-root {
+          padding-right: 130px; // 버튼을 위한 공간 확보
+        }
+      }
+
+      .attachButton {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: #f5f5f5;
+        color: #565656;
+        text-transform: none;
+        padding: 4px 10px;
+        min-width: 100px;
+        white-space: nowrap;
+        font-size: 13px;
+        height: 36px;
+        line-height: 1;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .MuiButton-startIcon {
+          margin-right: 4px;
+        }
+
+        &:hover {
+          background-color: #e0e0e0;
+        }
+      }
+    }
+  }
+
+  .buttonContainer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+
+    button {
+      padding: 5px 15px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      min-width: 80px;
+
+      &:hover {
+        background-color: #666;
+        color: white;
+      }
+    }
+
+    .registerButton {
+      background-color: #565656;
+      color: white;
+    }
+
+    .cancelButton {
+      background-color: #999;
+      color: white;
+    }
+  }
+}

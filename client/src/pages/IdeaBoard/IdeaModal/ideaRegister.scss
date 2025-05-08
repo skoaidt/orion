@@ -1,0 +1,475 @@
+// ideaRegister.scss
+@import "../../../style.scss";
+
+.modalContent {
+  color: #565656;
+  background: white;
+  // padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 1200px;
+  min-width: 1200px;
+  // max-width: 1200px;
+  height: auto;
+  min-height: 900px;
+  // max-height: 100%;
+  overflow-y: visible;
+  // margin-top: 100px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  position: relative;
+  z-index: 100;
+
+  .headerTitleBox {
+    font-size: 20px;
+    font-weight: 600;
+    color: $grayColor;
+  }
+
+  .titleBox {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .closeIcon {
+      cursor: pointer;
+      font-size: 24px;
+    }
+  }
+
+  .titleUnderline {
+    width: 100%;
+    border: none;
+    border-top: 1px solid #ccc;
+    margin-bottom: 20px;
+  }
+
+  // Material-UI 컴포넌트 스타일을 modalContent 내부에 중첩
+  .MuiMenuItem-root {
+    text-align: center;
+    font-size: 12px;
+    &.Mui-selected {
+      font-size: 12px;
+    }
+  }
+  .MuiFormControlLabel-label {
+    font-size: 12px;
+    margin-right: 5px; /* 라디오 버튼 옵션 간 간격 */
+  }
+
+  // Select 컴포넌트 스타일 추가
+  .MuiSelect-select {
+    font-size: 12px !important;
+    padding: 5px 10px !important;
+  }
+
+  .MuiInputBase-root {
+    font-size: 12px !important;
+  }
+
+  .MuiSelect-root {
+    .MuiSelect-select {
+      font-size: 12px !important;
+    }
+  }
+}
+
+.ideaRegister {
+  display: flex;
+  align-items: flex-start;
+  min-width: 1200px;
+  height: 100%;
+  margin-bottom: 20px; /* 버튼과의 간격 확보 */
+  position: relative; /* 세로선 위치 지정을 위해 */
+
+  /* 왼쪽과 오른쪽 사이의 세로선 */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 62%;
+    width: 1px;
+    background-color: #ddd;
+    z-index: 1;
+  }
+
+  .left {
+    flex: 2;
+    padding-right: 20px;
+    .titleWrap {
+      margin-bottom: 10px;
+      .titleBox {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+
+        .title {
+          font-size: 14px;
+          font-weight: 500;
+          color: $grayColor;
+        }
+      }
+
+      .desc {
+        .titleInput {
+          height: 30px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          font-size: 14px;
+        }
+      }
+    }
+
+    .contentBox {
+      border-radius: 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      .innerBox {
+        .titleBox {
+          display: flex;
+          // justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+
+          .title {
+            font-size: 14px;
+            font-weight: 500;
+            color: $grayColor;
+          }
+        }
+        .desc {
+          .editorContainer {
+            height: 140px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+
+            .editor {
+              height: 100%;
+              border: none;
+
+              .ql-toolbar {
+                border: none;
+                position: sticky;
+                top: 0;
+                z-index: 1;
+                background: #f0f0f0;
+                border-radius: 5px 5px 0 0;
+                display: flex;
+                flex-wrap: wrap;
+              }
+
+              .ql-container {
+                border: none;
+                height: calc(100% - 42px);
+                overflow-y: auto;
+                padding: 10px;
+                font-size: 12px;
+                line-height: 1.5;
+
+                &::-webkit-scrollbar {
+                  width: 6px;
+                }
+
+                &::-webkit-scrollbar-track {
+                  background: #f1f1f1;
+                  border-radius: 3px;
+                }
+
+                &::-webkit-scrollbar-thumb {
+                  background: #888;
+                  border-radius: 3px;
+                }
+
+                &::-webkit-scrollbar-thumb:hover {
+                  background: #555;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .right {
+    flex: 1;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    padding-left: 20px;
+
+    .projectCategory {
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      .fieldLabel {
+        width: 70px;
+        margin-right: 5px;
+        font-weight: bold;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .MuiFormControl-root {
+        margin-left: 0;
+        min-width: 120px;
+
+        .MuiSelect-select {
+          font-size: 12px !important;
+          padding: 5px 10px !important;
+        }
+
+        .MuiInputBase-root {
+          font-size: 12px !important;
+        }
+      }
+
+      /* RadioGroup 스타일 */
+      .MuiRadioGroup-root {
+        .MuiFormControlLabel-root {
+          margin-right: 5px; /* 라디오 버튼 옵션 간 간격 */
+          padding-left: 5px; /* 라디오 버튼과 텍스트 사이 간격 */
+        }
+      }
+
+      .fieldRow {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex: 1;
+        font-size: 9px;
+
+        .MuiFormControl-root {
+          margin-right: 20px;
+          min-width: 120px;
+
+          .MuiSelect-select {
+            font-size: 12px !important;
+            padding: 5px 10px !important;
+          }
+
+          .MuiInputBase-root {
+            font-size: 12px !important;
+          }
+        }
+
+        .fieldLabel {
+          margin-left: 10px;
+        }
+      }
+
+      // 검증 부서 컨테이너 스타일 수정
+      .verifyDepartmentContainer {
+        width: auto; // 너비를 자동으로 설정
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        flex: 1;
+        color: #565656;
+        //gap: 10px;
+        max-width: 340px; // 중복여부 컨테이너와 동일한 최대 너비 설정
+
+        .selectedDepartmentInfo {
+          width: 100%; // 전체 너비 사용
+
+          p {
+            margin: 0;
+            font-size: 14px;
+            color: #2e7d32;
+            white-space: nowrap;
+            overflow: hidden;
+            font-weight: 600;
+            text-overflow: ellipsis; // 텍스트가 너무 길면 생략 부호로 표시
+          }
+        }
+
+        .selectorsRow {
+          display: flex;
+          flex-direction: row;
+          gap: 10px;
+          width: 100%; // 전체 너비 사용
+          min-height: 40px; // 최소 높이 설정으로 위치 고정
+
+          .selectContainer {
+            flex: 1; // 동일한 비율로 공간 차지
+            width: calc(50% - 5px); // 간격을 고려한 너비 계산
+
+            .MuiInputBase-root {
+              font-size: 12px !important;
+              width: 100%;
+            }
+          }
+        }
+      }
+
+      // 부서 선택 관련 스타일 유지
+      .selectorsRow {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 10px;
+      }
+
+      // 선택 컨테이너
+      .selectContainer {
+        margin-bottom: 10px;
+        color: #565656;
+      }
+
+      // 부서 선택 버튼
+      .department-select-button {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 10px 12px;
+        width: 100%;
+        text-align: left;
+        background-color: #fff;
+        font-size: 14px;
+        cursor: pointer;
+        color: #565656;
+
+        &:hover {
+          border-color: #777;
+        }
+
+        &:focus {
+          outline: none;
+          border-color: #2e7d32;
+          box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+        }
+
+        &:disabled {
+          background-color: #f5f5f5;
+          cursor: not-allowed;
+          color: #888;
+        }
+
+        &.disabled {
+          background-color: #f5f5f5;
+          cursor: not-allowed;
+          color: #888;
+        }
+      }
+
+      // 검색 컨테이너 및 입력 필드
+      .department-search-container {
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .department-search-input {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        color: #565656;
+        box-sizing: border-box;
+
+        &:focus {
+          outline: none;
+          border-color: #2e7d32;
+          box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
+        }
+      }
+
+      // 선택 옵션
+      .department-select-option {
+        list-style: none;
+        padding: 8px 12px;
+        cursor: pointer;
+        color: #565656;
+        border-radius: 0;
+        transition: background-color 0.15s ease;
+
+        &:hover {
+          background-color: #f5f5f5;
+        }
+
+        &.selected {
+          background-color: #e8f5e9;
+          color: #2e7d32;
+          font-weight: 500;
+
+          &:hover {
+            background-color: #dcedc8;
+          }
+        }
+      }
+
+      // 검색 결과 없음 메시지
+      .department-select-no-results {
+        list-style: none;
+        padding: 12px;
+        color: #888;
+        text-align: center;
+        font-style: italic;
+        font-size: 13px;
+      }
+    }
+  }
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 20px;
+
+  button {
+    padding: 5px 15px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    min-width: 80px;
+
+    &:hover {
+      transform: scale(1.05);
+      background-color: #666;
+    }
+
+    &:active {
+      transform: scale(0.95);
+      background-color: #444;
+    }
+  }
+
+  .registerButton {
+    background-color: #565656;
+    color: white;
+  }
+
+  .cancelButton {
+    background-color: #999;
+    color: white;
+  }
+}

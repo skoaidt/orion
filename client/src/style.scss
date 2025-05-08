@@ -2,11 +2,15 @@ $blueColor: #5395d1;
 $redColor: #ef0000;
 $hotpinkColor: #dd1b8f;
 $purpleColr: rgb(119, 47, 201);
+$purpleIdea: #493d9e;
+$purpleIdeaLight: #989ef0;
+$darkBuleIdea: #151d14;
 $whitegrayColor: #b7b7b7;
 $grayColor: #5a5a5a;
 $whiteYellow: #f6ddd0;
 $pastelGreen: #79cab6;
 $pastelViolet: #afacd7;
+$greenColor: #b9d74d;
 $linear: linear-gradient(100deg, rgb(41, 162, 208) 0%, rgb(119, 47, 201) 100%);
 $prductLinear: linear-gradient(100deg, #4cc5f2 0%, #1ca8db 100%);
 $notoSans: "Noto Sans KR", Helvetica, sans-serif;
@@ -124,138 +128,243 @@ body {
     height: 100vh;
     left: 0;
     top: 0;
-    background-image: url(../public/image/login/loginbg.jpg);
-    background-size: cover;
+    background-color: #5c7eec;
 
     .leftSide {
-      position: relative;
-      flex: 60;
+      flex: 6;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      background-image: url(../public/image/login/loginSide.png);
-      background-position: center;
-      background-size: cover;
-      padding: 20px;
-      margin: 5vw 0 100px 15vw;
-      border-top-left-radius: 20px;
-      border-bottom-left-radius: 20px;
+      position: relative;
 
-      .logoName {
+      .logoBox {
+        width: 70%;
+        img {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          height: 50px;
+        }
+      }
+
+      .imgBox {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        img {
+          width: 100vh;
+          height: 100%;
+        }
+      }
+      .dadaBox {
         position: absolute;
-        color: white;
-        top: 40px;
-        left: 40px;
-        font-size: 30px;
-        font-weight: 800;
+        bottom: 0;
+        right: 0;
+        z-index: 1;
+        transform: translateX(100%);
+        opacity: 0;
+        transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out;
+
+        &.show {
+          transform: translateX(0);
+          opacity: 1;
+        }
+
+        img {
+          width: auto;
+          height: auto;
+          max-width: 800px;
+          max-height: 800px;
+        }
+        .dadaText {
+          width: 300px;
+          position: absolute;
+          background-color: #5c7eec;
+          bottom: 20px;
+          right: 400px;
+          z-index: 4;
+          color: white;
+          font-size: 16px;
+          font-weight: 400;
+          font-family: $notoSans;
+          border-radius: 5px;
+          padding: 10px;
+        }
+        .codingElf {
+          position: absolute;
+          top: -100px;
+          right: 120px;
+          z-index: 3;
+          transition: transform 0.5s ease-in-out 1s, opacity 1s ease-in-out 0.8s;
+          opacity: 0;
+
+          &.show {
+            transform: translateX(0) rotate(5deg);
+            opacity: 1;
+          }
+          img {
+            width: 150px;
+            height: auto;
+          }
+        }
+        .elf {
+          position: absolute;
+          top: -10px;
+          right: 270px;
+          z-index: 2;
+          transform: translate(-100%, -50%);
+          transition: transform 0.5s ease-in-out 1s, opacity 1s ease-in-out 0.8s;
+          opacity: 0;
+
+          &.show {
+            transform: translateX(0) rotate(10deg);
+            opacity: 1;
+          }
+          img {
+            width: 160px;
+            height: auto;
+          }
+        }
+      }
+      .circle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 40px;
+        height: 40px;
+        background-color: #e05cb3;
+        border-radius: 50%;
+        cursor: pointer;
       }
     }
 
     .rightSide {
-      flex: 40;
+      flex: 4;
       display: flex;
-      flex-direction: column;
       justify-content: center;
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 40px;
-      margin: 5vw 35vh 100px 0;
-      border-top-right-radius: 20px;
-      border-bottom-right-radius: 20px;
-      gap: 50px;
+      align-items: flex-start;
+      flex-direction: column;
 
       .logoBox {
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-        align-items: center;
-
         img {
-          width: 30%;
-          margin-bottom: 10px;
+          height: 37px;
+        }
+      }
+
+      .loginBox {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #efedf3f2;
+        width: 50%;
+        height: 50%;
+        border-radius: 20px;
+        padding: 40px;
+
+        margin-top: 20px;
+
+        form {
+          width: 80%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+
+          /* Material-UI TextField 관련 스타일 */
+          .MuiTextField-root {
+            margin: 10px 0;
+            z-index: 1;
+
+            .MuiInputBase-root {
+              background-color: white;
+            }
+
+            .MuiOutlinedInput-root {
+              &.Mui-focused .MuiOutlinedInput-notchedOutline {
+                border-color: #5c7eec;
+              }
+            }
+
+            .MuiInputLabel-root {
+              &.Mui-focused {
+                color: #5c7eec;
+              }
+            }
+          }
         }
 
-        .loginTitle {
+        .titleBox {
+          width: 80%;
           display: flex;
           justify-content: center;
-          color: $grayColor;
-          font-size: 26px;
-          font-weight: 200;
-          font-family: $notoSans;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+          .loginTitle {
+            display: flex;
+            color: #19348d;
+            font-size: 48px;
+            font-weight: 600;
+            font-family: $notoSans;
+          }
+
+          .subTitle {
+            display: flex;
+            justify-content: flex-start;
+            color: #19348d;
+            font-size: 14px;
+            font-weight: 300;
+            font-family: $notoSans;
+            padding: 5px 5px;
+          }
+        }
+        .errorMessageWrap {
+          margin-top: 8px;
+          margin-left: 20px;
+          font-size: 12px;
+          color: $redColor;
+        }
+
+        .retryMessageWrap {
+          margin-top: 8px;
+          margin-left: 20px;
+          font-size: 12px;
+          color: $redColor;
+        }
+
+        .loginBtn {
+          width: 100%;
+          font-size: 16px;
+          font-weight: 400;
+          padding: 20px;
+          margin-top: 20px;
+          background-color: #5c7eec;
+          color: white;
+          border-radius: 10px;
+          border: none;
+          cursor: pointer;
+          text-decoration: none;
+          &:hover {
+            background-color: #4765c9;
+          }
         }
       }
-
-      .formTitle {
-        text-align: center;
-        color: $grayColor;
-        font-size: 24px;
-      }
-
-      // .inputName {
-      //   font-size: 18px;
-      //   font-weight: 400;
-      //   color: $grayColor;
-      //   margin: 20px;
-
-      // }
-
-      // .inputWrap {
-      //   display: flex;
-      //   border-radius: 10px;
-      //   padding: 16px;
-      //   margin-top: 8px;
-      //   background-color: white;
-      //   border: 1px solid #e2e2e2;
-
-      //   &:focus-within {
-      //     border: $blueColor;
-      //     // outline: none;
-      //   }
-
-      //   input {
-      //     width: 100%;
-      //     outline: none;
-      //     border: none;
-      //     height: 16px;
-      //     font-size: 14px;
-      //     font-weight: 400;
-
-      //     &::placeholder {
-      //       color: $whitegrayColor;
-      //     }
-
-      //   }
-      // }
-
-      .errorMessageWrap {
-        margin-top: 8px;
-        margin-left: 20px;
-        font-size: 12px;
-        color: $redColor;
-      }
-
-      .retryMessageWrap {
-        margin-top: 8px;
-        margin-left: 20px;
-        font-size: 12px;
-        color: $redColor;
-      }
-
-      // .bottomButton {
-      //   margin-top: 40px;
-      //   width: 100%;
-      //   height: 48px;
-      //   border: none;
-      //   font-weight: 700;
-      //   background-color: $blueColor;
-      //   color: white;
-      //   border-radius: 64px;
-      //   margin-bottom: 16px;
-      //   margin-top: 100px;
-      //   cursor: pointer;
-      // }
-      .loginBtn {
-        font-size: 20px;
-        margin-top: 20px;
+      .loginFooter {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        margin-top: 10px;
+        width: 80%;
+        .loginFooterText {
+          color: white;
+          font-size: 14px;
+          font-weight: 300;
+          font-family: $notoSans;
+          padding: 2px;
+          margin-left: 5px;
+        }
       }
     }
   }
@@ -304,19 +413,12 @@ body {
         margin: 0 auto;
 
         .logo {
-          // text-decoration: none;
-          // font-family: $notoSans;
-          // font-size: 26px;
-          // font-weight: 900;
-
           .link {
             text-decoration: none;
             color: white;
 
-            // mainNavBar Logo Image
             img {
               width: 100px;
-              // min-width: 8%;
               margin-left: 10px;
             }
 
@@ -332,6 +434,7 @@ body {
           gap: 20px;
 
           .menu {
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -341,6 +444,67 @@ body {
 
             &:hover {
               color: $whitegrayColor;
+            }
+          }
+
+          .personDetail {
+            position: absolute;
+            top: 80px;
+            right: 180px;
+            width: auto;
+            max-width: 400px;
+            height: auto;
+            max-height: 500px;
+            background-color: #989ef0cb;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            gap: 10px;
+            z-index: 1000;
+            padding: 20px;
+
+            .personInfo {
+              .name {
+                font-size: 20px;
+                font-weight: 600;
+                color: white;
+              }
+              .nameDetail {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: $purpleIdea;
+                gap: 10px;
+                border-bottom: 1px solid #cbcbcb;
+                padding-bottom: 10px;
+                .dept {
+                  font-size: 12px;
+                  font-weight: 300;
+                }
+              }
+            }
+            .logout {
+              width: 100%;
+              font-size: 12px;
+              margin-right: 30px;
+              cursor: pointer;
+              button {
+                width: 100%;
+                background-color: $purpleIdea;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+
+                &:hover {
+                  background-color: $main-dark;
+                }
+              }
             }
           }
 
@@ -396,7 +560,9 @@ body {
                 .systemBtn,
                 .githubBtn {
                   background-color: white;
-
+                  width: 180px;
+                  height: 40px;
+                  padding: 0px 20px;
                   &:hover {
                     background-color: $blueColor;
                     box-shadow: 0px 5px 5px #00000040;

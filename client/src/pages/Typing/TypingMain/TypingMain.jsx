@@ -33,9 +33,24 @@ const TypingMain = () => {
       <div className="typingMainContent">
         <h1>Category Select</h1>
         <div className="categoryButtons">
-          <button onClick={() => handleCategorySelect("01")}>일반 문장</button>
-          <button onClick={() => handleCategorySelect("02")}>기술 문장</button>
-          <button onClick={() => handleCategorySelect("03")}>TEST</button>
+          <button
+            onClick={() => handleCategorySelect("01")}
+            style={{ width: "150px" }}
+          >
+            일반 문장
+          </button>
+          <button
+            onClick={() => handleCategorySelect("02")}
+            style={{ width: "150px" }}
+          >
+            기술 문장
+          </button>
+          <button
+            onClick={() => handleCategorySelect("03")}
+            style={{ width: "150px" }}
+          >
+            TEST
+          </button>
           {/* 추가적인 카테고리가 필요하면 여기에 버튼을 추가하세요 */}
         </div>
       </div>

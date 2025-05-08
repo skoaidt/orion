@@ -1,0 +1,487 @@
+@import "../../../style.scss";
+
+.ideaDesc {
+  // width: 100%;
+  // height: 100%;
+  background-color: #f5f5f5;
+  display: flex;
+  overflow-y: auto;
+
+  .ideaDescWrap {
+    // flex: 1;
+    margin: 50px;
+    width: 1000px;
+    min-height: 750px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+
+    .ideaDescBtn {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .left {
+        display: flex;
+        gap: 10px;
+      }
+      button {
+        width: 80px;
+        height: 30px;
+        border-radius: 5px;
+        border: none;
+        background-color: $purpleIdea;
+        color: #ffffff;
+        cursor: pointer;
+      }
+    }
+
+    .contentHead {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin: 20px 0px;
+      .devCategory {
+        color: #989ef0;
+      }
+      .headTitle {
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        align-items: center;
+        .title {
+          font-size: 26px;
+          font-weight: 500;
+          color: #262626;
+        }
+        .subTitle {
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          font-size: 14px;
+          font-weight: 300;
+          gap: 10px;
+          .idNo {
+            min-width: 40px;
+            color: #565656;
+            span:first-child {
+              color: #565565;
+              margin: 0px 5px;
+            }
+            span:last-child {
+              color: $purpleIdeaLight;
+              font-weight: 500;
+            }
+          }
+          .category {
+            min-width: 100px;
+            color: $purpleIdeaLight;
+            span:first-child {
+              color: #565565;
+              margin: 0px 5px;
+            }
+            span:last-child {
+              color: $purpleIdeaLight;
+              font-weight: 500;
+            }
+          }
+        }
+      }
+    }
+    .userInfo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px 0px;
+      .userInfoWrap {
+        display: flex;
+        gap: 10px;
+        .userInfoLeft {
+          img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+          }
+        }
+        .userInfoRight {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: flex-start;
+          gap: 2px;
+          .user {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            .name {
+              font-size: 14px;
+              font-weight: 600;
+              color: #262626;
+            }
+            .team {
+              font-size: 12px;
+              font-weight: 300;
+              color: #8b8b8b;
+            }
+          }
+          .date {
+            font-size: 12px;
+            font-weight: 300;
+            color: #8b8b8b;
+          }
+        }
+      }
+      .likeWrap {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #8c8c8c;
+        border-radius: 5px;
+        padding: 5px;
+        cursor: pointer;
+
+        .like {
+          color: #8c8c8c;
+        }
+        .likeCount {
+          font-size: 12px;
+          font-weight: 300;
+          color: #191919;
+        }
+        &:hover {
+          background-color: $purpleIdeaLight;
+          color: #ffffff;
+          border: none;
+          .like,
+          .likeCount {
+            color: #ffffff;
+          }
+        }
+        &:active {
+          background-color: $purpleIdea;
+          color: #ffffff;
+          border: none;
+        }
+      }
+    }
+
+    .contentBox {
+      .title {
+        color: $purpleIdeaLight;
+        font-size: 18px;
+        font-weight: 600;
+        margin: 20px 0px 10px 0px;
+      }
+      .description {
+        min-height: 100px;
+        // overflow-y: auto;
+        color: #565656;
+        background-color: #f6f6f6;
+
+        padding: 20px;
+        border-radius: 5px;
+      }
+      .desEffect {
+        height: 50px;
+        overflow-y: auto;
+        color: #565656;
+        background-color: #f6f6f6;
+
+        padding: 20px;
+        border-radius: 5px;
+      }
+    }
+    .hitsWrap {
+      color: #565656;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin: 10px 0 20px 0;
+      .Box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 12px;
+        gap: 5px;
+        margin: 0 20px;
+      }
+      .commentsCnt {
+        display: flex;
+        gap: 10px;
+      }
+    }
+
+    .commentsContent {
+      padding: 0px 30px;
+      color: #565656;
+      background-color: #ffffff;
+      border-radius: 5px;
+      box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+      .commentItem {
+        padding: 14px 23px 0 0;
+        border-bottom: 1px solid #ebecef;
+
+        .commentAuthor {
+          display: flex;
+          gap: 10px;
+
+          .commentAuthorNm {
+            font-size: 14px;
+            font-weight: 500;
+          }
+
+          .commentAuthorTeam {
+            font-size: 13px;
+            font-weight: 300;
+            color: #676767;
+          }
+        }
+        .commentText {
+          font-size: 15px;
+          margin: 5px 0;
+        }
+        .commentDownWrap {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          .commentDate {
+            font-size: 13px;
+            font-weight: 300;
+            color: #676767;
+          }
+          button {
+            font-size: 13px;
+          }
+        }
+      }
+
+      .addWrap {
+        border: 1px solid #757a81;
+        background-color: white;
+        border-radius: 6px;
+        margin: 30px 0;
+        padding: 10px;
+        position: relative;
+
+        .commentNm {
+          font-size: 13px;
+          margin-bottom: 5px;
+        }
+
+        .addComment {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          width: 100%;
+
+          textarea {
+            width: 100%;
+            border: none;
+            box-sizing: border-box;
+          }
+
+          form {
+            width: 100%;
+            margin: 5px 10px;
+
+            textarea {
+              width: 100%;
+              border: none;
+              box-sizing: border-box;
+            }
+
+            .btnGroup {
+              display: flex;
+              align-items: center;
+              justify-content: flex-end;
+              position: relative;
+
+              button {
+                height: 100%;
+                cursor: pointer;
+
+                :hover {
+                  color: $blueColor;
+                  background-color: #ebecef;
+                }
+              }
+            }
+
+            .emojiPickerWrapper {
+              position: absolute;
+              bottom: 100%;
+            }
+          }
+        }
+      }
+    }
+  }
+  .ideaProcess {
+    width: 400px;
+    margin: 50px 0px;
+    padding: 20px;
+    color: #565656;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .processTitle {
+      font-size: 18px;
+      font-weight: 500;
+      color: $purpleIdeaLight;
+    }
+
+    .processBox {
+      width: 100%;
+      height: 50px;
+      font-size: 14px;
+      color: $main-dark;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+
+      .processItem {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        border-radius: 1px solid $main-dark;
+        .processItemTitle {
+          flex: 2;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 16px;
+          font-weight: 500;
+          color: $whitegrayColor;
+          background-color: #ffffff;
+          border: 1px solid $whitegrayColor;
+          border-radius: 5px;
+          box-shadow: 0 0 5px 0 rgba(31, 31, 31, 0.1);
+          transition: all 0.3s ease;
+
+          &.disabled {
+            background-color: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+          }
+
+          &.completed {
+            background-color: $purpleIdea;
+            color: white;
+            border: 1px solid white;
+          }
+        }
+        .lineBox {
+          position: relative;
+          flex: 2;
+          width: 100%;
+          height: 120%;
+
+          .line {
+            width: 3px;
+            height: 100%;
+            background-color: $purpleIdeaLight;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            transition: all 0.3s ease;
+          }
+          .circle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            color: white;
+            background-color: $main-dark;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            top: calc(50% - 10px);
+            transform: translateX(-50%);
+            z-index: 10;
+            transition: all 0.3s ease;
+            .icons {
+              font-size: 14px;
+            }
+          }
+        }
+        .processItemContent {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 0px 10px;
+          flex: 6;
+          width: 100%;
+          height: 100%;
+          border: 1px solid $whitegrayColor;
+          border-radius: 5px;
+          box-shadow: 0 0 5px 0 rgba(31, 31, 31, 0.1);
+          background-color: #ffffff;
+          transition: all 0.3s ease;
+
+          &.disabled {
+            background-color: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+          }
+
+          // &.completed {
+          //   background-color: $purpleIdea;
+          //   color: white;
+          //   border: 1px solid white;
+          // }
+
+          .itemContentWrap {
+            display: flex;
+            justify-content: space-between;
+            gap: 5px;
+          }
+          .userInfo {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 5px;
+          }
+          .right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 5px;
+            .dDay {
+              width: 40px;
+              text-align: center;
+              font-size: 12px;
+              font-weight: 400;
+              color: white;
+              background-color: $grayColor;
+              padding: 5px;
+              border-radius: 5px;
+            }
+          }
+        }
+        .active {
+          background-color: $purpleIdeaLight;
+          color: white;
+          border: 1px solid white;
+        }
+        .dropLineBox {
+          height: 220%;
+          color: $grayColor;
+        }
+        .dropLine {
+          background-color: $whitegrayColor !important;
+        }
+      }
+    }
+  }
+}
