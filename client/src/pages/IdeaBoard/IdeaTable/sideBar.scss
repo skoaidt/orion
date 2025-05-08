@@ -3,12 +3,33 @@
 .sideBar {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   min-width: 150px;
   background-color: #333333;
-  gap: 20px;
-  height: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  overflow-y: auto;
+  position: relative;
+
+  .topMenus {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    padding-top: 20px;
+  }
+
+  .bottomMenus {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 30px;
+    position: absolute;
+    bottom: 0;
+  }
 
   .logo {
     padding: 20px 0;
@@ -24,7 +45,7 @@
 
   .menuNm {
     padding: 7px;
-    border-radius: 5px; // 둥근 모서리 추가
+    border-radius: 5px;
     width: 100px;
     text-align: center;
     font-size: 16px;
