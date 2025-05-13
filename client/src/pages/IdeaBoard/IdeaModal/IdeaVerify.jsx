@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./ideaVerify.scss";
 import CloseIcon from "@mui/icons-material/Close";
 import Radio from "@mui/material/Radio";
@@ -11,8 +11,14 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Switch from "@mui/material/Switch";
 import axios from "axios";
+import { AuthContext } from "../../../context/authContext";
 
 const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
+  const { currentUser } = useContext(AuthContext);
+
+  const [leftAuthor, setLeftAuthor] = useState("");
+  const [rightAuthor, setRightAuthor] = useState("");
+
   const [formData, setFormData] = useState({
     // 본사 선임부서 섹션
     development_collaboration: "",
@@ -124,6 +130,15 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
             console.log("뷰 모드로 설정되어 편집 모드 비활성화");
           }
 
+          // 작성자 정보 저장
+          if (response.data.left_author_id) {
+            setLeftAuthor(response.data.left_author_id);
+          }
+
+          if (response.data.right_author_id) {
+            setRightAuthor(response.data.right_author_id);
+          }
+
           // 데이터 로드 완료 표시
           setDataLoaded(true);
         } else {
@@ -196,47 +211,42 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
     }));
   };
 
-  // 편집 모드로 전환하는 함수 - 왼쪽(선임부서)
-  const handleLeftEdit = () => {
-    // 뷰 데이터가 있는 경우 해당 데이터로 폼 데이터를 복원
-    if (viewData) {
-      setFormData((prev) => ({
-        ...prev,
-        development_collaboration: viewData.development_collaboration || "",
-        target_user: viewData.target_user || "",
-        comment: viewData.comment || "",
-        verification_status:
-          viewData.verification_status !== undefined
-            ? viewData.verification_status
-            : true,
-      }));
-    }
+  // 편집 권한을 확인하는 함수 (선임부서 - 작성자 또는 Admin인 경우에만 수정 가능)
+  const hasLeftEditPermission = () => {
+    // 현재 사용자가 없는 경우 권한 없음
+    if (!currentUser) return false;
 
-    setLeftEditMode(true);
-    // 전체 모달의 viewMode 상태는 변경하지 않음
+    // Admin이거나 작성자인 경우 권한 있음
+    return currentUser.isAdmin || currentUser.userId === leftAuthor;
   };
 
-  // 편집 모드로 전환하는 함수 - 오른쪽(AI/DT)
-  const handleRightEdit = () => {
-    // 뷰 데이터가 있는 경우 해당 데이터로 폼 데이터를 복원
-    if (viewData) {
-      setFormData((prev) => ({
-        ...prev,
-        ai_development_collaboration:
-          viewData.ai_development_collaboration || "",
-        feasibility: viewData.feasibility || "",
-        ai_comment: viewData.ai_comment || "",
-        expected_personnel: viewData.expected_personnel || "",
-        expected_schedule: viewData.expected_schedule || "",
-        ai_verification_status:
-          viewData.ai_verification_status !== undefined
-            ? viewData.ai_verification_status
-            : true,
-      }));
-    }
+  // 편집 권한을 확인하는 함수 (AI/DT - 작성자 또는 Admin인 경우에만 수정 가능)
+  const hasRightEditPermission = () => {
+    // 현재 사용자가 없는 경우 권한 없음
+    if (!currentUser) return false;
 
-    setRightEditMode(true);
-    // 전체 모달의 viewMode 상태는 변경하지 않음
+    // Admin이거나 작성자인 경우 권한 있음
+    return currentUser.isAdmin || currentUser.userId === rightAuthor;
+  };
+
+  // 선임부서 편집 모드로 전환하는 함수
+  const handleLeftEdit = () => {
+    // 수정 권한이 있는지 확인
+    if (hasLeftEditPermission()) {
+      setLeftEditMode(true);
+    } else {
+      alert("수정 권한이 없습니다. 작성자 또는 관리자만 수정할 수 있습니다.");
+    }
+  };
+
+  // AI/DT 편집 모드로 전환하는 함수
+  const handleRightEdit = () => {
+    // 수정 권한이 있는지 확인
+    if (hasRightEditPermission()) {
+      setRightEditMode(true);
+    } else {
+      alert("수정 권한이 없습니다. 작성자 또는 관리자만 수정할 수 있습니다.");
+    }
   };
 
   // 왼쪽(선임부서) 제출 핸들러
