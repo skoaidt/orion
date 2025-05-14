@@ -22,7 +22,10 @@ const SideBar = () => {
         <div className="menuNm">IDEA 등록</div>
       </Link>
       <Link to="/ideaboard/devtable">
-        <div className="menuNm">Dev. 관리</div>
+        <div className="menuNm">과제 관리</div>
+      </Link>
+      <Link to="/ideaboard/solmgmt">
+        <div className="menuNm">System활용률</div>
       </Link>
     </div>
   );

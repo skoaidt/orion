@@ -19,7 +19,7 @@ import SolMgmt from "./SolMgmt/SolMgmt";
 import Portfolio from "./Portfolio/Portfolio";
 import TypingMain from "./Typing/TypingMain/TypingMain";
 import TypingHome from "./Typing/TypingHome/TypingHome";
-import DevTable from "./IdeaBoard/DevTable/DevTable";
+import DevTable from "./IdeaBoard/DevTable/DevTable"; // eslint-disable-line no-unused-vars
 
 export const Main = () => {
   const [getDevelopers, setGetDevelopers] = useState([]);
@@ -94,6 +94,7 @@ export const Main = () => {
           <Route path="/ideaboard/detail/:id" element={<IdeaBorad />} />
           <Route path="/ideaboard/kanban/:id" element={<IdeaBorad />} />
           <Route path="/ideaboard/devtable" element={<IdeaBorad />} />
+          <Route path="/ideaboard/solmgmt" element={<IdeaBorad />} />
           <Route path="/dashboard" element={<IdeaBorad />} />
           <Route path="/solmgmt" element={<SolMgmt />} />
         </Routes>

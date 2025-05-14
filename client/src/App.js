@@ -1,10 +1,9 @@
 import React, { useContext, useEffect } from "react";
 import Main from "./pages/Main";
 import Login from "./pages/Login";
-import './style.scss';
+import "./style.scss";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/authContext";
-
 
 function App() {
   const navigate = useNavigate();
@@ -16,17 +15,7 @@ function App() {
     }
   }, [currentUser, navigate]);
 
-  return (
-    <div className="app">
-      {currentUser ? (
-        <Main />
-      ) : (
-        <Login />
-      )}
-    </div>
-  );
-
-
+  return <div className="app">{currentUser ? <Main /> : <Login />}</div>;
 }
 
 export default App;
