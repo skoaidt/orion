@@ -9,15 +9,15 @@ const columns = [
   {
     field: "title",
     headerName: "제목",
-    width: 200,
+    width: 300,
     editable: false,
     headerAlign: "center",
-    align: "left",
+    align: "center",
   },
   {
     field: "status",
     headerName: "상태",
-    width: 80,
+    width: 100,
     editable: false,
     headerAlign: "center",
     align: "center",

@@ -41,7 +41,7 @@ export const Login = ({ onLogin }) => {
             alt="loginBG"
           />
         </div>
-        <div className={`dadaBox ${showDadaBox ? "show" : ""}`}>
+        {/* <div className={`dadaBox ${showDadaBox ? "show" : ""}`}>
           <img
             src={`${process.env.PUBLIC_URL}/image/login/dada2.png`}
             alt="loginBG"
@@ -60,7 +60,7 @@ export const Login = ({ onLogin }) => {
               alt="elf"
             />
           </div>
-        </div>
+        </div> */}
         <div
           className="circle"
           onMouseEnter={() => setShowDadaBox(true)}

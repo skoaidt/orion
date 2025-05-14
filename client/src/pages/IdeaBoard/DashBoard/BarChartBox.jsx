@@ -62,7 +62,7 @@ const BarChartBox = () => {
     const normalizedTeam = teamName.toLowerCase().replace(/\s+/g, "");
 
     // Access 관련 팀 처리
-    if (teamName === "Access계획팀" || teamName === "Access기획팀") {
+    if (teamName === "Access계획팀" || teamName === "Access기술팀") {
       console.log(`팀명 기준 치환: "${teamName}" -> Access 본부로 분류`);
       return "Access";
     }
@@ -147,8 +147,8 @@ const BarChartBox = () => {
     }
 
     if (normalizedHQ.includes("경영지원본부")) {
-      console.log(`본부명 치환 (경영지원): ${headquarter} -> 경영지원`);
-      return "경영지원";
+      console.log(`본부명 치환 (경영): ${headquarter} -> 경영`);
+      return "경영";
     }
 
     if (normalizedHQ.includes("so담당")) {
@@ -348,17 +348,9 @@ const BarChartBox = () => {
           </div>
         ) : (
           <div className="boxwrap">
-            <div className="box regBox">
+            <div className="box devBox">
               <div className="title">등록</div>
-              <div className="cnt">
-                {formatNumber(
-                  processData.등록 +
-                    processData.선정 +
-                    processData.pilot +
-                    processData.검증 +
-                    processData.개발심의
-                )}
-              </div>
+              <div className="cnt">{formatNumber(processData.등록)}</div>
             </div>
             <div className="box devBox">
               <div className="title">선정</div>

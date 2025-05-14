@@ -206,7 +206,7 @@ const DevTable = () => {
             } catch (err) {
               console.error(
                 `아이디어 ${
-                  idea.idea_id || idea.id
+                  idea.id || idea.id
                 }의 개발심의 데이터를 가져오는 중 오류:`,
                 err
               );
@@ -215,7 +215,7 @@ const DevTable = () => {
                 id: index + 1,
                 idea_id: idea.idea_id || idea.id,
                 status: idea.status,
-                title: idea.name || "-",
+                title: idea.title || "-",
                 dept_name: idea.dept_name || "-",
                 name: idea.author || "-",
                 job_field: idea.VerifyField || "-",
