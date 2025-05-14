@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./ideaPilot.scss";
 import CloseIcon from "@mui/icons-material/Close";
 import TextField from "@mui/material/TextField";
 import axios from "axios";
+import { AuthContext } from "../../../context/authContext";
 
 const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -15,6 +16,9 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [error, setError] = useState("");
   const [viewMode, setViewMode] = useState(isViewMode);
+  const [author, setAuthor] = useState("");
+
+  const { currentUser } = useContext(AuthContext);
 
   // 이미 완료된 단계인 경우 데이터 조회
   useEffect(() => {
@@ -41,6 +45,11 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
               ? response.data.filePath.split("/").pop()
               : ""
           );
+
+          // 작성자 정보 저장
+          if (response.data.author_id) {
+            setAuthor(response.data.author_id);
+          }
         }
       } catch (error) {
         console.error("파일럿 데이터 조회 오류:", error);
@@ -89,9 +98,23 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
     setQuantitybasis(event.target.value);
   };
 
+  // 편집 권한을 확인하는 함수 (작성자 또는 Admin인 경우에만 수정 가능)
+  const hasEditPermission = () => {
+    // 현재 사용자가 없는 경우 권한 없음
+    if (!currentUser) return false;
+
+    // Admin이거나 작성자인 경우 권한 있음
+    return currentUser.isAdmin || currentUser.userId === author;
+  };
+
   // 편집 모드로 전환하는 함수
   const handleEdit = () => {
-    setViewMode(false);
+    // 수정 권한이 있는지 확인
+    if (hasEditPermission()) {
+      setViewMode(false);
+    } else {
+      alert("수정 권한이 없습니다. 작성자 또는 관리자만 수정할 수 있습니다.");
+    }
   };
 
   // 등록 버튼 클릭 핸들러

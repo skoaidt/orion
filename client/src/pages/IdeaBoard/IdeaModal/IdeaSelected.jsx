@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./ideaSelected.scss";
 import CloseIcon from "@mui/icons-material/Close";
 import Radio from "@mui/material/Radio";
@@ -11,6 +11,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Switch from "@mui/material/Switch";
 import axios from "axios";
+import { AuthContext } from "../../../context/authContext";
 
 const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
   // 상태 변수 정의
@@ -23,6 +24,10 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
   const [viewData, setViewData] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [viewMode, setViewMode] = useState(isViewMode); // 읽기모드 상태 추가
+  const [author, setAuthor] = useState(""); // 작성자 정보 저장
+
+  // 인증 컨텍스트에서 현재 사용자 정보와 관리자 여부 가져오기
+  const { currentUser } = useContext(AuthContext);
 
   // 이미 완료된 단계인 경우 데이터 조회
   useEffect(() => {
@@ -45,6 +50,11 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
               ? response.data.is_selected
               : true
           );
+
+          // 작성자 정보 저장
+          if (response.data.author_id) {
+            setAuthor(response.data.author_id);
+          }
 
           // 데이터가 있으면 viewMode를 true로 설정
           setViewMode(true);
@@ -100,9 +110,23 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
     setIsSelected(event.target.checked);
   };
 
+  // 편집 권한을 확인하는 함수 (작성자 또는 Admin인 경우에만 수정 가능)
+  const hasEditPermission = () => {
+    // 현재 사용자가 없는 경우 권한 없음
+    if (!currentUser) return false;
+
+    // Admin이거나 작성자인 경우 권한 있음
+    return currentUser.isAdmin || currentUser.userId === author;
+  };
+
   // 편집 모드로 전환하는 함수
   const handleEdit = () => {
-    setViewMode(false);
+    // 수정 권한이 있는지 확인
+    if (hasEditPermission()) {
+      setViewMode(false);
+    } else {
+      alert("수정 권한이 없습니다. 작성자 또는 관리자만 수정할 수 있습니다.");
+    }
   };
 
   // 등록 버튼 클릭 핸들러
@@ -198,16 +222,15 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
               "알 수 없는 오류가 발생했습니다."
           );
           alert(
-            `오류: ${
-              error.response.data.error ||
+            error.response.data.error ||
               error.response.data.message ||
-              "알 수 없는 오류가 발생했습니다."
-            }`
+              "오류가 발생했습니다."
           );
         }
       } else {
-        setError("서버 연결에 실패했습니다.");
-        alert("서버 연결에 실패했습니다.");
+        // 네트워크 오류 또는 예상치 못한 오류
+        setError("네트워크 오류 또는 예상치 못한 오류가 발생했습니다.");
+        alert("네트워크 오류 또는 예상치 못한 오류가 발생했습니다.");
       }
     } finally {
       setLoading(false);

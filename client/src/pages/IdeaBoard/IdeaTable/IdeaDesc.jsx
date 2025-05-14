@@ -10,7 +10,6 @@ import DescProcess from "./DescProcess";
 import StreetviewIcon from "@mui/icons-material/Streetview";
 import ChatIcon from "@mui/icons-material/Chat";
 
-
 const IdeaDesc = () => {
   const { currentUser } = useContext(AuthContext);
   const { id } = useParams();
@@ -169,8 +168,8 @@ const IdeaDesc = () => {
     // 로그인하지 않았거나 작성자 정보가 없는 경우 false 반환
     if (!currentUser || !ideaData.user_id) return false;
 
-    // 현재 로그인한 사용자의 사번(userId)과 아이디어 작성자의 사번(n_id) 비교
-    return currentUser.userId === ideaData.user_id;
+    // Admin이거나 작성자인 경우 true 반환
+    return currentUser.isAdmin || currentUser.userId === ideaData.user_id;
   };
 
   // 댓글 수 업데이트 함수

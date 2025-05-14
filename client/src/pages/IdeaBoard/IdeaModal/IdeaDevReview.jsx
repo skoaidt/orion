@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./ideaDevReview.scss";
 import CloseIcon from "@mui/icons-material/Close";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -10,6 +10,7 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import axios from "axios";
+import { AuthContext } from "../../../context/authContext"; // AuthContext 추가
 
 const TransferList = ({
   onSelectedDevelopersChange,
@@ -286,6 +287,9 @@ const DatePickerComponent = ({ label, value, onChange, readOnly = false }) => {
 };
 
 const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
+  // 인증 컨텍스트에서 현재 사용자 정보 가져오기
+  const { currentUser } = useContext(AuthContext);
+
   // 상태 변수 정의
   const [selectedDevelopers, setSelectedDevelopers] = useState([]);
   const [startDate, setStartDate] = useState(dayjs()); // 오늘 날짜로 초기화
@@ -298,6 +302,7 @@ const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
     []
   );
   const [viewMode, setViewMode] = useState(isViewMode); // 읽기모드 상태 초기화
+  const [author, setAuthor] = useState(""); // 작성자 정보 저장
 
   // 개발심의 데이터 가져오기
   useEffect(() => {
@@ -314,6 +319,11 @@ const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
 
           // 데이터가 있으면 읽기 모드로 설정
           setViewMode(true);
+
+          // 작성자 정보 저장
+          if (response.data.author_id) {
+            setAuthor(response.data.author_id);
+          }
 
           // 폼에 데이터 설정
           if (response.data.developers && response.data.developers.length > 0) {
@@ -382,6 +392,15 @@ const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
       setViewMode(isViewMode);
     }
   }, [isViewMode, devReviewData]);
+
+  // 편집 권한을 확인하는 함수 (작성자 또는 Admin인 경우에만 수정 가능)
+  const hasEditPermission = () => {
+    // 현재 사용자가 없는 경우 권한 없음
+    if (!currentUser) return false;
+
+    // Admin이거나 작성자인 경우 권한 있음
+    return currentUser.isAdmin || currentUser.userId === author;
+  };
 
   // 우선순위 변경 핸들러
   const handlePriorityChange = (event) => {
@@ -500,7 +519,12 @@ const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
 
   // 편집 모드로 전환
   const handleEdit = () => {
-    setViewMode(false);
+    // 수정 권한이 있는지 확인
+    if (hasEditPermission()) {
+      setViewMode(false);
+    } else {
+      alert("수정 권한이 없습니다. 작성자 또는 관리자만 수정할 수 있습니다.");
+    }
   };
 
   return (
