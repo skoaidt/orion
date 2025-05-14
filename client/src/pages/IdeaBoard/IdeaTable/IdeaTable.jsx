@@ -24,8 +24,8 @@ const columns = [
     editable: true,
   },
   { field: "idea_title", headerName: "제목", width: 500, editable: true },
-  { field: "headqt", headerName: "제안본부", width: 80, editable: true },
-  { field: "team", headerName: "제안팀", width: 100, editable: true },
+  { field: "headqt", headerName: "제안본부", width: 130, editable: true },
+  { field: "team", headerName: "제안팀", width: 130, editable: true },
   { field: "name", headerName: "작성자", width: 100, editable: true },
   { field: "reg_date", headerName: "등록일", width: 100, editable: true },
   { field: "views", headerName: "조회수", width: 80, editable: true },
@@ -34,8 +34,17 @@ const columns = [
 ];
 
 const filterOptions = {
-  status: ["선택", "등록", "검증", "완료"],
-  dev_category: ["선택", "Access", "Infra", "신규개발", "고도화"],
+  status: [
+    "선택",
+    "등록",
+    "선정",
+    "Pilot",
+    "검증",
+    "개발심의",
+    "개발중",
+    "개발완료",
+  ],
+  dev_category: ["선택", "신규개발", "고도화", "내재화"],
   biz_category: [
     "선택",
     "Access",
@@ -47,6 +56,7 @@ const filterOptions = {
     "안전보건",
     "자산",
     "전송",
+    "공통",
   ],
   workfl_category: [
     "선택",
@@ -57,6 +67,10 @@ const filterOptions = {
     "CE",
     "사무",
     "Biz",
+    "서버",
+    "교육",
+    "자산",
+    "안전",
     "기타",
   ],
   searchType: ["제목", "작성자", "제안팀", "제안본부"],

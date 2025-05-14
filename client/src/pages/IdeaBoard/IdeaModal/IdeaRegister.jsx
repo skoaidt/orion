@@ -27,7 +27,9 @@ const IdeaRegister = ({
   const [usability, setUsability] = React.useState("");
   const [duplication, setDuplication] = React.useState("");
   const [tbohStatus, setTbohStatus] = React.useState("");
-  const [personName, setPersonName] = React.useState([]);
+  // 유용성과 개선내역을 위한 별도의 상태 생성
+  const [usabilityPoints, setUsabilityPoints] = React.useState([]);
+  const [improvementPoints, setImprovementPoints] = React.useState([]);
   const [usePeriod, setUsePeriod] = React.useState("");
   const [useScope, setUseScope] = React.useState("");
   const [platform, setPlatform] = React.useState("");
@@ -71,12 +73,21 @@ const IdeaRegister = ({
       setQuantitativeEffect(ideaData.quantitative_effect || "");
       setQualitativeEffect(ideaData.qualitative_effect || "");
 
-      // 개선항목 및 유용성 설정
+      // 유용성 설정
       if (ideaData.usability_points) {
-        setPersonName(
+        setUsabilityPoints(
           typeof ideaData.usability_points === "string"
             ? ideaData.usability_points.split(",")
             : ideaData.usability_points
+        );
+      }
+
+      // 개선내역 설정
+      if (ideaData.improvement_points) {
+        setImprovementPoints(
+          typeof ideaData.improvement_points === "string"
+            ? ideaData.improvement_points.split(",")
+            : ideaData.improvement_points
         );
       }
 
@@ -115,11 +126,24 @@ const IdeaRegister = ({
   };
 
   const theme = useTheme();
-  const handleChange = (event) => {
+
+  // 유용성 변경 핸들러
+  const handleUsabilityPointsChange = (event) => {
     const {
       target: { value },
     } = event;
-    setPersonName(
+    setUsabilityPoints(
+      // On autofill we get a stringified value.
+      typeof value === "string" ? value.split(",") : value
+    );
+  };
+
+  // 개선내역 변경 핸들러
+  const handleImprovementPointsChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setImprovementPoints(
       // On autofill we get a stringified value.
       typeof value === "string" ? value.split(",") : value
     );
@@ -164,9 +188,9 @@ const IdeaRegister = ({
     "기타",
   ];
 
-  function getStyles(name, personName, theme) {
+  function getStyles(name, selectedItems, theme) {
     return {
-      fontWeight: personName.includes(name)
+      fontWeight: selectedItems.includes(name)
         ? theme.typography.fontWeightMedium
         : theme.typography.fontWeightRegular,
     };
@@ -381,8 +405,8 @@ const IdeaRegister = ({
         use_period: usePeriod,
         use_scope: useScope,
         platform: platform,
-        usability_points: personName.join(","), // 배열을 문자열로 변환
-        improvement_points: personName.join(","), // 개선내역도 같은 state를 사용 중이므로 수정 필요
+        usability_points: usabilityPoints.join(","), // 유용성 - 별도의 state 사용
+        improvement_points: improvementPoints.join(","), // 개선내역 - 별도의 state 사용
         // 로그인한 사용자 정보 추가
         user_id: currentUser?.userId || "", // 사번
         name: currentUser?.name || "", // 이름
@@ -394,11 +418,9 @@ const IdeaRegister = ({
 
       // console.log(`${editMode ? "수정" : "등록"}할 아이디어 데이터:`, formData);
 
-      let response;
-
       if (editMode) {
         // 수정 모드: PUT 요청으로 업데이트
-        response = await axios.put(`/api/ideas/${ideaData.id}`, formData);
+        await axios.put(`/api/ideas/${ideaData.id}`, formData);
         // console.log("아이디어 수정 성공:", response.data);
 
         // 데이터 업데이트 콜백 호출 (제공된 경우)
@@ -409,7 +431,7 @@ const IdeaRegister = ({
         alert("아이디어가 성공적으로 수정되었습니다.");
       } else {
         // 등록 모드: POST 요청으로 새로 등록
-        response = await axios.post("/api/ideas/register", formData);
+        await axios.post("/api/ideas/register", formData);
         // console.log("아이디어 등록 성공:", response.data);
 
         // 데이터 업데이트 콜백 호출 (제공된 경우)
@@ -788,11 +810,11 @@ const IdeaRegister = ({
               <span className="fieldLabel">유용성</span>
               <FormControl sx={{ m: 0, width: 300 }}>
                 <Select
-                  labelId="demo-multiple-name-label"
-                  id="demo-multiple-name"
+                  labelId="usability-points-label"
+                  id="usability-points-select"
                   multiple
-                  value={personName}
-                  onChange={handleChange}
+                  value={usabilityPoints}
+                  onChange={handleUsabilityPointsChange}
                   variant="standard"
                   MenuProps={MenuProps}
                 >
@@ -800,7 +822,7 @@ const IdeaRegister = ({
                     <MenuItem
                       key={name}
                       value={name}
-                      style={getStyles(name, personName, theme)}
+                      style={getStyles(name, usabilityPoints, theme)}
                     >
                       {name}
                     </MenuItem>
@@ -813,11 +835,11 @@ const IdeaRegister = ({
               <span className="fieldLabel">개선내역</span>
               <FormControl sx={{ m: 0, width: 300 }}>
                 <Select
-                  labelId="demo-multiple-name-label"
-                  id="demo-multiple-name"
+                  labelId="improvement-points-label"
+                  id="improvement-points-select"
                   multiple
-                  value={personName}
-                  onChange={handleChange}
+                  value={improvementPoints}
+                  onChange={handleImprovementPointsChange}
                   variant="standard"
                   MenuProps={MenuProps}
                 >
@@ -825,7 +847,7 @@ const IdeaRegister = ({
                     <MenuItem
                       key={name}
                       value={name}
-                      style={getStyles(name, personName, theme)}
+                      style={getStyles(name, improvementPoints, theme)}
                     >
                       {name}
                     </MenuItem>
