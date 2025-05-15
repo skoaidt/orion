@@ -94,7 +94,14 @@ export const Main = () => {
           <Route path="/ideaboard/detail/:id" element={<IdeaBorad />} />
           <Route path="/ideaboard/kanban/:id" element={<IdeaBorad />} />
           <Route path="/ideaboard/devtable" element={<IdeaBorad />} />
-          <Route path="/ideaboard/solmgmt" element={<IdeaBorad />} />
+          <Route
+            path="/ideaboard/solmgmt"
+            element={
+              <RequireAdmin>
+                <IdeaBorad />
+              </RequireAdmin>
+            }
+          />
           <Route path="/dashboard" element={<IdeaBorad />} />
           <Route path="/solmgmt" element={<SolMgmt />} />
         </Routes>
