@@ -393,13 +393,49 @@ const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
     }
   }, [isViewMode, devReviewData]);
 
-  // 편집 권한을 확인하는 함수 (작성자 또는 Admin인 경우에만 수정 가능)
+  // 편집 권한을 확인하는 함수 (AI/DT기획 PL, AI/DT개발 PL 소속 또는 Admin인 경우에만 수정 가능)
   const hasEditPermission = () => {
     // 현재 사용자가 없는 경우 권한 없음
-    if (!currentUser) return false;
+    if (!currentUser) {
+      console.log("현재 로그인한 사용자가 없습니다. 권한 없음.");
+      return false;
+    }
 
-    // Admin이거나 작성자인 경우 권한 있음
-    return currentUser.isAdmin || currentUser.userId === author;
+    // Admin인 경우 권한 있음
+    if (currentUser.isAdmin) {
+      console.log("관리자 권한으로 접근: 권한 있음");
+      return true;
+    }
+
+    // 현재 사용자 부서
+    const userDeptName = currentUser.deptName;
+
+    // 허용된 AI/DT 부서 목록
+    const allowedDepartments = ["AI/DT기획 PL", "AI/DT개발 PL"];
+
+    console.log("개발심의 권한 확인 정보:");
+    console.log("- 사용자 정보:", currentUser);
+    console.log("- 사용자 부서:", userDeptName);
+
+    // 사용자 부서가 허용된 부서 목록에 있는지 확인
+    if (userDeptName) {
+      // 정확히 일치하는 경우
+      if (allowedDepartments.includes(userDeptName.trim())) {
+        console.log("AI/DT 허용 부서 일치: 권한 있음");
+        return true;
+      }
+
+      // 부분 일치하는 경우 (유연한 매칭)
+      for (const dept of allowedDepartments) {
+        if (userDeptName.includes(dept) || dept.includes(userDeptName)) {
+          console.log(`AI/DT 허용 부서 부분 일치 (${dept}): 권한 있음`);
+          return true;
+        }
+      }
+    }
+
+    console.log("권한 없음 - 관리자/AI/DT 허용 부서가 아님");
+    return false;
   };
 
   // 우선순위 변경 핸들러
@@ -435,6 +471,14 @@ const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
   };
 
   const handleRegister = async () => {
+    // 권한 확인
+    if (!hasEditPermission()) {
+      alert(
+        "등록 권한이 없습니다. AI/DT기획 PL, AI/DT개발 PL 소속 또는 관리자만 등록할 수 있습니다."
+      );
+      return;
+    }
+
     // 필수 필드 검증
     if (selectedDevelopers.length === 0) {
       setError("개발자를 한 명 이상 선택해주세요.");
@@ -523,7 +567,9 @@ const IdeaDevReview = ({ onClose, ideaId, isViewMode = false, onRegister }) => {
     if (hasEditPermission()) {
       setViewMode(false);
     } else {
-      alert("수정 권한이 없습니다. 작성자 또는 관리자만 수정할 수 있습니다.");
+      alert(
+        "수정 권한이 없습니다. AI/DT기획 PL, AI/DT개발 PL 소속 또는 관리자만 수정할 수 있습니다."
+      );
     }
   };
 

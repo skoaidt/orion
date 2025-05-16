@@ -1140,60 +1140,117 @@ export const registerIdeaPilot = (req, res) => {
     });
   }
 
-  // 데이터 삽입 쿼리 - created_at과 filePath 필드 추가
-  let insertQuery;
-  let values;
+  // 먼저 기존 데이터가 있는지 확인
+  const checkQuery = `SELECT * FROM special.ITAsset_ideaPilot WHERE idea_id = ? LIMIT 1`;
 
-  if (filePath) {
-    insertQuery = `
-      INSERT INTO special.ITAsset_ideaPilot (
-        idea_id, productivity, cost, quantitybasis, filePath, created_at
-      ) VALUES (?, ?, ?, ?, ?, NOW())
-    `;
-    values = [
-      idea_id,
-      parseFloat(productivity) || 0,
-      parseFloat(cost) || 0,
-      quantitybasis,
-      filePath,
-    ];
-  } else {
-    insertQuery = `
-      INSERT INTO special.ITAsset_ideaPilot (
-        idea_id, productivity, cost, quantitybasis, created_at
-      ) VALUES (?, ?, ?, ?, NOW())
-    `;
-    values = [
-      idea_id,
-      parseFloat(productivity) || 0,
-      parseFloat(cost) || 0,
-      quantitybasis,
-    ];
-  }
-
-  db.query(insertQuery, values, (err, data) => {
-    if (err) {
-      console.error("Pilot 데이터 등록 오류:", err);
-      return res.status(500).json({ error: err.message });
+  db.query(checkQuery, [idea_id], (checkErr, checkData) => {
+    if (checkErr) {
+      console.error("기존 파일럿 데이터 확인 오류:", checkErr);
+      return res.status(500).json({ error: checkErr.message });
     }
 
-    // 아이디어 상태 업데이트 (Pilot으로 변경)
-    const updateIdeaStatusQuery = `
-      UPDATE special.ITAsset_ideas 
-      SET status = 'pilot' 
-      WHERE id = ?
-    `;
+    let query;
+    let values;
 
-    db.query(updateIdeaStatusQuery, [idea_id], (updateErr, updateData) => {
-      if (updateErr) {
-        console.error("아이디어 상태 업데이트 오류:", updateErr);
-        // 상태 업데이트 실패해도 파일럿 데이터는 저장되었으므로 성공 응답
+    if (checkData && checkData.length > 0) {
+      // 기존 데이터가 있으면 UPDATE
+      console.log(
+        "기존 파일럿 데이터가 있어 업데이트합니다. idea_id:",
+        idea_id
+      );
+
+      if (filePath) {
+        query = `
+          UPDATE special.ITAsset_ideaPilot 
+          SET productivity = ?, 
+              cost = ?, 
+              quantitybasis = ?, 
+              filePath = ?
+          WHERE idea_id = ?
+        `;
+        values = [
+          parseFloat(productivity) || 0,
+          parseFloat(cost) || 0,
+          quantitybasis,
+          filePath,
+          idea_id,
+        ];
+      } else {
+        // 기졸 파일 경로 유지
+        query = `
+          UPDATE special.ITAsset_ideaPilot 
+          SET productivity = ?, 
+              cost = ?, 
+              quantitybasis = ?
+          WHERE idea_id = ?
+        `;
+        values = [
+          parseFloat(productivity) || 0,
+          parseFloat(cost) || 0,
+          quantitybasis,
+          idea_id,
+        ];
+      }
+    } else {
+      // 기존 데이터가 없으면 INSERT
+      console.log("신규 파일럿 데이터를 등록합니다. idea_id:", idea_id);
+
+      if (filePath) {
+        query = `
+          INSERT INTO special.ITAsset_ideaPilot (
+            idea_id, productivity, cost, quantitybasis, filePath, created_at
+          ) VALUES (?, ?, ?, ?, ?, NOW())
+        `;
+        values = [
+          idea_id,
+          parseFloat(productivity) || 0,
+          parseFloat(cost) || 0,
+          quantitybasis,
+          filePath,
+        ];
+      } else {
+        query = `
+          INSERT INTO special.ITAsset_ideaPilot (
+            idea_id, productivity, cost, quantitybasis, created_at
+          ) VALUES (?, ?, ?, ?, NOW())
+        `;
+        values = [
+          idea_id,
+          parseFloat(productivity) || 0,
+          parseFloat(cost) || 0,
+          quantitybasis,
+        ];
+      }
+    }
+
+    db.query(query, values, (err, data) => {
+      if (err) {
+        console.error("Pilot 데이터 등록/업데이트 오류:", err);
+        return res.status(500).json({ error: err.message });
       }
 
-      return res.status(200).json({
-        message: "Pilot 데이터가 성공적으로 등록되었습니다.",
-        idea_id: idea_id, // pilotId 대신 idea_id만 반환
-        status: "pilot", // 상태도 함께 반환
+      // 아이디어 상태 업데이트 (Pilot으로 변경)
+      const updateIdeaStatusQuery = `
+        UPDATE special.ITAsset_ideas 
+        SET status = 'pilot' 
+        WHERE id = ?
+      `;
+
+      db.query(updateIdeaStatusQuery, [idea_id], (updateErr, updateData) => {
+        if (updateErr) {
+          console.error("아이디어 상태 업데이트 오류:", updateErr);
+          // 상태 업데이트 실패해도 파일럿 데이터는 저장되었으므로 성공 응답
+        }
+
+        const isUpdate = checkData && checkData.length > 0;
+        return res.status(200).json({
+          message: `Pilot 데이터가 성공적으로 ${
+            isUpdate ? "업데이트" : "등록"
+          }되었습니다.`,
+          idea_id: idea_id,
+          status: "pilot",
+          is_update: isUpdate,
+        });
       });
     });
   });

@@ -26,6 +26,7 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
   const [viewMode, setViewMode] = useState(isViewMode); // 읽기모드 상태 추가
   const [author, setAuthor] = useState(""); // 작성자 정보 저장
   const [verifyDepartment, setVerifyDepartment] = useState(""); // 검증 부서 정보 저장
+  const [fullIdeaData, setFullIdeaData] = useState(null); // 전체 아이디어 데이터 저장
 
   // 인증 컨텍스트에서 현재 사용자 정보와 관리자 여부 가져오기
   const { currentUser } = useContext(AuthContext);
@@ -37,20 +38,38 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
 
       try {
         setLoading(true);
+        console.log("아이디어 ID:", ideaId, "데이터 조회 시작");
+
+        // 아이디어 기본 정보 조회 (검증 부서 정보를 가져오기 위해)
+        const ideaResponse = await axios.get(`/api/ideas/${ideaId}`);
+        console.log("아이디어 기본 정보 조회 결과:", ideaResponse.data);
+
+        // 전체 아이디어 데이터 저장
+        setFullIdeaData(ideaResponse.data);
+
+        // 아이디어 데이터 구조 검사
+        if (!ideaResponse.data) {
+          console.error("아이디어 데이터가 없습니다.");
+        } else {
+          console.log("아이디어 데이터 구조:", Object.keys(ideaResponse.data));
+
+          // 검증 부서 정보 확인 및 저장
+          const verifyDeptValue = ideaResponse.data.VerifyDepartment;
+          console.log("검증 부서 필드 값:", verifyDeptValue);
+
+          if (verifyDeptValue && verifyDeptValue.trim() !== "") {
+            setVerifyDepartment(verifyDeptValue);
+            console.log(`검증 부서 정보 설정 완료: '${verifyDeptValue}'`);
+          } else {
+            console.warn("검증 부서 정보가 비어있습니다:", verifyDeptValue);
+          }
+        }
 
         // 선정 데이터 조회
         const selectionResponse = await axios.get(
           `/api/ideas/selection/${ideaId}`
         );
-
-        // 아이디어 기본 정보 조회 (검증 부서 정보를 가져오기 위해)
-        const ideaResponse = await axios.get(`/api/ideas/${ideaId}`);
-
-        // 검증 부서 정보 저장
-        if (ideaResponse.data && ideaResponse.data.VerifyDepartment) {
-          setVerifyDepartment(ideaResponse.data.VerifyDepartment);
-          console.log("검증 부서 정보:", ideaResponse.data.VerifyDepartment);
-        }
+        console.log("선정 정보 조회 결과:", selectionResponse.data);
 
         // 선정 데이터가 있으면 상태 업데이트
         if (
@@ -130,27 +149,53 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
   // 편집 권한을 확인하는 함수 (관리자 또는 검증 부서 사람인 경우에만 수정 가능)
   const hasEditPermission = () => {
     // 현재 사용자가 없는 경우 권한 없음
-    if (!currentUser) return false;
+    if (!currentUser) {
+      console.log("현재 로그인한 사용자가 없습니다. 권한 없음.");
+      return false;
+    }
 
     // Admin인 경우 권한 있음
-    if (currentUser.isAdmin) return true;
-
-    // 작성자인 경우 권한 있음
-    if (currentUser.userId === author) return true;
-
-    // 검증 부서 소속인지 확인
-    const userDeptName = currentUser.deptName;
-    if (userDeptName && verifyDepartment && userDeptName === verifyDepartment) {
-      console.log("검증 부서 소속 사용자: 권한 있음");
+    if (currentUser.isAdmin) {
+      console.log("관리자 권한으로 접근: 권한 있음");
       return true;
     }
 
-    console.log(
-      "권한 없음 - 사용자 부서:",
-      userDeptName,
-      "검증 부서:",
-      verifyDepartment
-    );
+    // 검증 부서 정보 확인 - fullIdeaData에서 직접 접근
+    const verifyDeptFromData = fullIdeaData?.VerifyDepartment;
+    // 현재 사용자 부서
+    const userDeptName = currentUser.deptName;
+
+    console.log("권한 확인 정보:");
+    console.log("- 사용자 정보:", currentUser);
+    console.log("- 사용자 부서:", userDeptName);
+    console.log("- 검증 부서 (state):", verifyDepartment);
+    console.log("- 검증 부서 (직접 접근):", verifyDeptFromData);
+
+    // 먼저 fullIdeaData에서 직접 접근한 값 사용
+    if (
+      userDeptName &&
+      verifyDeptFromData &&
+      (userDeptName.trim() === verifyDeptFromData.trim() ||
+        userDeptName.includes(verifyDeptFromData) ||
+        verifyDeptFromData.includes(userDeptName))
+    ) {
+      console.log("검증 부서 소속 확인됨 (직접 접근 데이터 사용): 권한 있음");
+      return true;
+    }
+
+    // 그 다음 state 값 사용
+    if (
+      userDeptName &&
+      verifyDepartment &&
+      (userDeptName.trim() === verifyDepartment.trim() ||
+        userDeptName.includes(verifyDepartment) ||
+        verifyDepartment.includes(userDeptName))
+    ) {
+      console.log("검증 부서 소속 확인됨 (state 데이터 사용): 권한 있음");
+      return true;
+    }
+
+    console.log("권한 없음 - 사용자 부서와 검증 부서가 일치하지 않음");
     return false;
   };
 
