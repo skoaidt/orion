@@ -9,7 +9,7 @@ const columns = [
   {
     field: "idea_title",
     headerName: "제목",
-    width: 400,
+    width: 200,
     editable: false,
     headerAlign: "center",
     align: "left",

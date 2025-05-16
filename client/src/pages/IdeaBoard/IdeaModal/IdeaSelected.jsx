@@ -25,35 +25,71 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [viewMode, setViewMode] = useState(isViewMode); // 읽기모드 상태 추가
   const [author, setAuthor] = useState(""); // 작성자 정보 저장
+  const [verifyDepartment, setVerifyDepartment] = useState(""); // 검증 부서 정보 저장
+  const [fullIdeaData, setFullIdeaData] = useState(null); // 전체 아이디어 데이터 저장
 
   // 인증 컨텍스트에서 현재 사용자 정보와 관리자 여부 가져오기
   const { currentUser } = useContext(AuthContext);
 
-  // 이미 완료된 단계인 경우 데이터 조회
+  // 이미 완료된 단계인 경우 데이터 조회 및 아이디어 정보 가져오기
   useEffect(() => {
-    const fetchSelectionData = async () => {
+    const fetchData = async () => {
       if (!ideaId) return;
 
       try {
         setLoading(true);
-        const response = await axios.get(`/api/ideas/selection/${ideaId}`);
+        console.log("아이디어 ID:", ideaId, "데이터 조회 시작");
 
-        // 데이터가 있으면 상태 업데이트
-        if (response.data && Object.keys(response.data).length > 0) {
-          setViewData(response.data);
+        // 아이디어 기본 정보 조회 (검증 부서 정보를 가져오기 위해)
+        const ideaResponse = await axios.get(`/api/ideas/${ideaId}`);
+        console.log("아이디어 기본 정보 조회 결과:", ideaResponse.data);
+
+        // 전체 아이디어 데이터 저장
+        setFullIdeaData(ideaResponse.data);
+
+        // 아이디어 데이터 구조 검사
+        if (!ideaResponse.data) {
+          console.error("아이디어 데이터가 없습니다.");
+        } else {
+          console.log("아이디어 데이터 구조:", Object.keys(ideaResponse.data));
+
+          // 검증 부서 정보 확인 및 저장
+          const verifyDeptValue = ideaResponse.data.VerifyDepartment;
+          console.log("검증 부서 필드 값:", verifyDeptValue);
+
+          if (verifyDeptValue && verifyDeptValue.trim() !== "") {
+            setVerifyDepartment(verifyDeptValue);
+            console.log(`검증 부서 정보 설정 완료: '${verifyDeptValue}'`);
+          } else {
+            console.warn("검증 부서 정보가 비어있습니다:", verifyDeptValue);
+          }
+        }
+
+        // 선정 데이터 조회
+        const selectionResponse = await axios.get(
+          `/api/ideas/selection/${ideaId}`
+        );
+        console.log("선정 정보 조회 결과:", selectionResponse.data);
+
+        // 선정 데이터가 있으면 상태 업데이트
+        if (
+          selectionResponse.data &&
+          Object.keys(selectionResponse.data).length > 0
+        ) {
+          setViewData(selectionResponse.data);
           // 폼에도 데이터 설정
-          setDuplication(response.data.duplication || "");
-          setScope(response.data.scope || "");
-          setComment(response.data.comment || "");
+          setDuplication(selectionResponse.data.duplication || "");
+          setScope(selectionResponse.data.scope || "");
+          setComment(selectionResponse.data.comment || "");
           setIsSelected(
-            response.data.is_selected !== undefined
-              ? response.data.is_selected
+            selectionResponse.data.is_selected !== undefined
+              ? selectionResponse.data.is_selected
               : true
           );
 
           // 작성자 정보 저장
-          if (response.data.author_id) {
-            setAuthor(response.data.author_id);
+          if (selectionResponse.data.author_id) {
+            setAuthor(selectionResponse.data.author_id);
           }
 
           // 데이터가 있으면 viewMode를 true로 설정
@@ -63,7 +99,7 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
           setViewMode(isViewMode);
         }
       } catch (error) {
-        console.error("선정 데이터 조회 오류:", error);
+        console.error("데이터 조회 오류:", error);
         if (viewMode) {
           setError("저장된 선정 데이터를 불러올 수 없습니다.");
         }
@@ -73,7 +109,7 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
       }
     };
 
-    fetchSelectionData();
+    fetchData();
   }, [ideaId, isViewMode]);
 
   // 읽기모드 변경 시 상태 설정
@@ -110,13 +146,57 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
     setIsSelected(event.target.checked);
   };
 
-  // 편집 권한을 확인하는 함수 (작성자 또는 Admin인 경우에만 수정 가능)
+  // 편집 권한을 확인하는 함수 (관리자 또는 검증 부서 사람인 경우에만 수정 가능)
   const hasEditPermission = () => {
     // 현재 사용자가 없는 경우 권한 없음
-    if (!currentUser) return false;
+    if (!currentUser) {
+      console.log("현재 로그인한 사용자가 없습니다. 권한 없음.");
+      return false;
+    }
 
-    // Admin이거나 작성자인 경우 권한 있음
-    return currentUser.isAdmin || currentUser.userId === author;
+    // Admin인 경우 권한 있음
+    if (currentUser.isAdmin) {
+      console.log("관리자 권한으로 접근: 권한 있음");
+      return true;
+    }
+
+    // 검증 부서 정보 확인 - fullIdeaData에서 직접 접근
+    const verifyDeptFromData = fullIdeaData?.VerifyDepartment;
+    // 현재 사용자 부서
+    const userDeptName = currentUser.deptName;
+
+    console.log("권한 확인 정보:");
+    console.log("- 사용자 정보:", currentUser);
+    console.log("- 사용자 부서:", userDeptName);
+    console.log("- 검증 부서 (state):", verifyDepartment);
+    console.log("- 검증 부서 (직접 접근):", verifyDeptFromData);
+
+    // 먼저 fullIdeaData에서 직접 접근한 값 사용
+    if (
+      userDeptName &&
+      verifyDeptFromData &&
+      (userDeptName.trim() === verifyDeptFromData.trim() ||
+        userDeptName.includes(verifyDeptFromData) ||
+        verifyDeptFromData.includes(userDeptName))
+    ) {
+      console.log("검증 부서 소속 확인됨 (직접 접근 데이터 사용): 권한 있음");
+      return true;
+    }
+
+    // 그 다음 state 값 사용
+    if (
+      userDeptName &&
+      verifyDepartment &&
+      (userDeptName.trim() === verifyDepartment.trim() ||
+        userDeptName.includes(verifyDepartment) ||
+        verifyDepartment.includes(userDeptName))
+    ) {
+      console.log("검증 부서 소속 확인됨 (state 데이터 사용): 권한 있음");
+      return true;
+    }
+
+    console.log("권한 없음 - 사용자 부서와 검증 부서가 일치하지 않음");
+    return false;
   };
 
   // 편집 모드로 전환하는 함수
@@ -125,12 +205,22 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
     if (hasEditPermission()) {
       setViewMode(false);
     } else {
-      alert("수정 권한이 없습니다. 작성자 또는 관리자만 수정할 수 있습니다.");
+      alert(
+        "수정 권한이 없습니다. 관리자 또는 검증 부서 소속만 수정할 수 있습니다."
+      );
     }
   };
 
   // 등록 버튼 클릭 핸들러
   const handleSubmit = async () => {
+    // 권한 확인
+    if (!hasEditPermission()) {
+      alert(
+        "등록 권한이 없습니다. 관리자 또는 검증 부서 소속만 등록할 수 있습니다."
+      );
+      return;
+    }
+
     // 필수 입력 필드 확인
     if (!duplication) {
       alert("과제중복 항목을 선택해주세요.");
