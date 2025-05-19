@@ -160,6 +160,12 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
       return true;
     }
 
+    // 작성자인 경우 권한 있음
+    if (currentUser.userId === author) {
+      console.log("작성자로 접근: 권한 있음");
+      return true;
+    }
+
     // 검증 부서 정보 확인 - fullIdeaData에서 직접 접근
     const verifyDeptFromData = fullIdeaData?.VerifyDepartment;
     // 현재 사용자 부서
