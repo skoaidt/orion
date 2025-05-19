@@ -61,6 +61,30 @@ export const Main = () => {
     };
   }, []);
 
+  // MAU 로직: Dashboard 또는 IdeaBoard 접속 시 유저 활동 기록
+  useEffect(() => {
+    const trackUserActivity = async () => {
+      // 사용자가 로그인되어 있는 경우 추적 (N10 제한 제거)
+      if (
+        currentUser &&
+        currentUser.userId &&
+        (isIdeaBoardPage || isDashboardPage)
+      ) {
+        try {
+          await axios.post("/api/analytics/track-activity", {
+            userId: currentUser.userId,
+            page: location.pathname,
+            timestamp: new Date().toISOString(),
+          });
+        } catch (error) {
+          console.error("활동 추적 오류:", error);
+        }
+      }
+    };
+
+    trackUserActivity();
+  }, [location.pathname, currentUser, isIdeaBoardPage, isDashboardPage]);
+
   // console.log("Main에서 보는 getDevelopers : ", getDevelopers);
   return (
     <>
@@ -94,7 +118,14 @@ export const Main = () => {
           <Route path="/ideaboard/detail/:id" element={<IdeaBorad />} />
           <Route path="/ideaboard/kanban/:id" element={<IdeaBorad />} />
           <Route path="/ideaboard/devtable" element={<IdeaBorad />} />
-          <Route path="/ideaboard/solmgmt" element={<IdeaBorad />} />
+          <Route
+            path="/ideaboard/solmgmt"
+            element={
+              <RequireAdmin>
+                <IdeaBorad />
+              </RequireAdmin>
+            }
+          />
           <Route path="/dashboard" element={<IdeaBorad />} />
           <Route path="/solmgmt" element={<SolMgmt />} />
         </Routes>

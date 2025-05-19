@@ -1,8 +1,16 @@
-import React from "react";
+import React, { useContext } from "react";
 import "./sideBar.scss";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../../../context/authContext";
 
 const SideBar = () => {
+  const { currentUser } = useContext(AuthContext);
+
+  // Admin 권한 확인 함수
+  const isAdmin = () => {
+    return currentUser && currentUser.isAdmin;
+  };
+
   return (
     <div className="sideBar">
       <Link to="/">
@@ -24,9 +32,11 @@ const SideBar = () => {
       <Link to="/ideaboard/devtable">
         <div className="menuNm">과제 관리</div>
       </Link>
-      <Link to="/ideaboard/solmgmt">
-        <div className="menuNm">System활용률</div>
-      </Link>
+      {isAdmin() && (
+        <Link to="/ideaboard/solmgmt">
+          <div className="menuNm">System활용률</div>
+        </Link>
+      )}
     </div>
   );
 };
