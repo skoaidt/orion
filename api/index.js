@@ -15,6 +15,7 @@ import "dotenv/config";
 import fs from "fs";
 import ideaRoutes from "./routes/ideas.js";
 import kanbanRoutes from "./routes/kanbans.js";
+import analyticsRoutes from "./routes/analytics.js";
 const app = express();
 
 // 미들웨어 설정 - 모든 라우트 정의 전에 배치
@@ -278,10 +279,11 @@ app.post("/api/login", async (req, res) => {
 app.use("/api/solutions", solutionRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/developers", developerRoutes);
-app.use("/api/datatables", dataTableRoutes);
+app.use("/api/dataTables", dataTableRoutes);
 app.use("/api/typings", typingRoutes);
 app.use("/api/ideas", ideaRoutes);
 app.use("/api/kanbans", kanbanRoutes);
+app.use("/api/analytics", analyticsRoutes);
 // 이미지 파일 업로드 로직
 
 // 파일 업로드를 위한 저장소 설정
