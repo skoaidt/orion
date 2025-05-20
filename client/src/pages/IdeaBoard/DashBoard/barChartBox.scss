@@ -19,6 +19,10 @@
         flex: 1;
         flex-direction: column;
         border-radius: 10px;
+        min-height: 80px;
+        height: auto;
+        padding: 15px 10px;
+
         .title {
           color: white;
           text-align: center;

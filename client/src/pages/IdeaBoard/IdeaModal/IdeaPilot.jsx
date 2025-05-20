@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./ideaPilot.scss";
 import CloseIcon from "@mui/icons-material/Close";
 import TextField from "@mui/material/TextField";
 import axios from "axios";
+import { AuthContext } from "../../../context/authContext";
 
 const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -15,14 +16,28 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [error, setError] = useState("");
   const [viewMode, setViewMode] = useState(isViewMode);
+  const [author, setAuthor] = useState("");
+  const [fullIdeaData, setFullIdeaData] = useState(null); // 전체 아이디어 데이터 저장
+  const [isUpdating, setIsUpdating] = useState(false); // 수정 모드인지 신규 등록 모드인지 구분
 
-  // 이미 완료된 단계인 경우 데이터 조회
+  const { currentUser } = useContext(AuthContext);
+
+  // 이미 완료된 단계인 경우 데이터 조회 및 아이디어 정보 가져오기
   useEffect(() => {
     const fetchPilotData = async () => {
       if (!ideaId) return;
 
       try {
         setLoading(true);
+
+        // 아이디어 기본 정보 조회 (부서 정보를 가져오기 위해)
+        const ideaResponse = await axios.get(`/api/ideas/${ideaId}`);
+        console.log("아이디어 기본 정보 조회 결과:", ideaResponse.data);
+
+        // 전체 아이디어 데이터 저장
+        setFullIdeaData(ideaResponse.data);
+
+        // 파일럿 데이터 조회
         const response = await axios.get(`/api/ideas/pilot/${ideaId}`);
         console.log("파일럿 데이터 조회 결과:", response.data);
 
@@ -31,6 +46,8 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
           setPilotData(response.data);
           // 파일럿 데이터가 있으면 viewMode를 true로 설정 (강제 읽기 모드)
           setViewMode(true);
+          // 수정 모드임을 표시
+          setIsUpdating(true);
 
           // 폼에 데이터 설정
           setProductivity(response.data.productivity || "");
@@ -41,6 +58,14 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
               ? response.data.filePath.split("/").pop()
               : ""
           );
+
+          // 작성자 정보 저장
+          if (response.data.author_id) {
+            setAuthor(response.data.author_id);
+          }
+        } else {
+          // 데이터가 없으면 신규 등록 모드
+          setIsUpdating(false);
         }
       } catch (error) {
         console.error("파일럿 데이터 조회 오류:", error);
@@ -89,13 +114,76 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
     setQuantitybasis(event.target.value);
   };
 
+  // 편집 권한을 확인하는 함수 (작성자, Admin 또는 작성자와 같은 부서 소속인 경우에만 수정 가능)
+  const hasEditPermission = () => {
+    // 현재 사용자가 없는 경우 권한 없음
+    if (!currentUser) {
+      console.log("현재 로그인한 사용자가 없습니다. 권한 없음.");
+      return false;
+    }
+
+    // Admin인 경우 권한 있음
+    if (currentUser.isAdmin) {
+      console.log("관리자 권한으로 접근: 권한 있음");
+      return true;
+    }
+
+    // 작성자인 경우 권한 있음
+    if (currentUser.userId === author) {
+      console.log("작성자로 접근: 권한 있음");
+      return true;
+    }
+
+    // 작성자의 부서와 현재 사용자의 부서 비교
+    // 아이디어 데이터에서 작성자 부서 정보 가져오기
+    const authorDeptName = fullIdeaData?.dept_name;
+    // 현재 사용자 부서
+    const userDeptName = currentUser.deptName;
+
+    console.log("권한 확인 정보:");
+    console.log("- 사용자 정보:", currentUser);
+    console.log("- 사용자 부서:", userDeptName);
+    console.log("- 작성자 부서:", authorDeptName);
+    console.log("- 아이디어 데이터:", fullIdeaData);
+
+    // 부서명이 정확히 일치하거나, 하나가 다른 하나를 포함하는 경우 (부서명 표기 방식이 다를 수 있음)
+    if (
+      userDeptName &&
+      authorDeptName &&
+      (userDeptName.trim() === authorDeptName.trim() ||
+        userDeptName.includes(authorDeptName) ||
+        authorDeptName.includes(userDeptName))
+    ) {
+      console.log("작성자와 같은 부서 소속 확인됨: 권한 있음");
+      return true;
+    }
+
+    console.log("권한 없음 - 관리자/작성자/같은 부서가 아님");
+    return false;
+  };
+
   // 편집 모드로 전환하는 함수
   const handleEdit = () => {
-    setViewMode(false);
+    // 수정 권한이 있는지 확인
+    if (hasEditPermission()) {
+      setViewMode(false);
+    } else {
+      alert(
+        "수정 권한이 없습니다. 작성자, 같은 부서 소속 또는 관리자만 수정할 수 있습니다."
+      );
+    }
   };
 
   // 등록 버튼 클릭 핸들러
   const handleRegister = async () => {
+    // 등록 권한 확인
+    if (!hasEditPermission()) {
+      alert(
+        "등록 권한이 없습니다. 작성자, 같은 부서 소속 또는 관리자만 등록할 수 있습니다."
+      );
+      return;
+    }
+
     try {
       setLoading(true);
       setError(""); // 오류 상태 초기화
@@ -151,6 +239,7 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
 
       console.log("아이디어 ID:", ideaId);
       console.log("등록할 파일럿 데이터:", pilotFormData);
+      console.log("작업 모드:", isUpdating ? "업데이트" : "신규 등록");
 
       // API 호출
       const response = await axios.post(
@@ -160,12 +249,18 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
 
       console.log("파일럿 데이터 등록 성공:", response.data);
       console.log("결과 - 아이디어 ID:", response.data.idea_id);
+      console.log("업데이트 여부:", response.data.is_update);
 
-      alert("파일럿 결과가 성공적으로 등록되었습니다.");
+      alert(
+        `파일럿 결과가 성공적으로 ${
+          isUpdating ? "업데이트" : "등록"
+        }되었습니다.`
+      );
 
       // 등록 완료 후 데이터 업데이트하고 읽기 모드로 전환
       setPilotData(response.data);
       setViewMode(true);
+      setIsUpdating(true); // 다음에는 업데이트 모드가 됨
 
       // 등록 완료 후 모달 닫기
       onClose();
@@ -345,7 +440,7 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
                     onClick={handleRegister}
                     disabled={loading}
                   >
-                    {loading ? "등록 중..." : "등록"}
+                    {loading ? "등록 중..." : isUpdating ? "업데이트" : "등록"}
                   </button>
                 </>
               )}

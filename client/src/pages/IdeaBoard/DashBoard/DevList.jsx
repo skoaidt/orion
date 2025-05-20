@@ -9,15 +9,15 @@ const columns = [
   {
     field: "title",
     headerName: "제목",
-    width: 200,
+    width: 150,
     editable: false,
     headerAlign: "center",
-    align: "left",
+    align: "center",
   },
   {
     field: "status",
     headerName: "상태",
-    width: 80,
+    width: 100,
     editable: false,
     headerAlign: "center",
     align: "center",
@@ -40,8 +40,8 @@ const columns = [
   },
   {
     field: "dday",
-    headerName: "D-day",
-    width: 100,
+    headerName: "day",
+    width: 50,
     editable: false,
     renderCell: (params) => {
       if (!params.value && params.value !== 0) return "-";

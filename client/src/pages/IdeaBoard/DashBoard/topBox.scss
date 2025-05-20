@@ -44,4 +44,17 @@
       }
     }
   }
+
+  .loading,
+  .error,
+  .no-data {
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #888;
+  }
+
+  .error {
+    color: #e74c3c;
+  }
 }

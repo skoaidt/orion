@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./ideaVerify.scss";
 import CloseIcon from "@mui/icons-material/Close";
 import Radio from "@mui/material/Radio";
@@ -11,8 +11,16 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Switch from "@mui/material/Switch";
 import axios from "axios";
+import { AuthContext } from "../../../context/authContext";
 
 const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
+  const { currentUser } = useContext(AuthContext);
+
+  const [leftAuthor, setLeftAuthor] = useState("");
+  const [rightAuthor, setRightAuthor] = useState("");
+  const [verifyDepartment, setVerifyDepartment] = useState(""); // 검증 부서 정보 저장
+  const [fullIdeaData, setFullIdeaData] = useState(null); // 전체 아이디어 데이터 저장
+
   const [formData, setFormData] = useState({
     // 본사 선임부서 섹션
     development_collaboration: "",
@@ -48,6 +56,24 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
     const fetchVerificationData = async () => {
       try {
         console.log("검증 데이터 불러오기 시작 - ideaId:", ideaId);
+
+        // 아이디어 기본 정보 조회 (검증 부서 정보를 가져오기 위해)
+        const ideaResponse = await axios.get(`/api/ideas/${ideaId}`);
+        console.log("아이디어 기본 정보 조회 결과:", ideaResponse.data);
+
+        // 전체 아이디어 데이터 저장
+        setFullIdeaData(ideaResponse.data);
+
+        // 검증 부서 정보 저장
+        if (ideaResponse.data && ideaResponse.data.VerifyDepartment) {
+          setVerifyDepartment(ideaResponse.data.VerifyDepartment);
+          console.log(
+            "검증 부서 정보 설정:",
+            ideaResponse.data.VerifyDepartment
+          );
+        }
+
+        // 검증 데이터 조회
         const response = await axios.get(`/api/ideas/verify/${ideaId}`);
 
         if (response.data) {
@@ -124,6 +150,15 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
             console.log("뷰 모드로 설정되어 편집 모드 비활성화");
           }
 
+          // 작성자 정보 저장
+          if (response.data.left_author_id) {
+            setLeftAuthor(response.data.left_author_id);
+          }
+
+          if (response.data.right_author_id) {
+            setRightAuthor(response.data.right_author_id);
+          }
+
           // 데이터 로드 완료 표시
           setDataLoaded(true);
         } else {
@@ -196,51 +231,142 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
     }));
   };
 
-  // 편집 모드로 전환하는 함수 - 왼쪽(선임부서)
-  const handleLeftEdit = () => {
-    // 뷰 데이터가 있는 경우 해당 데이터로 폼 데이터를 복원
-    if (viewData) {
-      setFormData((prev) => ({
-        ...prev,
-        development_collaboration: viewData.development_collaboration || "",
-        target_user: viewData.target_user || "",
-        comment: viewData.comment || "",
-        verification_status:
-          viewData.verification_status !== undefined
-            ? viewData.verification_status
-            : true,
-      }));
+  // 편집 권한을 확인하는 함수 (선임부서 - Admin 또는 검증부서 소속인 경우에만 수정 가능)
+  const hasLeftEditPermission = () => {
+    // 현재 사용자가 없는 경우 권한 없음
+    if (!currentUser) {
+      console.log("현재 로그인한 사용자가 없습니다. 권한 없음.");
+      return false;
     }
 
-    setLeftEditMode(true);
-    // 전체 모달의 viewMode 상태는 변경하지 않음
+    // Admin인 경우 권한 있음
+    if (currentUser.isAdmin) {
+      console.log("관리자 권한으로 접근: 권한 있음");
+      return true;
+    }
+
+    // 작성자 권한 제거 - 더 이상 작성자는 권한이 없음
+
+    // 검증 부서 정보 확인 - fullIdeaData에서 직접 접근
+    const verifyDeptFromData = fullIdeaData?.VerifyDepartment;
+    // 현재 사용자 부서
+    const userDeptName = currentUser.deptName;
+
+    console.log("권한 확인 정보:");
+    console.log("- 사용자 정보:", currentUser);
+    console.log("- 사용자 부서:", userDeptName);
+    console.log("- 검증 부서 (state):", verifyDepartment);
+    console.log("- 검증 부서 (직접 접근):", verifyDeptFromData);
+
+    // 먼저 fullIdeaData에서 직접 접근한 값 사용
+    if (
+      userDeptName &&
+      verifyDeptFromData &&
+      (userDeptName.trim() === verifyDeptFromData.trim() ||
+        userDeptName.includes(verifyDeptFromData) ||
+        verifyDeptFromData.includes(userDeptName))
+    ) {
+      console.log("검증 부서 소속 확인됨 (직접 접근 데이터 사용): 권한 있음");
+      return true;
+    }
+
+    // 그 다음 state 값 사용
+    if (
+      userDeptName &&
+      verifyDepartment &&
+      (userDeptName.trim() === verifyDepartment.trim() ||
+        userDeptName.includes(verifyDepartment) ||
+        verifyDepartment.includes(userDeptName))
+    ) {
+      console.log("검증 부서 소속 확인됨 (state 데이터 사용): 권한 있음");
+      return true;
+    }
+
+    console.log("권한 없음 - 관리자/검증부서가 아님");
+    return false;
   };
 
-  // 편집 모드로 전환하는 함수 - 오른쪽(AI/DT)
-  const handleRightEdit = () => {
-    // 뷰 데이터가 있는 경우 해당 데이터로 폼 데이터를 복원
-    if (viewData) {
-      setFormData((prev) => ({
-        ...prev,
-        ai_development_collaboration:
-          viewData.ai_development_collaboration || "",
-        feasibility: viewData.feasibility || "",
-        ai_comment: viewData.ai_comment || "",
-        expected_personnel: viewData.expected_personnel || "",
-        expected_schedule: viewData.expected_schedule || "",
-        ai_verification_status:
-          viewData.ai_verification_status !== undefined
-            ? viewData.ai_verification_status
-            : true,
-      }));
+  // 편집 권한을 확인하는 함수 (AI/DT - AI/DT기획 PL, AI/DT개발 PL 소속 또는 Admin인 경우에만 수정 가능)
+  const hasRightEditPermission = () => {
+    // 현재 사용자가 없는 경우 권한 없음
+    if (!currentUser) {
+      console.log("현재 로그인한 사용자가 없습니다. 권한 없음.");
+      return false;
     }
 
-    setRightEditMode(true);
-    // 전체 모달의 viewMode 상태는 변경하지 않음
+    // Admin인 경우 권한 있음
+    if (currentUser.isAdmin) {
+      console.log("관리자 권한으로 접근: 권한 있음");
+      return true;
+    }
+
+    // 작성자 권한 제거 - 더 이상 작성자는 권한이 없음
+
+    // 현재 사용자 부서
+    const userDeptName = currentUser.deptName;
+
+    // 허용된 AI/DT 부서 목록
+    const allowedDepartments = ["AI/DT기획 PL", "AI/DT개발 PL"];
+
+    console.log("AI/DT 권한 확인 정보:");
+    console.log("- 사용자 정보:", currentUser);
+    console.log("- 사용자 부서:", userDeptName);
+
+    // 사용자 부서가 허용된 부서 목록에 있는지 확인
+    if (userDeptName) {
+      // 정확히 일치하는 경우
+      if (allowedDepartments.includes(userDeptName.trim())) {
+        console.log("AI/DT 허용 부서 일치: 권한 있음");
+        return true;
+      }
+
+      // 부분 일치하는 경우 (유연한 매칭)
+      for (const dept of allowedDepartments) {
+        if (userDeptName.includes(dept) || dept.includes(userDeptName)) {
+          console.log(`AI/DT 허용 부서 부분 일치 (${dept}): 권한 있음`);
+          return true;
+        }
+      }
+    }
+
+    console.log("권한 없음 - 관리자/AI/DT 허용 부서가 아님");
+    return false;
+  };
+
+  // 선임부서 편집 모드로 전환하는 함수
+  const handleLeftEdit = () => {
+    // 수정 권한이 있는지 확인
+    if (hasLeftEditPermission()) {
+      setLeftEditMode(true);
+    } else {
+      alert(
+        "수정 권한이 없습니다. 검증 부서 소속 또는 관리자만 수정할 수 있습니다."
+      );
+    }
+  };
+
+  // AI/DT 편집 모드로 전환하는 함수
+  const handleRightEdit = () => {
+    // 수정 권한이 있는지 확인
+    if (hasRightEditPermission()) {
+      setRightEditMode(true);
+    } else {
+      alert(
+        "수정 권한이 없습니다. AI/DT기획 PL, AI/DT개발 PL 소속 또는 관리자만 수정할 수 있습니다."
+      );
+    }
   };
 
   // 왼쪽(선임부서) 제출 핸들러
   const handleLeftSubmit = async () => {
+    // 권한 확인
+    if (!hasLeftEditPermission()) {
+      alert(
+        "등록 권한이 없습니다. 검증 부서 소속 또는 관리자만 등록할 수 있습니다."
+      );
+      return;
+    }
+
     // 필수 입력 필드 확인
     const requiredFields = [
       "development_collaboration",
@@ -357,6 +483,14 @@ const IdeaVerify = ({ onClose, ideaId, ideaData, isViewMode }) => {
 
   // 오른쪽(AI/DT) 제출 핸들러
   const handleRightSubmit = async () => {
+    // 권한 확인
+    if (!hasRightEditPermission()) {
+      alert(
+        "등록 권한이 없습니다. AI/DT기획 PL, AI/DT개발 PL 소속 또는 관리자만 등록할 수 있습니다."
+      );
+      return;
+    }
+
     // 필수 입력 필드 확인
     const requiredFields = [
       "ai_development_collaboration",
