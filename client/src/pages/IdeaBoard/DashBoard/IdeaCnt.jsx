@@ -95,7 +95,7 @@ const IdeaCnt = () => {
   return (
     <div className="ideaCnt">
       <div className="header">
-        <span>IDEA 등록</span>
+        <span>신규 개발 과제 제안</span>
         <span>기준 : {new Date().getFullYear()}년 누적</span>
       </div>
       <div className="totalCnt">
