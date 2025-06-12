@@ -133,20 +133,20 @@ export const getIdeaDevelopers = async (req, res) => {
 // 개발 심의 데이터 조회
 export const getIdeaDevReviewById = (req, res) => {
   const ideaId = req.params.idea_id;
-  console.log("개발 심의 데이터 조회 요청 (idea_id):", ideaId);
+  // console.log("개발 심의 데이터 조회 요청 (idea_id):", ideaId);
 
   if (!ideaId) {
     return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
   }
 
   const q = `SELECT * FROM special.ITAsset_ideaDevReview WHERE idea_id = ?`;
-  console.log("실행 쿼리:", q);
-  console.log("쿼리 파라미터:", ideaId);
+  // console.log("실행 쿼리:", q);
+  // console.log("쿼리 파라미터:", ideaId);
 
   try {
     db.query(q, [ideaId], (err, data) => {
       if (err) {
-        console.error("개발 심의 데이터 조회 오류:", err);
+        // console.error("개발 심의 데이터 조회 오류:", err);
         return res.status(500).json({
           error: err.message,
           sqlMessage: err.sqlMessage,
@@ -155,7 +155,7 @@ export const getIdeaDevReviewById = (req, res) => {
       }
 
       if (!data || data.length === 0) {
-        console.log("데이터가 없음: idea_id =", ideaId);
+        // console.log("데이터가 없음: idea_id =", ideaId);
         return res
           .status(404)
           .json({ message: "개발 심의 데이터를 찾을 수 없습니다." });
@@ -186,11 +186,11 @@ export const getIdeaDevReviewById = (req, res) => {
         rawData: data,
       };
 
-      console.log("개발 심의 데이터 조회 성공:", result);
+      // console.log("개발 심의 데이터 조회 성공:", result);
       return res.status(200).json(result);
     });
   } catch (error) {
-    console.error("예상치 못한 에러:", error);
+    // console.error("예상치 못한 에러:", error);
     return res.status(500).json({ error: "서버 내부 오류가 발생했습니다." });
   }
 };
