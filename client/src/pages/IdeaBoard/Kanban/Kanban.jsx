@@ -9,6 +9,8 @@ import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import CodeIcon from "@mui/icons-material/Code";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import SaveIcon from "@mui/icons-material/Save";
 import {
   Tooltip,
   IconButton,
@@ -62,6 +64,8 @@ const Kanban = () => {
   });
   const [showDevelopModal, setShowDevelopModal] = useState(false);
   const [showDevStartModal, setShowDevStartModal] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [isEditingProgress, setIsEditingProgress] = useState(false);
   // 초기 데이터 상태
   const [columns, setColumns] = useState({
     todo: {
@@ -98,8 +102,13 @@ const Kanban = () => {
     try {
       const response = await axios.get(`/api/ideas/${id}`);
       setIdeaData(response.data);
+      // 진행율 데이터 설정
+      if (response.data.ideaprogress) {
+        setProgress(Number(response.data.ideaprogress));
+      }
+      // console.log("아이디어 데이터 로드 완료:", response.data);
     } catch (error) {
-      console.error("아이디어 정보 가져오기 오류:", error);
+      // console.error("아이디어 정보 가져오기 오류:", error);
     }
   };
 
@@ -109,7 +118,7 @@ const Kanban = () => {
       const response = await axios.get(`/api/ideas/devreview/${id}`);
       setDevReviewData(response.data);
     } catch (error) {
-      console.error("개발자 정보 가져오기 오류:", error);
+      // console.error("개발자 정보 가져오기 오류:", error);
     }
   };
 
@@ -157,7 +166,7 @@ const Kanban = () => {
         setColumns(newColumns);
         setLoading(false);
       } catch (err) {
-        console.error("데이터 로딩 오류:", err);
+        // console.error("데이터 로딩 오류:", err);
         setError("칸반 보드 데이터를 로드하는 중 오류가 발생했습니다.");
         setLoading(false);
       }
@@ -220,7 +229,7 @@ const Kanban = () => {
           position: destination.index,
         });
       } catch (err) {
-        console.error("작업 순서 업데이트 오류:", err);
+        // console.error("작업 순서 업데이트 오류:", err);
         // 오류 발생 시 상태를 원래대로 복원할 수도 있음
       }
     } else {
@@ -268,7 +277,7 @@ const Kanban = () => {
           position: destination.index,
         });
       } catch (err) {
-        console.error("작업 상태 업데이트 오류:", err);
+        // console.error("작업 상태 업데이트 오류:", err);
         // 오류 발생 시 상태를 원래대로 복원할 수도 있음
       }
     }
@@ -315,18 +324,18 @@ const Kanban = () => {
         position: todoColumn.tasks.length,
       });
     } catch (err) {
-      console.error("작업 추가 오류:", err);
+      // console.error("작업 추가 오류:", err);
       // 오류 발생 시 상태를 원래대로 복원할 수도 있음
     }
   };
 
   const handleDevelopComplete = () => {
-    console.log("개발 완료 버튼 클릭, 현재 아이디어 ID:", id);
+    // console.log("개발 완료 버튼 클릭, 현재 아이디어 ID:", id);
     setShowDevelopModal(true);
   };
 
   const handleDevStart = () => {
-    console.log("개발 시작 버튼 클릭, 현재 아이디어 ID:", id);
+    // console.log("개발 시작 버튼 클릭, 현재 아이디어 ID:", id);
     setShowDevStartModal(true);
   };
 
@@ -352,9 +361,9 @@ const Kanban = () => {
         status: newStatus,
       }));
 
-      console.log(`아이디어 상태가 "${newStatus}"로 업데이트 되었습니다.`);
+      // console.log(`아이디어 상태가 "${newStatus}"로 업데이트 되었습니다.`);
     } catch (error) {
-      console.error("아이디어 상태 업데이트 오류:", error);
+      // console.error("아이디어 상태 업데이트 오류:", error);
     }
   };
 
@@ -392,10 +401,10 @@ const Kanban = () => {
         [columnId]: newColumn,
       });
 
-      console.log("작업이 삭제되었습니다.");
+      // console.log("작업이 삭제되었습니다.");
       setDeleteModalOpen(false);
     } catch (err) {
-      console.error("작업 삭제 오류:", err);
+      // console.error("작업 삭제 오류:", err);
       setDeleteModalOpen(false);
     }
   };
@@ -419,6 +428,90 @@ const Kanban = () => {
     }
   };
 
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [taskToEdit, setTaskToEdit] = useState({
+    id: null,
+    columnId: null,
+    content: "",
+  });
+
+  // 수정 모달 열기
+  const openEditModal = (task, columnId) => {
+    setTaskToEdit({
+      id: task.id,
+      columnId: columnId,
+      content: task.title,
+    });
+    setEditModalOpen(true);
+  };
+
+  // 수정 모달 닫기
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setTaskToEdit({ id: null, columnId: null, content: "" });
+  };
+
+  // 태스크 수정 처리 함수
+  const handleEditTask = async () => {
+    try {
+      // 서버에 수정 요청
+      await axios.put(`/api/kanbans/${id}/tasks/${taskToEdit.id}`, {
+        content: taskToEdit.content,
+      });
+
+      // 로컬 상태 업데이트
+      const column = columns[taskToEdit.columnId];
+      const newTasks = column.tasks.map((task) =>
+        task.id === taskToEdit.id
+          ? { ...task, title: taskToEdit.content }
+          : task
+      );
+
+      const newColumn = {
+        ...column,
+        tasks: newTasks,
+      };
+
+      setColumns({
+        ...columns,
+        [taskToEdit.columnId]: newColumn,
+      });
+
+      // console.log("작업이 수정되었습니다.");
+      setEditModalOpen(false);
+    } catch (err) {
+      // console.error("작업 수정 오류:", err);
+      setEditModalOpen(false);
+    }
+  };
+
+  // 진행율 수정 함수
+  const handleProgressChange = async (newProgress) => {
+    try {
+      // 서버에 진행율 업데이트 요청
+      const response = await axios.put(`/api/ideas/${id}`, {
+        ideaprogress: newProgress.toString(),
+      });
+
+      if (response.data.success) {
+        // 로컬 상태 업데이트
+        setProgress(newProgress);
+        setIsEditingProgress(false);
+
+        // 아이디어 데이터 새로고침
+        await fetchIdeaData();
+
+        // console.log("진행율이 성공적으로 업데이트되었습니다:", newProgress);
+      } else {
+        // console.error("진행율 업데이트 실패:", response.data.message);
+        alert("진행율 업데이트에 실패했습니다.");
+      }
+    } catch (err) {
+      // console.error("진행율 업데이트 오류:", err);
+      alert("진행율 업데이트 중 오류가 발생했습니다.");
+    }
+  };
+
   if (loading) return <div className="loading">로딩 중...</div>;
   if (error) return <div className="error">{error}</div>;
 
@@ -430,17 +523,23 @@ const Kanban = () => {
 
   // 현재 사용자가 개발자인지 확인하는 함수
   const isCurrentUserDeveloper = () => {
+    // currentUser가 없는 경우
+    if (!currentUser) {
+      return false;
+    }
+
+    // Admin인 경우 권한 있음
+    if (currentUser.isAdmin) {
+      // console.log("관리자 권한으로 접근: 권한 있음");
+      return true;
+    }
+
     // 개발자 목록이 없거나 빈 배열인 경우
     if (
       !devReviewData ||
       !devReviewData.developers ||
       devReviewData.developers.length === 0
     ) {
-      return false;
-    }
-
-    // currentUser가 없는 경우
-    if (!currentUser) {
       return false;
     }
 
@@ -491,6 +590,34 @@ const Kanban = () => {
         </DialogActions>
       </Dialog>
 
+      {/* 수정 모달 */}
+      <Dialog
+        open={editModalOpen}
+        onClose={closeEditModal}
+        aria-labelledby="edit-dialog-title"
+        aria-describedby="edit-dialog-description"
+        className="edit-modal"
+      >
+        <DialogTitle id="edit-dialog-title">Task 수정</DialogTitle>
+        <DialogContent>
+          <textarea
+            value={taskToEdit.content}
+            onChange={(e) =>
+              setTaskToEdit({ ...taskToEdit, content: e.target.value })
+            }
+            className="edit-content"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeEditModal} color="primary">
+            취소
+          </Button>
+          <Button onClick={handleEditTask} color="primary" autoFocus>
+            수정
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <div className="kanban-header">
         <div className="header">
           <div className="left">
@@ -515,6 +642,47 @@ const Kanban = () => {
                   [{devReviewData.schedule.priority}]
                 </div>
               )}
+            {isDeveloper && (
+              <div className="progress-box">
+                {isEditingProgress ? (
+                  <div className="progress-edit">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={progress}
+                      onChange={(e) => {
+                        const value = Number(e.target.value);
+                        if (value >= 0 && value <= 100) {
+                          setProgress(value);
+                        }
+                      }}
+                    />
+                    <span>%</span>
+                    <Tooltip title="저장" arrow placement="top">
+                      <div
+                        className="icon"
+                        onClick={() => handleProgressChange(progress)}
+                      >
+                        <SaveIcon style={{ fontSize: "20px" }} />
+                      </div>
+                    </Tooltip>
+                  </div>
+                ) : (
+                  <div className="progress-display">
+                    <span>진행율: {progress}%</span>
+                    <Tooltip title="수정" arrow placement="top">
+                      <div
+                        className="icon"
+                        onClick={() => setIsEditingProgress(true)}
+                      >
+                        <EditIcon style={{ fontSize: "20px" }} />
+                      </div>
+                    </Tooltip>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           <div className="right">
             {isDeveloper && isDevInProgressStatus && (
@@ -616,39 +784,42 @@ const Kanban = () => {
               <div className="kanban-column" key={column.id}>
                 <h2 className="column-title">{column.title}</h2>
 
-                {column.id === "todo" && isDevInProgressStatus && (
-                  <div className="add-task-section">
-                    {!showForm ? (
-                      <button
-                        className="add-task-button"
-                        onClick={() => setShowForm(true)}
-                      >
-                        + 새 작업 추가
-                      </button>
-                    ) : (
-                      <div className="task-form">
-                        <textarea
-                          name="content"
-                          placeholder="작업 내용을 입력하세요"
-                          value={newTask.content}
-                          onChange={handleInputChange}
-                        ></textarea>
-                        <div className="form-buttons">
-                          <button onClick={handleAddTask}>추가</button>
-                          <button onClick={() => setShowForm(false)}>
-                            취소
-                          </button>
+                {column.id === "todo" &&
+                  (isDevInProgressStatus || ideaData.status === "개발완료") && (
+                    <div className="add-task-section">
+                      {!showForm ? (
+                        <button
+                          className="add-task-button"
+                          onClick={() => setShowForm(true)}
+                        >
+                          + 새 작업 추가
+                        </button>
+                      ) : (
+                        <div className="task-form">
+                          <textarea
+                            name="content"
+                            placeholder="작업 내용을 입력하세요"
+                            value={newTask.content}
+                            onChange={handleInputChange}
+                          ></textarea>
+                          <div className="form-buttons">
+                            <button onClick={handleAddTask}>추가</button>
+                            <button onClick={() => setShowForm(false)}>
+                              취소
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
+                    </div>
+                  )}
 
-                {column.id === "todo" && !isDevInProgressStatus && (
-                  <div className="add-task-info">
-                    <p>개발시작 후 "새 작업 추가"가 가능합니다.</p>
-                  </div>
-                )}
+                {column.id === "todo" &&
+                  !isDevInProgressStatus &&
+                  ideaData.status !== "개발완료" && (
+                    <div className="add-task-info">
+                      <p>개발시작 후 "새 작업 추가"가 가능합니다.</p>
+                    </div>
+                  )}
 
                 <StrictModeDroppable droppableId={column.id}>
                   {(provided) => (
@@ -677,17 +848,32 @@ const Kanban = () => {
                                     task.createdAt
                                   ).toLocaleDateString()}
                                 </small>
-                                <Tooltip title="지우기" arrow placement="top">
-                                  <div
-                                    className="icon"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openDeleteModal(task.id, column.id);
-                                    }}
-                                  >
-                                    <DeleteIcon style={{ fontSize: "20px" }} />
-                                  </div>
-                                </Tooltip>
+                                <div className="task-actions">
+                                  <Tooltip title="수정" arrow placement="top">
+                                    <div
+                                      className="icon"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openEditModal(task, column.id);
+                                      }}
+                                    >
+                                      <EditIcon style={{ fontSize: "20px" }} />
+                                    </div>
+                                  </Tooltip>
+                                  <Tooltip title="지우기" arrow placement="top">
+                                    <div
+                                      className="icon"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openDeleteModal(task.id, column.id);
+                                      }}
+                                    >
+                                      <DeleteIcon
+                                        style={{ fontSize: "20px" }}
+                                      />
+                                    </div>
+                                  </Tooltip>
+                                </div>
                               </div>
                             </div>
                           )}
