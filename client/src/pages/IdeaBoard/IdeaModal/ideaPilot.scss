@@ -110,11 +110,14 @@
     }
     .rowContainerBasis {
       display: flex;
-      align-items: center;
+      align-items: stretch;
       width: 700px;
       height: 200px;
+      max-height: 200px;
+      min-height: 200px;
       background-color: white;
       gap: 10px;
+      overflow: hidden;
 
       .fieldLabel {
         display: flex;
@@ -138,19 +141,158 @@
         height: 100%;
         border-radius: 5px;
         display: flex;
+        overflow: hidden; // 컨테이너를 벗어나는 내용 숨기기
 
         .MuiInputBase-root {
           font-size: 12px;
           height: 100%;
           align-items: flex-start; // 상단 정렬을 위해 추가
+          width: 100%; // 전체 너비 사용
+          overflow: hidden; // 내용이 넘치면 숨기기
 
           textarea {
             padding-left: 2px; // 상단 여백 조정
             font-size: 12px;
+            width: 100%; // 전체 너비 사용
+            height: 100%; // 전체 높이 사용
+            box-sizing: border-box; // 패딩 포함한 크기 계산
+            overflow-y: auto; // 세로 스크롤 활성화
+            overflow-x: hidden; // 가로 스크롤 비활성화
+            word-wrap: break-word; // 긴 단어 줄바꿈
+            word-break: break-all; // 모든 문자에서 줄바꿈 허용
+            resize: none; // 사용자가 크기 조절 불가
 
             &::placeholder {
               font-size: 12px;
               color: #413e3e;
+            }
+          }
+        }
+
+        // MUI TextField의 기본 스타일을 강제로 오버라이드
+        .MuiInputBase-input {
+          height: 100% !important;
+          max-height: 100% !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          word-wrap: break-word !important;
+          word-break: break-all !important;
+          white-space: pre-wrap !important; // 줄바꿈과 공백 유지
+          box-sizing: border-box !important;
+          padding: 8px !important;
+          margin: 0 !important;
+        }
+
+        // fieldset 테두리도 높이에 맞게 조정
+        .MuiOutlinedInput-notchedOutline {
+          height: 100% !important;
+        }
+
+        // 포커스 상태에서도 동일하게 적용
+        .MuiInputBase-root.Mui-focused {
+          height: 100% !important;
+
+          .MuiInputBase-input {
+            height: 100% !important;
+            overflow-y: auto !important;
+          }
+        }
+
+        // MUI InputBase-root 전체 스타일
+        .MuiInputBase-root {
+          height: 100% !important;
+          align-items: flex-start !important;
+          padding: 0 !important;
+
+          &.Mui-disabled {
+            height: 100% !important;
+            align-items: flex-start !important;
+          }
+
+          &.Mui-readOnly {
+            height: 100% !important;
+            align-items: flex-start !important;
+          }
+        }
+
+        // TextField 컨테이너 자체 스타일
+        &.MuiTextField-root {
+          height: 100% !important;
+
+          .MuiInputBase-root {
+            height: 100% !important;
+            align-items: flex-start !important;
+          }
+
+          .MuiInputBase-input {
+            height: 100% !important;
+            overflow: auto !important;
+            box-sizing: border-box !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            word-wrap: break-word !important;
+            word-break: break-all !important;
+            resize: none !important;
+            padding: 8px !important;
+          }
+        }
+
+        // 정량적 기대효과 근거 전용 스타일
+        &.quantityBasisTextfield {
+          height: 100% !important;
+          max-height: 100% !important;
+          overflow: hidden !important;
+
+          .MuiInputBase-root {
+            height: 100% !important;
+            max-height: 100% !important;
+            align-items: flex-start !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+
+            textarea {
+              height: 100% !important;
+              max-height: 100% !important;
+              min-height: 100% !important;
+              overflow-y: auto !important;
+              overflow-x: hidden !important;
+              word-wrap: break-word !important;
+              word-break: break-all !important;
+              white-space: pre-wrap !important;
+              box-sizing: border-box !important;
+              padding: 8px !important;
+              margin: 0 !important;
+              resize: none !important;
+              border: none !important;
+              outline: none !important;
+              font-size: 12px !important;
+            }
+
+            &.Mui-disabled,
+            &.Mui-readOnly {
+              height: 100% !important;
+
+              textarea {
+                height: 100% !important;
+                overflow-y: auto !important;
+                color: inherit !important;
+              }
+            }
+          }
+
+          .MuiOutlinedInput-notchedOutline {
+            height: 100% !important;
+            max-height: 100% !important;
+          }
+
+          &.Mui-focused {
+            .MuiInputBase-root {
+              height: 100% !important;
+
+              textarea {
+                height: 100% !important;
+                overflow-y: auto !important;
+              }
             }
           }
         }
@@ -229,6 +371,40 @@
         &:active {
           transform: scale(0.95); /* 클릭 시 크기 축소 */
           background-color: #493d9e; /* 클릭 시 배경색 변경 */
+          transition: transform 0.1s ease-in-out; /* 부드러운 전환 효과 */
+        }
+      }
+
+      .downloadButton {
+        display: flex; /* 이미지와 텍스트를 수평으로 배치 */
+        align-items: center; /* 수직 중앙 정렬 */
+        gap: 5px; /* 이미지와 텍스트 간격 */
+        background-color: #28a745; /* 다운로드 버튼은 녹색 계열 */
+        color: white;
+        font-size: 14px;
+        border-radius: 5px;
+        cursor: pointer;
+        border: none;
+        width: 160px;
+        height: 30px;
+        font-size: 14px;
+        font-weight: normal;
+
+        img.downloadIcon {
+          width: 20px; /* 이미지 너비 */
+          height: auto; /* 비율 유지 */
+          display: block; /* 이미지 정렬 문제 방지 */
+        }
+
+        &:hover {
+          background-color: #5cbf2a; /* 호버 시 배경색 변경 */
+          transform: scale(1.05); /* 호버 시 크기 확대 */
+          transition: transform 0.2s ease-in-out; /* 부드러운 전환 효과 */
+        }
+
+        &:active {
+          transform: scale(0.95); /* 클릭 시 크기 축소 */
+          background-color: #28a745; /* 클릭 시 배경색 변경 */
           transition: transform 0.1s ease-in-out; /* 부드러운 전환 효과 */
         }
       }

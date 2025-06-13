@@ -344,7 +344,7 @@ const IdeaPilot = ({ onClose, ideaId, ideaData, isViewMode }) => {
                 근거
               </div>
               <TextField
-                className="Textfield"
+                className="Textfield quantityBasisTextfield"
                 variant="outlined"
                 multiline
                 rows={12}
