@@ -1,10 +1,9 @@
 import "./portNavbar.scss";
-import Sidebar from '../Sidebar/Sidebar';
+import Sidebar from "../Sidebar/Sidebar";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-
-// import { LuClipboardEdit } from "react-icons/lu";
+// import { LuClipboardPen } from "react-icons/lu";
 // import { BsClipboardData } from "react-icons/bs";
 // import { AiOutlineDashboard } from "react-icons/ai";
 
@@ -24,7 +23,7 @@ const PortNavbar = () => {
         </motion.span>
         {/* <div className="controls">
           <Link to="/idearegister" className="menu regLink">
-            <LuClipboardEdit size={24} />
+            <LuClipboardPen size={24} />
           </Link>
           <Link to="/solmgmt" className="menu regLink">
             <BsClipboardData size={24} />
@@ -35,7 +34,7 @@ const PortNavbar = () => {
         </div> */}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PortNavbar
+export default PortNavbar;

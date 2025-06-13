@@ -10,7 +10,7 @@ import { loginOpark } from "./opark.js";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
-import redis from "redis";
+// import redis from "redis"; // 임시 주석 처리
 import "dotenv/config";
 import fs from "fs";
 import ideaRoutes from "./routes/ideas.js";
@@ -195,7 +195,8 @@ app.post(
 ////////////////////////
 // Opark 로그인 로직
 
-// Redis 클라이언트 생성
+// Redis 클라이언트 생성 - 임시 주석 처리
+/*
 const redisClient = redis.createClient({
   host: "localhost",
   port: 6379,
@@ -212,17 +213,19 @@ redisClient
   .catch((error) => {
     console.error("Redis에 연결하지 못했습니다. :", error);
   });
+*/
 //// redis ////
 
 app.post("/api/login", async (req, res) => {
   const { username, password } = req.body;
 
   console.log(`로그인 시도: ${username}`);
-  const key = `login_attempts_${username}`; // redis 추가
-  let attempts;
+  // const key = `login_attempts_${username}`; // redis 추가
+  // let attempts;
 
   try {
-    //////  Redis 로그인 시도 횟수 확인
+    //////  Redis 로그인 시도 횟수 확인 - 임시 주석 처리
+    /*
     attempts = (await redisClient.get(key)) || 0;
     console.log(`${username} 로그인 시도 횟수 : ${attempts}번`); // 현재 로그인 시도 횟수 로그
     console.log("redis key: ", key);
@@ -235,42 +238,43 @@ app.post("/api/login", async (req, res) => {
         attempts: parseInt(attempts),
       });
     }
+    */
     ///// redis 추가///
 
     const loginResult = await loginOpark(username, password);
     // 여기서 loginResult의 success와 userDetails를 확인합니다.
     if (loginResult.success && loginResult.authUserValue === "Y") {
       // 로그인 성공
-      // 성공시 로그인 시도횟수 초기화
-      await redisClient.del(key); // redis 추가
+      // 성공시 로그인 시도횟수 초기화 - Redis 관련 주석 처리
+      // await redisClient.del(key); // redis 추가
       console.log(`로그인 성공: ${username}`);
       res
         .status(200)
         .json({ success: true, message: "로그인 성공", data: loginResult });
     } else {
       //로그인 실패
-      //실패시 로그인 시도 횟수 증가 및 30분 정도 저장
-      attempts = parseInt(attempts) + 1;
-      await redisClient.setEx(key, 1800, attempts.toString());
+      //실패시 로그인 시도 횟수 증가 및 30분 정도 저장 - Redis 관련 주석 처리
+      // attempts = parseInt(attempts) + 1;
+      // await redisClient.setEx(key, 1800, attempts.toString());
       console.log(`로그인 실패: ${username}`);
-      console.log(`${username} login failed, attempt ${attempts}`); // 새로운 로그인 시도 횟수 로그
+      // console.log(`${username} login failed, attempt ${attempts}`); // 새로운 로그인 시도 횟수 로그
 
       res.status(401).json({
         success: false,
         message: "로그인 인증 실패",
-        attempts: parseInt(attempts),
+        // attempts: parseInt(attempts),
       });
     }
   } catch (error) {
     // //로그인 처리 중 에러
-    attempts = parseInt(attempts) + 1;
-    await redisClient.setEx(key, 1800, attempts.toString()); // 실패 시 로그인 시도 횟수 증가 및 30분 동안 저장
+    // attempts = parseInt(attempts) + 1;
+    // await redisClient.setEx(key, 1800, attempts.toString()); // 실패 시 로그인 시도 횟수 증가 및 30분 동안 저장
     console.error(`로그인 처리 중 에러: ${error.message}`);
     res.status(500).json({
       success: false,
       message: "로그인 실패",
       error: error.message,
-      attempts: parseInt(attempts),
+      // attempts: parseInt(attempts),
     });
   }
 });
