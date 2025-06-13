@@ -9,6 +9,8 @@ import DashBoard from "./DashBoard/DashBoard";
 import Kanban from "./Kanban/Kanban";
 import DevTable from "./DevTable/DevTable";
 import SolMgmt from "../SolMgmt/SolMgmt";
+import TrendPage from "./TrendPage/TrendPage";
+import TrendDetail from "./TrendPage/TrendDetail";
 
 const IdeaBorad = () => {
   const location = useLocation();
@@ -17,6 +19,10 @@ const IdeaBorad = () => {
   const isDashBoardPage = location.pathname.includes("/dashboard");
   const isDevTablePage = location.pathname.includes("/devtable");
   const isSolMgmtPage = location.pathname.includes("/solmgmt");
+  const isTrendPage = location.pathname === "/ideaboard/trend";
+  const isTrendDetailPage = location.pathname.match(
+    /^\/ideaboard\/trend\/\d+$/
+  );
 
   // 화면 초기화 설정
   useEffect(() => {
@@ -48,6 +54,10 @@ const IdeaBorad = () => {
       return <DevTable />;
     } else if (isSolMgmtPage) {
       return <SolMgmt />;
+    } else if (isTrendDetailPage) {
+      return <TrendDetail />;
+    } else if (isTrendPage) {
+      return <TrendPage />;
     } else {
       // /ideaboard 경로일 때 IdeaTable 렌더링
       return <IdeaTable />;
