@@ -9,3 +9,5 @@
 
 # Redis 데이터베이스 파일 제외 (모든 위치에서)
 **/dump.rdb
+
+DANGEROUSLY_DISABLE_HOST_CHECK=true

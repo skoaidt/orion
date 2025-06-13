@@ -28,6 +28,69 @@ $table-width: 1600px;
     }
   }
 
+  .MenuBox {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    height: 60px;
+    margin-bottom: 5px;
+    padding: 10px 0px;
+    gap: 20px;
+
+    .MuiFormControl-root {
+      min-width: 120px;
+
+      .MuiInputLabel-root {
+        font-size: 14px;
+      }
+
+      .MuiSelect-select {
+        font-size: 14px;
+      }
+
+      // Radio 그룹을 위한 스타일
+      &[component="fieldset"] {
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        min-width: auto !important;
+        background-color: transparent !important;
+
+        .MuiFormLabel-root {
+          font-size: 14px !important;
+          color: #565656 !important;
+          margin-bottom: 5px !important;
+        }
+
+        .MuiRadioGroup-root {
+          margin-top: 5px !important;
+        }
+
+        .MuiFormControlLabel-root {
+          margin-right: 15px !important;
+
+          .MuiFormControlLabel-label {
+            font-size: 14px !important;
+            color: #333333 !important;
+            font-weight: 500 !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+        }
+
+        .MuiRadio-root {
+          padding: 4px !important;
+          color: #565656 !important;
+
+          &.Mui-checked {
+            color: #1976d2 !important;
+          }
+        }
+      }
+    }
+  }
+
   .headerRow {
     display: flex;
     justify-content: space-between;

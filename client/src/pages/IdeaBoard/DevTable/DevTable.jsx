@@ -1,15 +1,45 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import "./devTable.scss";
 import DataTable from "../../../components/DataTable/DataTable";
+import FilterSelect from "../IdeaTable/FilterSelect";
+import {
+  TextField,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+} from "@mui/material";
 import axios from "axios";
 import { format, differenceInDays } from "date-fns";
 import GitHubIcon from "@mui/icons-material/GitHub";
+
+// 검색 필터 옵션 정의
+const filterOptions = {
+  searchType: ["제목", "작성자", "제안팀", "제안본부"],
+};
+
+// 상태 필터 옵션 정의
+const statusOptions = [
+  { value: "전체", label: "전체" },
+  { value: "개발중", label: "개발중" },
+  { value: "개발완료", label: "개발완료" },
+];
 
 const DevTable = () => {
   // 아이디어 목록 데이터 상태
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // 검색 관련 상태
+  const [searchFilters, setSearchFilters] = useState({
+    searchType: "제목",
+    searchText: "",
+  });
+
+  // 상태 필터 상태
+  const [statusFilter, setStatusFilter] = useState("전체");
 
   // 컬럼 정의
   const columns = [
@@ -25,6 +55,29 @@ const DevTable = () => {
     { field: "start_date", headerName: "시작날짜", width: 120 },
     { field: "end_date", headerName: "종료날짜", width: 120 },
     {
+      field: "progress",
+      headerName: "진행율",
+      width: 100,
+      renderCell: (params) => {
+        if (!params.value && params.value !== 0) return "-";
+        return (
+          <span
+            style={{
+              color:
+                params.value >= 100
+                  ? "#4caf50"
+                  : params.value >= 50
+                  ? "#ff9800"
+                  : "#f44336",
+              fontWeight: "bold",
+            }}
+          >
+            {params.value}%
+          </span>
+        );
+      },
+    },
+    {
       field: "dday",
       headerName: "D-day",
       width: 100,
@@ -38,6 +91,67 @@ const DevTable = () => {
       },
     },
   ];
+
+  // 검색 필터 변경 핸들러
+  const handleFilterChange = useCallback(
+    (key) => (e) => {
+      setSearchFilters((prev) => ({ ...prev, [key]: e.target.value }));
+    },
+    []
+  );
+
+  // 상태 필터 변경 핸들러
+  const handleStatusFilterChange = useCallback((e) => {
+    setStatusFilter(e.target.value);
+  }, []);
+
+  // 상태 체크 함수 - 다양한 상태 표현을 통합
+  const getUnifiedStatus = (status) => {
+    const lowerStatus = status?.toLowerCase();
+    if (lowerStatus === "개발중" || lowerStatus === "developing") {
+      return "개발중";
+    }
+    if (
+      lowerStatus === "완료" ||
+      lowerStatus === "개발완료" ||
+      lowerStatus === "completed" ||
+      lowerStatus === "developmentcompleted"
+    ) {
+      return "개발완료";
+    }
+    return status;
+  };
+
+  // 필터링된 아이디어 목록
+  const filteredIdeas = useMemo(() => {
+    return ideas.filter((idea) => {
+      // 상태 필터링
+      if (statusFilter !== "전체") {
+        const unifiedStatus = getUnifiedStatus(idea.status);
+        if (unifiedStatus !== statusFilter) {
+          return false;
+        }
+      }
+
+      // 검색어 필터링
+      if (searchFilters.searchText) {
+        const searchFieldMap = {
+          제목: idea.title,
+          작성자: idea.name,
+          제안팀: idea.dept_name,
+          제안본부: idea.prnt_dept_name,
+        };
+        const searchField = searchFieldMap[searchFilters.searchType];
+        if (
+          !searchField
+            ?.toLowerCase()
+            .includes(searchFilters.searchText.toLowerCase())
+        )
+          return false;
+      }
+      return true;
+    });
+  }, [searchFilters, ideas, statusFilter]);
 
   // D-day 계산 함수
   const calculateDday = (endDateStr) => {
@@ -68,8 +182,8 @@ const DevTable = () => {
         const response = await axios.get("/api/ideas");
         console.log("아이디어 목록 가져오기 성공:", response.data.length);
 
-        // "개발중" 또는 "완료" 상태인 아이디어만 필터링
-        const developingIdeas = response.data.filter(
+        // 실제 개발중이거나 완료된 아이디어만 필터링
+        const developmentRelatedIdeas = response.data.filter(
           (idea) =>
             idea.status === "개발중" ||
             idea.status === "완료" ||
@@ -78,11 +192,11 @@ const DevTable = () => {
             idea.status === "completed" ||
             idea.status === "developmentCompleted"
         );
-        console.log("필터링된 아이디어 수:", developingIdeas.length);
+        console.log("개발 관련 아이디어 수:", developmentRelatedIdeas.length);
 
         // 각 아이디어에 대해 개발심의 데이터 가져오기 (병렬 처리)
         const ideasWithDevReviewData = await Promise.all(
-          developingIdeas.map(async (idea, index) => {
+          developmentRelatedIdeas.map(async (idea, index) => {
             try {
               console.log(
                 `아이디어 ${
@@ -201,6 +315,7 @@ const DevTable = () => {
                 name: idea.name || "-",
                 start_date: startDate,
                 end_date: endDate,
+                progress: idea.ideaprogress ? Number(idea.ideaprogress) : 0, // 진행율 추가
                 dday: dday,
               };
             } catch (err) {
@@ -224,6 +339,7 @@ const DevTable = () => {
                 dev_team: "-",
                 start_date: "-",
                 end_date: "-",
+                progress: 0,
                 dday: null,
               };
             }
@@ -260,11 +376,79 @@ const DevTable = () => {
         <h1>개발 과제 목록</h1>
       </div>
 
+      {/* 검색 영역 */}
+      <div className="MenuBox">
+        {/* 상태 필터 Radio 그룹 */}
+        <FormControl component="fieldset">
+          <FormLabel
+            component="legend"
+            sx={{
+              fontSize: "14px !important",
+              color: "#565656 !important",
+              marginBottom: "5px",
+            }}
+          >
+            상태
+          </FormLabel>
+          <RadioGroup
+            row
+            value={statusFilter}
+            onChange={handleStatusFilterChange}
+            sx={{ gap: 1, marginTop: "5px" }}
+          >
+            {statusOptions.map((option) => (
+              <FormControlLabel
+                key={option.value}
+                value={option.value}
+                control={
+                  <Radio
+                    size="small"
+                    sx={{
+                      padding: "4px",
+                      color: "#565656",
+                      "&.Mui-checked": {
+                        color: "#1976d2",
+                      },
+                    }}
+                  />
+                }
+                label={option.label}
+                sx={{
+                  marginRight: "15px",
+                  "& .MuiFormControlLabel-label": {
+                    fontSize: "14px !important",
+                    color: "#333333 !important",
+                    fontWeight: "500 !important",
+                  },
+                }}
+              />
+            ))}
+          </RadioGroup>
+        </FormControl>
+
+        <FilterSelect
+          label="검색"
+          value={searchFilters.searchType}
+          options={filterOptions.searchType}
+          onChange={handleFilterChange("searchType")}
+        />
+
+        {/* 검색창 */}
+        <TextField
+          size="small"
+          placeholder={`${searchFilters.searchType} 검색...`}
+          value={searchFilters.searchText}
+          onChange={handleFilterChange("searchText")}
+          sx={{ minWidth: 200 }}
+        />
+      </div>
+
       {/* 개수 표시하는 헤더 행 */}
       <div className="headerRow">
         <span>
-          <span className="count-number">{ideas.length}</span>건의 개발중 또는
-          완료 상태 아이디어가 있습니다
+          <span className="count-number">{filteredIdeas.length}</span>건의{" "}
+          {statusFilter === "전체" ? "개발 관련" : statusFilter} 아이디어가
+          있습니다
         </span>
       </div>
 
@@ -279,7 +463,7 @@ const DevTable = () => {
         <DataTable
           slug="dev"
           columns={columns}
-          rows={ideas}
+          rows={filteredIdeas}
           onRowClick={handleIdeaClick}
         />
       )}
