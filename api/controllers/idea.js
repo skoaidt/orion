@@ -1356,7 +1356,38 @@ export const updateIdea = (req, res) => {
     return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
   }
 
-  // 필드 이름 한글 매핑 (사용자에게 더 이해하기 쉬운 이름으로 표시)
+  // 진행율만 업데이트하는 경우
+  if (req.body.ideaprogress !== undefined) {
+    const q = `
+      UPDATE special.ITAsset_ideas 
+      SET ideaprogress = ?, 
+          updated_at = NOW()
+      WHERE id = ?
+    `;
+
+    db.query(q, [req.body.ideaprogress, ideaId], (err, data) => {
+      if (err) {
+        console.error("진행율 업데이트 오류:", err);
+        return res.status(500).json({ error: err.message });
+      }
+
+      if (data.affectedRows === 0) {
+        return res
+          .status(404)
+          .json({ error: "해당 아이디어를 찾을 수 없습니다." });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "진행율이 성공적으로 업데이트되었습니다.",
+        ideaId: ideaId,
+        ideaprogress: req.body.ideaprogress,
+      });
+    });
+    return;
+  }
+
+  // 기존의 전체 업데이트 로직
   const fieldNameMap = {
     title: "제목",
     background: "추진 배경",

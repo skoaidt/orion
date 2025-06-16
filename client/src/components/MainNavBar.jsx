@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { LuClipboardEdit } from "react-icons/lu";
+import { LuClipboardPen } from "react-icons/lu";
 
 import { FaCode } from "react-icons/fa6";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -68,7 +68,7 @@ export const MainNavBar = () => {
         </div>
         <div className="controls">
           <Link to="/dashboard" className="menu regLink">
-            <LuClipboardEdit size={24} />
+            <LuClipboardPen size={24} />
             <span>신규 제안</span>
           </Link>
           <Link to="/portfolio" className="menu regLink">

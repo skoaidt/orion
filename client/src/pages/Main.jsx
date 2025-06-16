@@ -20,6 +20,8 @@ import Portfolio from "./Portfolio/Portfolio";
 import TypingMain from "./Typing/TypingMain/TypingMain";
 import TypingHome from "./Typing/TypingHome/TypingHome";
 import DevTable from "./IdeaBoard/DevTable/DevTable"; // eslint-disable-line no-unused-vars
+import TrendPage from "./IdeaBoard/TrendPage/TrendPage";
+import TrendDetail from "./IdeaBoard/TrendPage/TrendDetail";
 
 export const Main = () => {
   const [getDevelopers, setGetDevelopers] = useState([]);
@@ -32,6 +34,7 @@ export const Main = () => {
   const isIdeaBoardPage = location.pathname.startsWith("/ideaboard");
   const isDashboardPage = location.pathname.startsWith("/dashboard");
   const isDevTablePage = location.pathname.startsWith("/devtable");
+  const isTrendPage = location.pathname.startsWith("/ideaboard/trend");
 
   ////////////////////////
   // 개발자 목록 가져오기
@@ -93,7 +96,8 @@ export const Main = () => {
           !isTypingPage &&
           !isIdeaBoardPage &&
           !isDashboardPage &&
-          !isDevTablePage && <MainNavBar />}
+          !isDevTablePage &&
+          !isTrendPage && <MainNavBar />}
         <Routes>
           <Route path="/typingMain" element={<TypingMain />}></Route>
           <Route path="/typingHome" element={<TypingHome />}></Route>
@@ -118,6 +122,8 @@ export const Main = () => {
           <Route path="/ideaboard/detail/:id" element={<IdeaBorad />} />
           <Route path="/ideaboard/kanban/:id" element={<IdeaBorad />} />
           <Route path="/ideaboard/devtable" element={<IdeaBorad />} />
+          <Route path="/ideaboard/trend" element={<IdeaBorad />} />
+          <Route path="/ideaboard/trend/:id" element={<IdeaBorad />} />
           <Route
             path="/ideaboard/solmgmt"
             element={
@@ -137,7 +143,8 @@ export const Main = () => {
         isTypingPage ||
         isIdeaBoardPage ||
         isDashboardPage ||
-        isDevTablePage
+        isDevTablePage ||
+        isTrendPage
       ) && <Footer />}
     </>
   );
