@@ -113,7 +113,7 @@ export const registerIdea = (req, res) => {
       tboh_status, use_period, use_scope, 
       platform, usability_points, improvement_points,
       user_id, name, prnt_dept_name, dept_name,
-      VerifyDepartment,ideaprogress
+      VerifyDepartment
     ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
   `;
 
@@ -139,8 +139,7 @@ export const registerIdea = (req, res) => {
     name,
     prnt_dept_name,
     dept_name,
-    VerifyDepartment,
-    ideaprogress || "",
+    VerifyDepartment || "",
   ];
 
   db.query(q, values, (err, data) => {
