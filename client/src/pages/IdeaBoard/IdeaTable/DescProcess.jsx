@@ -11,6 +11,8 @@ import IdeaDevReview from "../IdeaModal/IdeaDevReview";
 import IdeaCompleted from "../IdeaModal/IdeaCompleted";
 import IdeaDrop from "../IdeaModal/IdeaDrop";
 import IdeaRegister from "../IdeaModal/IdeaRegister";
+import SecurityCode from "../IdeaModal/SecurityCode";
+import SecurityInfra from "../IdeaModal/SecurityInfra";
 import PropTypes from "prop-types";
 
 import AssignmentIcon from "@mui/icons-material/Assignment";
@@ -44,7 +46,7 @@ const STAGES = {
   DEVELOPING: "developing", // 개발 진행 중
   DEV_COMPLETE: "devComplete", // 개발 완료
   SECURITY_CODE: "securityCode", // 소스코드 보안진단 완료
-  SECURITY_WEB: "securityWeb", // 웹 보안 진단 완료
+  SECURITY_INFRA: "securityInfra", // 인프라 보안 진단 완료
   COMPLETED: "sol등록완료", // 완료
   DROP: "Drop", // Drop 상태 (첫 글자 대문자로 수정)
 };
@@ -59,7 +61,7 @@ const STAGE_ORDER = {
   developing: 5,
   devComplete: 6,
   securityCode: 7,
-  securityWeb: 8,
+  securityInfra: 8,
   sol등록완료: 9,
 };
 
@@ -69,6 +71,8 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [ideaData, setIdeaData] = useState(propIdeaData || null);
   const [loading, setLoading] = useState(!propIdeaData);
+  const [showSecurityCodeModal, setShowSecurityCodeModal] = useState(false);
+  const [showSecurityInfraModal, setShowSecurityInfraModal] = useState(false);
   const navigate = useNavigate();
 
   // API 호출하는 함수를 useCallback으로 감싸기
@@ -113,7 +117,7 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       개발중: 5,
       개발완료: 6,
       소스코드보안진단완료: 7,
-      웹보안진단완료: 8,
+      인프라보안진단완료: 8,
       sol등록완료: 9,
       Drop: -1,
       // 이전 영문 상태값도 호환성을 위해 유지
@@ -124,7 +128,7 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       developing: 5,
       devComplete: 6,
       securityCode: 7,
-      securityWeb: 8,
+      securityInfra: 8,
       complete: 9,
     };
 
@@ -146,7 +150,7 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       return 6;
     } else if (status && /securityCode/i.test(status)) {
       return 7;
-    } else if (status && /securityWeb/i.test(status)) {
+    } else if (status && /securityInfra/i.test(status)) {
       return 8;
     } else if (status && /sol/i.test(status)) {
       return 9;
@@ -168,7 +172,7 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       ideaDeveloping: "developing",
       ideaDevComplete: "devComplete",
       ideaSecurityCode: "securityCode",
-      ideaSecurityWeb: "securityWeb",
+      ideaSecurityInfra: "securityInfra",
       ideaCompleted: "sol등록완료",
       ideaDrop: "drop",
     };
@@ -272,7 +276,7 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
         ideaDeveloping: 5, // 개발중
         ideaDevComplete: 6, // 개발완료
         ideaSecurityCode: 7, // 소스코드 보안진단 완료
-        ideaSecurityWeb: 8, // 웹 보안 진단 완료
+        ideaSecurityInfra: 8, // 인프라 보안 진단 완료
         ideaCompleted: 9, // 최종완료
       };
 
@@ -324,7 +328,7 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
         // 개발완료 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
         return currentStageIndex >= 7; // 소스코드 보안진단 완료 이상
 
-      case "ideaSecurityWeb": // 웹 보안 진단 완료 단계
+      case "ideaSecurityInfra": // 인프라 보안 진단 완료 단계
         // 소스코드 보안진단 완료 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
         return currentStageIndex >= 8; // 웹 보안 진단 완료 이상
 
@@ -444,12 +448,12 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       return "1차 보안 : 소스코드 보안진단 필요";
     }
 
-    if (stage === "securityWeb") {
+    if (stage === "securityInfra") {
       const currentStageIndex = getStageIndex(ideaData.status);
-      if (currentStageIndex >= STAGE_ORDER["securityWeb"]) {
-        return "2차 보안 : 웹 보안 진단 완료";
+      if (currentStageIndex >= STAGE_ORDER["securityInfra"]) {
+        return "2차 보안 : Infra 보안진단 완료";
       }
-      return "2차 보안 : 웹 보안 진단 필요";
+      return "2차 보안 : Infra 보안진단 필요";
     }
 
     if (stage === "completed") {
@@ -538,6 +542,37 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
     // 부모 컴포넌트에 상태 변경 알림
     if (onStatusChange) {
       onStatusChange();
+    }
+  };
+
+  // 보안진단 모달 닫기 및 데이터 새로고침 처리
+  const handleCloseSecurityCodeModal = (shouldRefresh) => {
+    setShowSecurityCodeModal(false);
+
+    // 등록이 완료된 경우 데이터 새로고침
+    if (shouldRefresh) {
+      console.log("소스코드 보안진단 완료 - 데이터 새로고침");
+      fetchIdeaData();
+
+      // 부모 컴포넌트에 상태 변경 알림
+      if (onStatusChange) {
+        onStatusChange();
+      }
+    }
+  };
+
+  const handleCloseSecurityInfraModal = (shouldRefresh) => {
+    setShowSecurityInfraModal(false);
+
+    // 등록이 완료된 경우 데이터 새로고침
+    if (shouldRefresh) {
+      console.log("인프라 보안진단 완료 - 데이터 새로고침");
+      fetchIdeaData();
+
+      // 부모 컴포넌트에 상태 변경 알림
+      if (onStatusChange) {
+        onStatusChange();
+      }
     }
   };
 
@@ -766,7 +801,11 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
         </div>
       </div>
       <div className="processBox">
-        <div className="processItem">
+        <div
+          className="processItem"
+          onClick={() => setShowSecurityCodeModal(true)}
+          style={{ cursor: "pointer" }}
+        >
           <div className={`processItemTitle ${getStageClass("securityCode")}`}>
             {getStageIndex(ideaData.status) >= 7
               ? "소스코드\n진단완료"
@@ -798,11 +837,15 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
         </div>
       </div>
       <div className="processBox">
-        <div className="processItem">
-          <div className={`processItemTitle ${getStageClass("securityWeb")}`}>
+        <div
+          className="processItem"
+          onClick={() => setShowSecurityInfraModal(true)}
+          style={{ cursor: "pointer" }}
+        >
+          <div className={`processItemTitle ${getStageClass("securityInfra")}`}>
             {getStageIndex(ideaData.status) >= 8
-              ? "웹 보안\n진단완료"
-              : "웹 보안\n진단필요"}
+              ? "Infra보안\n진단완료"
+              : "Infra보안\n진단필요"}
           </div>
           <div className="lineBox">
             <div className="line">
@@ -811,7 +854,9 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
               </div>
             </div>
           </div>
-          <div className={`processItemContent ${getStageClass("securityWeb")}`}>
+          <div
+            className={`processItemContent ${getStageClass("securityInfra")}`}
+          >
             <div className="itemcontentWrap">
               <div className="left">
                 <div className="userInfo">
@@ -819,7 +864,7 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
                     className="processItemContentTitle"
                     style={{ fontSize: "13px", fontWeight: "300" }}
                   >
-                    {getVerifyStatusText("securityWeb", "웹보안진단")}
+                    {getVerifyStatusText("securityInfra", "인프라보안진단")}
                   </div>
                 </div>
               </div>
@@ -957,6 +1002,24 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
           editMode={true}
           ideaData={ideaData}
           onUpdate={fetchIdeaData}
+        />
+      )}
+
+      {/* 코드보안진단 모달 */}
+      {showSecurityCodeModal && (
+        <SecurityCode
+          onClose={handleCloseSecurityCodeModal}
+          ideaId={id}
+          isViewMode={getStageIndex(ideaData.status) >= 7}
+        />
+      )}
+
+      {/* 웹보안진단 모달 */}
+      {showSecurityInfraModal && (
+        <SecurityInfra
+          onClose={handleCloseSecurityInfraModal}
+          ideaId={id}
+          isViewMode={getStageIndex(ideaData.status) >= 8}
         />
       )}
     </div>
