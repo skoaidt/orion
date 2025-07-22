@@ -21,6 +21,8 @@ import RateReviewIcon from "@mui/icons-material/RateReview";
 import DeveloperModeIcon from "@mui/icons-material/DeveloperMode";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import CancelIcon from "@mui/icons-material/Cancel";
+import SecurityIcon from "@mui/icons-material/Security";
+import HttpsIcon from "@mui/icons-material/Https";
 
 // formatDate 함수 직접 정의
 const formatDate = (dateString) => {
@@ -41,6 +43,8 @@ const STAGES = {
   DEV_REVIEW: "devReviewed", // 개발자 검토 완료
   DEVELOPING: "developing", // 개발 진행 중
   DEV_COMPLETE: "devComplete", // 개발 완료
+  SECURITY_CODE: "securityCode", // 소스코드 보안진단 완료
+  SECURITY_WEB: "securityWeb", // 웹 보안 진단 완료
   COMPLETED: "sol등록완료", // 완료
   DROP: "Drop", // Drop 상태 (첫 글자 대문자로 수정)
 };
@@ -54,7 +58,9 @@ const STAGE_ORDER = {
   devReviewed: 4,
   developing: 5,
   devComplete: 6,
-  sol등록완료: 7,
+  securityCode: 7,
+  securityWeb: 8,
+  sol등록완료: 9,
 };
 
 const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
@@ -106,7 +112,9 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       개발심의: 4,
       개발중: 5,
       개발완료: 6,
-      sol등록완료: 7,
+      소스코드보안진단완료: 7,
+      웹보안진단완료: 8,
+      sol등록완료: 9,
       Drop: -1,
       // 이전 영문 상태값도 호환성을 위해 유지
       selected: 1,
@@ -115,7 +123,9 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       devReviewed: 4,
       developing: 5,
       devComplete: 6,
-      complete: 7,
+      securityCode: 7,
+      securityWeb: 8,
+      complete: 9,
     };
 
     if (statusStageMap[status] !== undefined) {
@@ -134,8 +144,12 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       return 5;
     } else if (status && /devComplete/i.test(status)) {
       return 6;
-    } else if (status && /sol/i.test(status)) {
+    } else if (status && /securityCode/i.test(status)) {
       return 7;
+    } else if (status && /securityWeb/i.test(status)) {
+      return 8;
+    } else if (status && /sol/i.test(status)) {
+      return 9;
     }
 
     return -1; // 알 수 없는 상태
@@ -153,6 +167,8 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       ideaDevReview: "devReviewed",
       ideaDeveloping: "developing",
       ideaDevComplete: "devComplete",
+      ideaSecurityCode: "securityCode",
+      ideaSecurityWeb: "securityWeb",
       ideaCompleted: "sol등록완료",
       ideaDrop: "drop",
     };
@@ -255,7 +271,9 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
         ideaDevReview: 4, // 개발심의
         ideaDeveloping: 5, // 개발중
         ideaDevComplete: 6, // 개발완료
-        ideaCompleted: 7, // 최종완료
+        ideaSecurityCode: 7, // 소스코드 보안진단 완료
+        ideaSecurityWeb: 8, // 웹 보안 진단 완료
+        ideaCompleted: 9, // 최종완료
       };
 
       // 요청된 단계의 인덱스
@@ -301,6 +319,14 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       case "ideaCompleted": // 최종 완료 단계
         // 개발중 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
         return currentStageIndex >= 6; // 개발완료 이상
+
+      case "ideaSecurityCode": // 소스코드 보안진단 완료 단계
+        // 개발완료 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
+        return currentStageIndex >= 7; // 소스코드 보안진단 완료 이상
+
+      case "ideaSecurityWeb": // 웹 보안 진단 완료 단계
+        // 소스코드 보안진단 완료 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
+        return currentStageIndex >= 8; // 웹 보안 진단 완료 이상
 
       case "ideaDrop": // Drop 단계
         return true; // Drop은 언제든지 가능
@@ -408,6 +434,22 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       } else {
         return "개발 대기중";
       }
+    }
+
+    if (stage === "securityCode") {
+      const currentStageIndex = getStageIndex(ideaData.status);
+      if (currentStageIndex >= STAGE_ORDER["securityCode"]) {
+        return "1차 보안 : 소스코드 보안진단 완료";
+      }
+      return "1차 보안 : 소스코드 보안진단 필요";
+    }
+
+    if (stage === "securityWeb") {
+      const currentStageIndex = getStageIndex(ideaData.status);
+      if (currentStageIndex >= STAGE_ORDER["securityWeb"]) {
+        return "2차 보안 : 웹 보안 진단 완료";
+      }
+      return "2차 보안 : 웹 보안 진단 필요";
     }
 
     if (stage === "completed") {
@@ -716,6 +758,68 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
                     style={{ fontSize: "13px", fontWeight: "300" }}
                   >
                     {getVerifyStatusText("developing", "개발")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="processBox">
+        <div className="processItem">
+          <div className={`processItemTitle ${getStageClass("securityCode")}`}>
+            {getStageIndex(ideaData.status) >= 7
+              ? "소스코드\n진단완료"
+              : "소스코드\n진단필요"}
+          </div>
+          <div className="lineBox">
+            <div className="line">
+              <div className="circle">
+                <SecurityIcon className="icons" />
+              </div>
+            </div>
+          </div>
+          <div
+            className={`processItemContent ${getStageClass("securityCode")}`}
+          >
+            <div className="itemcontentWrap">
+              <div className="left">
+                <div className="userInfo">
+                  <div
+                    className="processItemContentTitle"
+                    style={{ fontSize: "13px", fontWeight: "300" }}
+                  >
+                    {getVerifyStatusText("securityCode", "소스코드보안진단")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="processBox">
+        <div className="processItem">
+          <div className={`processItemTitle ${getStageClass("securityWeb")}`}>
+            {getStageIndex(ideaData.status) >= 8
+              ? "웹 보안\n진단완료"
+              : "웹 보안\n진단필요"}
+          </div>
+          <div className="lineBox">
+            <div className="line">
+              <div className="circle">
+                <HttpsIcon className="icons" />
+              </div>
+            </div>
+          </div>
+          <div className={`processItemContent ${getStageClass("securityWeb")}`}>
+            <div className="itemcontentWrap">
+              <div className="left">
+                <div className="userInfo">
+                  <div
+                    className="processItemContentTitle"
+                    style={{ fontSize: "13px", fontWeight: "300" }}
+                  >
+                    {getVerifyStatusText("securityWeb", "웹보안진단")}
                   </div>
                 </div>
               </div>
