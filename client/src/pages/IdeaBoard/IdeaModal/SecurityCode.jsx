@@ -32,8 +32,15 @@ const SecurityCode = ({ onClose, ideaId, isViewMode }) => {
           const fileName =
             response.data.sourceCode_URL.split("/").pop() || "uploaded_file";
           setUploadedFile({ name: fileName });
+
+          // 데이터가 있는 경우에만 강제로 viewMode를 true로 설정
+          if (!viewMode) {
+            setViewMode(true);
+          }
+        } else {
+          // 데이터가 없는 경우 초기 isViewMode 값 사용
+          setViewMode(isViewMode);
         }
-        setViewMode(isViewMode);
       } catch (error) {
         console.error("코드보안진단 데이터 조회 오류:", error);
         if (error.response && error.response.status === 404) {
@@ -49,7 +56,7 @@ const SecurityCode = ({ onClose, ideaId, isViewMode }) => {
     };
 
     fetchData();
-  }, [ideaId, isViewMode, viewMode]);
+  }, [ideaId, isViewMode]);
 
   // 파일 업로드 핸들러
   const handleFileUpload = (event) => {
@@ -88,17 +95,15 @@ const SecurityCode = ({ onClose, ideaId, isViewMode }) => {
         // FormData로 파일 업로드
         const formData = new FormData();
         formData.append("file", uploadedFile);
+        formData.append("path", "SecurityCode"); // 폴더 구분용
+        formData.append("ideaId", ideaId); // 파일명 생성용
 
         // 이미지 업로드 API 호출
-        const uploadRes = await axios.post(
-          `/api/upload/security-code/${ideaId}`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        const uploadRes = await axios.post("/api/upload", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         sourceCode_URL = uploadRes.data.url; // 업로드 결과로 이미지 url을 받음
       } else if (viewData && viewData.sourceCode_URL) {
         // 기존 이미지를 그대로 사용하는 경우
