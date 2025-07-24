@@ -44,8 +44,9 @@ const SecurityCode = ({ onClose, ideaId, isViewMode }) => {
       } catch (error) {
         console.error("코드보안진단 데이터 조회 오류:", error);
         if (error.response && error.response.status === 404) {
-          // 데이터가 없는 경우는 에러가 아님
+          // 데이터가 없는 경우는 에러가 아님 - 정상적인 상황
           setViewData(null);
+          setViewMode(isViewMode);
         } else if (viewMode) {
           setError("저장된 코드보안진단 데이터를 불러올 수 없습니다.");
         }

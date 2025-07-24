@@ -323,14 +323,25 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
     }
 
     // 파일 경로 반환
-    const relativePath = `/upload/${
-      req.body.path && req.body.path.toLowerCase() === "pilot"
-        ? "Pilot"
-        : "Completed"
-    }/$${req.file.filename}`;
+    let folderName = "Completed";
+    if (req.body.path) {
+      const pathLower = req.body.path.toLowerCase();
+      if (pathLower === "pilot") {
+        folderName = "Pilot";
+      } else if (pathLower === "securitycode") {
+        folderName = "SecurityCode";
+      } else if (pathLower === "securityinfra") {
+        folderName = "SecurityInfra";
+      }
+    }
+
+    const relativePath = `/upload/${folderName}/${req.file.filename}`;
+
     return res.status(200).json({
       message: "파일 업로드 성공",
       filePath: relativePath,
+      url: relativePath, // SecurityCode/SecurityInfra에서 url로 접근
+      originalName: req.file.originalname,
     });
   } catch (error) {
     console.error("파일 업로드 오류:", error);
