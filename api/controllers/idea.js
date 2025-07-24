@@ -1761,3 +1761,190 @@ export const updateIdeaStatus = (req, res) => {
       .json({ message: "아이디어 상태가 성공적으로 업데이트되었습니다." });
   });
 };
+
+// 소스코드 보안진단 정보 등록/업데이트
+export const registerSecurityCode = (req, res) => {
+  console.log("소스코드 보안진단 등록 요청:", req.body);
+
+  const idea_id = req.params.idea_id;
+  const { sourceCode_URL } = req.body;
+
+  if (!idea_id) {
+    return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
+  }
+
+  if (!sourceCode_URL) {
+    return res
+      .status(400)
+      .json({ error: "소스코드 보안진단 URL이 필요합니다." });
+  }
+
+  // 현재 날짜 생성
+  const now = new Date();
+  const currentDate = now.toISOString().slice(0, 19).replace("T", " ");
+
+  // 기존 데이터 확인
+  const checkQuery = `SELECT * FROM special.ITAsset_ideaSecurity WHERE idea_id = ? LIMIT 1`;
+
+  db.query(checkQuery, [idea_id], (checkErr, checkData) => {
+    if (checkErr) {
+      console.error("기존 보안진단 데이터 확인 오류:", checkErr);
+      return res.status(500).json({ error: checkErr.message });
+    }
+
+    let query;
+    let values;
+
+    if (checkData && checkData.length > 0) {
+      // 기존 데이터가 있으면 UPDATE
+      query = `
+        UPDATE special.ITAsset_ideaSecurity 
+        SET sourceCode = 'O', 
+            sourceCode_URL = ?, 
+            update_at = ?
+        WHERE idea_id = ?
+      `;
+      values = [sourceCode_URL, currentDate, idea_id];
+    } else {
+      // 기존 데이터가 없으면 INSERT
+      query = `
+        INSERT INTO special.ITAsset_ideaSecurity (
+          idea_id, sourceCode, sourceCode_URL, create_at
+        ) VALUES (?, 'O', ?, ?)
+      `;
+      values = [idea_id, sourceCode_URL, currentDate];
+    }
+
+    db.query(query, values, (err, data) => {
+      if (err) {
+        console.error("소스코드 보안진단 등록 오류:", err);
+        return res.status(500).json({ error: err.message });
+      }
+
+      // 아이디어 상태 업데이트 (소스코드보안진단완료로 변경)
+      const updateIdeaStatusQuery = `
+        UPDATE special.ITAsset_ideas 
+        SET status = '소스코드보안진단완료' 
+        WHERE id = ?
+      `;
+
+      db.query(updateIdeaStatusQuery, [idea_id], (updateErr, updateData) => {
+        if (updateErr) {
+          console.error("아이디어 상태 업데이트 오류:", updateErr);
+        }
+
+        return res.status(200).json({
+          message: "소스코드 보안진단 정보가 성공적으로 등록되었습니다.",
+          idea_id: idea_id,
+          sourceCode_URL: sourceCode_URL,
+        });
+      });
+    });
+  });
+};
+
+// 인프라 보안진단 정보 등록/업데이트
+export const registerSecurityInfra = (req, res) => {
+  console.log("인프라 보안진단 등록 요청:", req.body);
+
+  const idea_id = req.params.idea_id;
+  const { infra_URL } = req.body;
+
+  if (!idea_id) {
+    return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
+  }
+
+  if (!infra_URL) {
+    return res.status(400).json({ error: "인프라 보안진단 URL이 필요합니다." });
+  }
+
+  // 현재 날짜 생성
+  const now = new Date();
+  const currentDate = now.toISOString().slice(0, 19).replace("T", " ");
+
+  // 기존 데이터 확인
+  const checkQuery = `SELECT * FROM special.ITAsset_ideaSecurity WHERE idea_id = ? LIMIT 1`;
+
+  db.query(checkQuery, [idea_id], (checkErr, checkData) => {
+    if (checkErr) {
+      console.error("기존 보안진단 데이터 확인 오류:", checkErr);
+      return res.status(500).json({ error: checkErr.message });
+    }
+
+    let query;
+    let values;
+
+    if (checkData && checkData.length > 0) {
+      // 기존 데이터가 있으면 UPDATE
+      query = `
+        UPDATE special.ITAsset_ideaSecurity 
+        SET infra = 'O', 
+            infra_URL = ?, 
+            update_at = ?
+        WHERE idea_id = ?
+      `;
+      values = [infra_URL, currentDate, idea_id];
+    } else {
+      // 기존 데이터가 없으면 INSERT
+      query = `
+        INSERT INTO special.ITAsset_ideaSecurity (
+          idea_id, infra, infra_URL, create_at
+        ) VALUES (?, 'O', ?, ?)
+      `;
+      values = [idea_id, infra_URL, currentDate];
+    }
+
+    db.query(query, values, (err, data) => {
+      if (err) {
+        console.error("인프라 보안진단 등록 오류:", err);
+        return res.status(500).json({ error: err.message });
+      }
+
+      // 아이디어 상태 업데이트 (인프라보안진단완료로 변경)
+      const updateIdeaStatusQuery = `
+        UPDATE special.ITAsset_ideas 
+        SET status = '인프라보안진단완료' 
+        WHERE id = ?
+      `;
+
+      db.query(updateIdeaStatusQuery, [idea_id], (updateErr, updateData) => {
+        if (updateErr) {
+          console.error("아이디어 상태 업데이트 오류:", updateErr);
+        }
+
+        return res.status(200).json({
+          message: "인프라 보안진단 정보가 성공적으로 등록되었습니다.",
+          idea_id: idea_id,
+          infra_URL: infra_URL,
+        });
+      });
+    });
+  });
+};
+
+// 보안진단 정보 조회
+export const getSecurityData = (req, res) => {
+  const idea_id = req.params.idea_id;
+  console.log("보안진단 정보 조회 요청 (idea_id):", idea_id);
+
+  if (!idea_id) {
+    return res.status(400).json({ error: "아이디어 ID가 필요합니다." });
+  }
+
+  const q = `SELECT * FROM special.ITAsset_ideaSecurity WHERE idea_id = ? LIMIT 1`;
+
+  db.query(q, [idea_id], (err, data) => {
+    if (err) {
+      console.error("보안진단 정보 조회 오류:", err);
+      return res.status(500).json({ error: err.message });
+    }
+
+    if (data.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "보안진단 정보를 찾을 수 없습니다." });
+    }
+
+    return res.status(200).json(data[0]);
+  });
+};

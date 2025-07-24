@@ -593,12 +593,36 @@ const IdeaRegister = ({
                   row
                   name="row-radio-buttons-group"
                   value={projectType}
-                  onChange={(e) => setProjectType(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setProjectType(value);
+
+                    // "기 완료" 선택 시 검증 부서 자동 설정
+                    if (value === "기 완료") {
+                      setSelectedHeadqt("사업지원담당");
+                      setSelectedTeam("AI/DT기획 PL");
+                      setVerifyDepartment({
+                        headqt: "사업지원담당",
+                        team: "AI/DT기획 PL",
+                        fullPath: "사업지원담당 > AI/DT기획 PL",
+                      });
+
+                      // 해당 본부의 팀 목록도 설정
+                      if (teamsByHeadqt["사업지원담당"]) {
+                        setTeams(teamsByHeadqt["사업지원담당"]);
+                      }
+                    }
+                  }}
                 >
                   <FormControlLabel
                     value="신규개발"
                     control={<Radio />}
                     label="신규개발"
+                  />
+                  <FormControlLabel
+                    value="기 완료"
+                    control={<Radio />}
+                    label="기 완료"
                   />
                   {/* <FormControlLabel
                     value="고도화"

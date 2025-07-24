@@ -38,11 +38,11 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
 
       try {
         setLoading(true);
-        console.log("아이디어 ID:", ideaId, "데이터 조회 시작");
+        // console.log("아이디어 ID:", ideaId, "데이터 조회 시작");
 
         // 아이디어 기본 정보 조회 (검증 부서 정보를 가져오기 위해)
         const ideaResponse = await axios.get(`/api/ideas/${ideaId}`);
-        console.log("아이디어 기본 정보 조회 결과:", ideaResponse.data);
+        // console.log("아이디어 기본 정보 조회 결과:", ideaResponse.data);
 
         // 전체 아이디어 데이터 저장
         setFullIdeaData(ideaResponse.data);
@@ -51,15 +51,15 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
         if (!ideaResponse.data) {
           console.error("아이디어 데이터가 없습니다.");
         } else {
-          console.log("아이디어 데이터 구조:", Object.keys(ideaResponse.data));
+          // console.log("아이디어 데이터 구조:", Object.keys(ideaResponse.data));
 
           // 검증 부서 정보 확인 및 저장
           const verifyDeptValue = ideaResponse.data.VerifyDepartment;
-          console.log("검증 부서 필드 값:", verifyDeptValue);
+          // console.log("검증 부서 필드 값:", verifyDeptValue);
 
           if (verifyDeptValue && verifyDeptValue.trim() !== "") {
             setVerifyDepartment(verifyDeptValue);
-            console.log(`검증 부서 정보 설정 완료: '${verifyDeptValue}'`);
+            // console.log(`검증 부서 정보 설정 완료: '${verifyDeptValue}'`);
           } else {
             console.warn("검증 부서 정보가 비어있습니다:", verifyDeptValue);
           }
@@ -69,7 +69,7 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
         const selectionResponse = await axios.get(
           `/api/ideas/selection/${ideaId}`
         );
-        console.log("선정 정보 조회 결과:", selectionResponse.data);
+        // console.log("선정 정보 조회 결과:", selectionResponse.data);
 
         // 선정 데이터가 있으면 상태 업데이트
         if (
@@ -123,7 +123,7 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
 
   // viewMode 상태 변경 감지
   useEffect(() => {
-    console.log("viewMode state 변경됨:", viewMode);
+    // console.log("viewMode state 변경됨:", viewMode);
   }, [viewMode]);
 
   // 과제중복 라디오 버튼 변경 핸들러
@@ -150,19 +150,19 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
   const hasEditPermission = () => {
     // 현재 사용자가 없는 경우 권한 없음
     if (!currentUser) {
-      console.log("현재 로그인한 사용자가 없습니다. 권한 없음.");
+      // console.log("현재 로그인한 사용자가 없습니다. 권한 없음.");
       return false;
     }
 
     // Admin인 경우 권한 있음
     if (currentUser.isAdmin) {
-      console.log("관리자 권한으로 접근: 권한 있음");
+      // console.log("관리자 권한으로 접근: 권한 있음");
       return true;
     }
 
     // 작성자인 경우 권한 있음
     if (currentUser.userId === author) {
-      console.log("작성자로 접근: 권한 있음");
+      // console.log("작성자로 접근: 권한 있음");
       return true;
     }
 
@@ -171,11 +171,11 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
     // 현재 사용자 부서
     const userDeptName = currentUser.deptName;
 
-    console.log("권한 확인 정보:");
-    console.log("- 사용자 정보:", currentUser);
-    console.log("- 사용자 부서:", userDeptName);
-    console.log("- 검증 부서 (state):", verifyDepartment);
-    console.log("- 검증 부서 (직접 접근):", verifyDeptFromData);
+    // console.log("권한 확인 정보:");
+    // console.log("- 사용자 정보:", currentUser);
+    // console.log("- 사용자 부서:", userDeptName);
+    // console.log("- 검증 부서 (state):", verifyDepartment);
+    // console.log("- 검증 부서 (직접 접근):", verifyDeptFromData);
 
     // 먼저 fullIdeaData에서 직접 접근한 값 사용
     if (
@@ -185,7 +185,7 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
         userDeptName.includes(verifyDeptFromData) ||
         verifyDeptFromData.includes(userDeptName))
     ) {
-      console.log("검증 부서 소속 확인됨 (직접 접근 데이터 사용): 권한 있음");
+      // console.log("검증 부서 소속 확인됨 (직접 접근 데이터 사용): 권한 있음");
       return true;
     }
 
@@ -197,11 +197,11 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
         userDeptName.includes(verifyDepartment) ||
         verifyDepartment.includes(userDeptName))
     ) {
-      console.log("검증 부서 소속 확인됨 (state 데이터 사용): 권한 있음");
+      // console.log("검증 부서 소속 확인됨 (state 데이터 사용): 권한 있음");
       return true;
     }
 
-    console.log("권한 없음 - 사용자 부서와 검증 부서가 일치하지 않음");
+    // console.log("권한 없음 - 사용자 부서와 검증 부서가 일치하지 않음");
     return false;
   };
 
@@ -256,8 +256,8 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
       };
 
       // ideaId 디버깅
-      console.log("아이디어 ID:", ideaId);
-      console.log("등록할 과제 선정 데이터:", selectionData);
+      // console.log("아이디어 ID:", ideaId);
+      // console.log("등록할 과제 선정 데이터:", selectionData);
 
       // API 호출 - ideaId가 있으면 URL 파라미터로 전달, 없으면 기존 방식 사용
       let response;
@@ -280,9 +280,9 @@ const IdeaSelected = ({ onClose, ideaId, isViewMode }) => {
         return;
       }
 
-      console.log("과제 선정 등록 성공:", response.data);
+      // console.log("과제 선정 등록 성공:", response.data);
       // 결과에서 idea_id 확인 (기존에는 selectionId를 확인했을 수 있음)
-      console.log("결과 - 아이디어 ID:", response.data.idea_id);
+      // console.log("결과 - 아이디어 ID:", response.data.idea_id);
 
       // 선정 여부에 따라 다른 알림 메시지 표시
       if (isSelected) {
