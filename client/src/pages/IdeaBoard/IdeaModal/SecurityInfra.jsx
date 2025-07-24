@@ -115,7 +115,7 @@ const SecurityInfra = ({ onClose, ideaId, isViewMode }) => {
       }
 
       // DB에 URL만 저장
-      const response = await axios.post(`/api/ideas/security-infra/${ideaId}`, {
+      const response = await axios.post(`/api/ideas/securityinfra/${ideaId}`, {
         infra_URL: infra_URL,
       });
 

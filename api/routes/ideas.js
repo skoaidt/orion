@@ -53,8 +53,8 @@ router.get("/debug-mssql", debugMssqlConnection);
 router.get("/teams", getTeam);
 
 // 보안진단 관련 라우트 추가
-router.post("/security-code/:idea_id", registerSecurityCode);
-router.post("/security-infra/:idea_id", registerSecurityInfra);
+router.post("/securitycode/:idea_id", registerSecurityCode);
+router.post("/securityinfra/:idea_id", registerSecurityInfra);
 router.get("/security/:idea_id", getSecurityData);
 
 // 댓글 관련 라우트 추가

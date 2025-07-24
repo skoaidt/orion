@@ -115,7 +115,7 @@ const SecurityCode = ({ onClose, ideaId, isViewMode }) => {
       }
 
       // DB에 URL만 저장
-      const response = await axios.post(`/api/ideas/security-code/${ideaId}`, {
+      const response = await axios.post(`/api/ideas/securitycode/${ideaId}`, {
         sourceCode_URL: sourceCode_URL,
       });
 
