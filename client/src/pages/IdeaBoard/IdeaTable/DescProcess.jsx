@@ -11,6 +11,8 @@ import IdeaDevReview from "../IdeaModal/IdeaDevReview";
 import IdeaCompleted from "../IdeaModal/IdeaCompleted";
 import IdeaDrop from "../IdeaModal/IdeaDrop";
 import IdeaRegister from "../IdeaModal/IdeaRegister";
+import SecurityCode from "../IdeaModal/SecurityCode";
+import SecurityInfra from "../IdeaModal/SecurityInfra";
 import PropTypes from "prop-types";
 
 import AssignmentIcon from "@mui/icons-material/Assignment";
@@ -21,6 +23,8 @@ import RateReviewIcon from "@mui/icons-material/RateReview";
 import DeveloperModeIcon from "@mui/icons-material/DeveloperMode";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import CancelIcon from "@mui/icons-material/Cancel";
+import SecurityIcon from "@mui/icons-material/Security";
+import HttpsIcon from "@mui/icons-material/Https";
 
 // formatDate 함수 직접 정의
 const formatDate = (dateString) => {
@@ -41,6 +45,8 @@ const STAGES = {
   DEV_REVIEW: "devReviewed", // 개발자 검토 완료
   DEVELOPING: "developing", // 개발 진행 중
   DEV_COMPLETE: "devComplete", // 개발 완료
+  SECURITY_CODE: "securityCode", // 소스코드 보안진단 완료
+  SECURITY_INFRA: "securityInfra", // 인프라 보안 진단 완료
   COMPLETED: "sol등록완료", // 완료
   DROP: "Drop", // Drop 상태 (첫 글자 대문자로 수정)
 };
@@ -54,7 +60,9 @@ const STAGE_ORDER = {
   devReviewed: 4,
   developing: 5,
   devComplete: 6,
-  sol등록완료: 7,
+  securityCode: 7,
+  securityInfra: 8,
+  sol등록완료: 9,
 };
 
 const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
@@ -63,6 +71,8 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [ideaData, setIdeaData] = useState(propIdeaData || null);
   const [loading, setLoading] = useState(!propIdeaData);
+  const [showSecurityCodeModal, setShowSecurityCodeModal] = useState(false);
+  const [showSecurityInfraModal, setShowSecurityInfraModal] = useState(false);
   const navigate = useNavigate();
 
   // API 호출하는 함수를 useCallback으로 감싸기
@@ -106,7 +116,9 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       개발심의: 4,
       개발중: 5,
       개발완료: 6,
-      sol등록완료: 7,
+      소스코드보안진단완료: 7,
+      인프라보안진단완료: 8,
+      sol등록완료: 9,
       Drop: -1,
       // 이전 영문 상태값도 호환성을 위해 유지
       selected: 1,
@@ -115,7 +127,9 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       devReviewed: 4,
       developing: 5,
       devComplete: 6,
-      complete: 7,
+      securityCode: 7,
+      securityInfra: 8,
+      complete: 9,
     };
 
     if (statusStageMap[status] !== undefined) {
@@ -134,8 +148,12 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       return 5;
     } else if (status && /devComplete/i.test(status)) {
       return 6;
-    } else if (status && /sol/i.test(status)) {
+    } else if (status && /securityCode/i.test(status)) {
       return 7;
+    } else if (status && /securityInfra/i.test(status)) {
+      return 8;
+    } else if (status && /sol/i.test(status)) {
+      return 9;
     }
 
     return -1; // 알 수 없는 상태
@@ -145,6 +163,20 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
   const handleBoxClick = (modalType) => {
     if (!ideaData) return;
 
+    // 조기 단계 건너뛰기 조건에서 해당 단계 클릭 시 메시지 표시
+    if (
+      shouldSkipEarlyStages() &&
+      (modalType === "ideaSelected" ||
+        modalType === "ideaPiloted" ||
+        modalType === "ideaVerify" ||
+        modalType === "ideaDevReview")
+    ) {
+      const skipReason =
+        ideaData.project_type === "기 완료" ? "기 완료" : "자체";
+      alert(`${skipReason} 프로젝트는 해당 단계를 건너뜁니다.`);
+      return;
+    }
+
     // STAGES 상수에서 정의한 상태값과 모달 타입 매핑
     const modalToStageMap = {
       ideaSelected: "선정",
@@ -153,6 +185,8 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       ideaDevReview: "devReviewed",
       ideaDeveloping: "developing",
       ideaDevComplete: "devComplete",
+      ideaSecurityCode: "securityCode",
+      ideaSecurityInfra: "securityInfra",
       ideaCompleted: "sol등록완료",
       ideaDrop: "drop",
     };
@@ -232,10 +266,70 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
     setOpenModal(modalType);
   };
 
+  // 보안진단 단계 클릭 처리 함수
+  const handleSecurityCodeClick = () => {
+    if (ideaData.dev_env === "ID_CUBE") {
+      alert("ID CUBE 환경에서는 보안 진단 단계를 건너뜁니다.");
+      return;
+    }
+    setShowSecurityCodeModal(true);
+  };
+
+  const handleSecurityInfraClick = () => {
+    if (ideaData.dev_env === "ID_CUBE") {
+      alert("ID CUBE 환경에서는 보안 진단 단계를 건너뜁니다.");
+      return;
+    }
+    setShowSecurityInfraModal(true);
+  };
+
+  // 조기 단계 건너뛰기 확인 함수 (기 완료 또는 자체)
+  const shouldSkipEarlyStages = () => {
+    if (!ideaData) return false;
+    return (
+      ideaData.project_type === "기 완료" || ideaData.target_user === "자체"
+    );
+  };
+
   // 단계 진행 가능 여부 확인 함수
   const canProceedToStage = (stage) => {
     // 필요한 데이터가 없을 경우 진행 불가
     if (!ideaData) return false;
+
+    // 조기 단계 건너뛰기 로직 (기 완료 또는 자체)
+    if (shouldSkipEarlyStages()) {
+      const currentStageIndex = getStageIndex(ideaData.status);
+
+      // 선정~개발심의 단계들은 접근 불가
+      if (
+        stage === "ideaSelected" ||
+        stage === "ideaPiloted" ||
+        stage === "ideaVerify" ||
+        stage === "ideaDevReview"
+      ) {
+        return false;
+      }
+
+      // 개발중 단계는 등록(0) 이상에서 접근 가능
+      if (stage === "ideaDeveloping") {
+        return currentStageIndex >= 0; // 등록 이상
+      }
+    }
+
+    // ID CUBE 환경에서 보안진단 단계 건너뛰기 로직
+    if (ideaData.dev_env === "ID_CUBE") {
+      const currentStageIndex = getStageIndex(ideaData.status);
+
+      // 보안진단 단계들은 접근 불가
+      if (stage === "ideaSecurityCode" || stage === "ideaSecurityInfra") {
+        return false;
+      }
+
+      // 최종완료 단계는 개발완료(6) 이상에서 접근 가능
+      if (stage === "ideaCompleted") {
+        return currentStageIndex >= 6; // 개발완료 이상
+      }
+    }
 
     // Drop 상태인 경우, 특별 처리
     if (ideaData.status === STAGES.DROP) {
@@ -255,7 +349,9 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
         ideaDevReview: 4, // 개발심의
         ideaDeveloping: 5, // 개발중
         ideaDevComplete: 6, // 개발완료
-        ideaCompleted: 7, // 최종완료
+        ideaSecurityCode: 7, // 소스코드 보안진단 완료
+        ideaSecurityInfra: 8, // 인프라 보안 진단 완료
+        ideaCompleted: 9, // 최종완료
       };
 
       // 요청된 단계의 인덱스
@@ -299,8 +395,20 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
         return currentStageIndex >= 5; // 개발중 이상
 
       case "ideaCompleted": // 최종 완료 단계
-        // 개발중 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
+        // SKO/로컬 환경: 인프라 보안진단(8) 이상, ID CUBE 환경: 개발완료(6) 이상
+        if (ideaData.dev_env === "ID_CUBE") {
+          return currentStageIndex >= 6; // 개발완료 이상
+        } else {
+          return currentStageIndex >= 8; // 인프라 보안진단 완료 이상 (기존 로직)
+        }
+
+      case "ideaSecurityCode": // 소스코드 보안진단 완료 단계
+        // 개발완료 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
         return currentStageIndex >= 6; // 개발완료 이상
+
+      case "ideaSecurityInfra": // 인프라 보안 진단 완료 단계
+        // 소스코드 보안진단 완료 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
+        return currentStageIndex >= 8; // 웹 보안 진단 완료 이상
 
       case "ideaDrop": // Drop 단계
         return true; // Drop은 언제든지 가능
@@ -319,6 +427,42 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
 
     // 요청된 단계의 인덱스 (0-7)
     const requestedStageIndex = STAGE_ORDER[stage];
+
+    // 조기 단계 건너뛰기 로직 (기 완료 또는 자체)
+    if (shouldSkipEarlyStages()) {
+      // 선정~개발심의 단계들은 회색으로 표시
+      if (
+        stage === "선정" ||
+        stage === "pilot" ||
+        stage === "verified" ||
+        stage === "devReviewed"
+      ) {
+        return "disabled"; // 건너뛴 단계는 회색
+      }
+
+      // 등록 상태에서 개발중 단계는 흰색으로 표시 (다음 진행할 단계)
+      if (currentStageIndex === 0 && stage === "developing") {
+        return ""; // 흰색 (다음 단계)
+      }
+    }
+
+    // ID CUBE 환경에서 개발완료 상태일 때 보안진단 단계 건너뛰기 로직
+    if (ideaData.dev_env === "ID_CUBE" && currentStageIndex >= 6) {
+      // 개발완료(6) 이상
+      // 보안진단 단계들은 건너뛰고 disabled로 표시
+      if (stage === "securityCode" || stage === "securityInfra") {
+        return "disabled"; // 보안진단 단계는 비활성화
+      }
+
+      // 최종완료 단계는 개발완료 직후 바로 활성화
+      if (stage === "sol등록완료") {
+        if (currentStageIndex >= 9) {
+          return "active"; // 이미 완료된 경우
+        } else if (currentStageIndex === 6) {
+          return ""; // 현재 진행 가능한 다음 단계
+        }
+      }
+    }
 
     // Drop 상태일 때 특별 처리
     if (ideaData.status === STAGES.DROP) {
@@ -410,6 +554,22 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       }
     }
 
+    if (stage === "securityCode") {
+      const currentStageIndex = getStageIndex(ideaData.status);
+      if (currentStageIndex >= STAGE_ORDER["securityCode"]) {
+        return "1차 보안 : 소스코드 보안진단 완료";
+      }
+      return "1차 보안 : 소스코드 보안진단 필요";
+    }
+
+    if (stage === "securityInfra") {
+      const currentStageIndex = getStageIndex(ideaData.status);
+      if (currentStageIndex >= STAGE_ORDER["securityInfra"]) {
+        return "2차 보안 : Infra 보안진단 완료";
+      }
+      return "2차 보안 : Infra 보안진단 필요";
+    }
+
     if (stage === "completed") {
       const currentStageIndex = getStageIndex(ideaData.status);
       if (currentStageIndex >= STAGE_ORDER["sol등록완료"]) {
@@ -436,6 +596,16 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
   // 칸반 보드 페이지로 이동 (원래의 handleKanbanNavigate 역할 복원)
   const handleKanbanNavigate = () => {
     if (!ideaData) return;
+
+    // 조기 단계 건너뛰기 조건인 경우 등록 후 바로 개발중 접근 가능
+    if (shouldSkipEarlyStages()) {
+      const currentStageIndex = getStageIndex(ideaData.status);
+      if (currentStageIndex >= 0) {
+        // 등록 이상이면 접근 가능
+        navigate(`/ideaboard/kanban/${id}`);
+        return;
+      }
+    }
 
     // 진행 가능 여부 확인
     if (!canProceedToStage("ideaDeveloping")) {
@@ -496,6 +666,37 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
     // 부모 컴포넌트에 상태 변경 알림
     if (onStatusChange) {
       onStatusChange();
+    }
+  };
+
+  // 보안진단 모달 닫기 및 데이터 새로고침 처리
+  const handleCloseSecurityCodeModal = (shouldRefresh) => {
+    setShowSecurityCodeModal(false);
+
+    // 등록이 완료된 경우 데이터 새로고침
+    if (shouldRefresh) {
+      console.log("소스코드 보안진단 완료 - 데이터 새로고침");
+      fetchIdeaData();
+
+      // 부모 컴포넌트에 상태 변경 알림
+      if (onStatusChange) {
+        onStatusChange();
+      }
+    }
+  };
+
+  const handleCloseSecurityInfraModal = (shouldRefresh) => {
+    setShowSecurityInfraModal(false);
+
+    // 등록이 완료된 경우 데이터 새로고침
+    if (shouldRefresh) {
+      console.log("인프라 보안진단 완료 - 데이터 새로고침");
+      fetchIdeaData();
+
+      // 부모 컴포넌트에 상태 변경 알림
+      if (onStatusChange) {
+        onStatusChange();
+      }
     }
   };
 
@@ -726,6 +927,78 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       <div className="processBox">
         <div
           className="processItem"
+          onClick={handleSecurityCodeClick}
+          style={{ cursor: "pointer" }}
+        >
+          <div className={`processItemTitle ${getStageClass("securityCode")}`}>
+            {getStageIndex(ideaData.status) >= 7
+              ? "소스코드\n진단완료"
+              : "소스코드\n진단필요"}
+          </div>
+          <div className="lineBox">
+            <div className="line">
+              <div className="circle">
+                <SecurityIcon className="icons" />
+              </div>
+            </div>
+          </div>
+          <div
+            className={`processItemContent ${getStageClass("securityCode")}`}
+          >
+            <div className="itemcontentWrap">
+              <div className="left">
+                <div className="userInfo">
+                  <div
+                    className="processItemContentTitle"
+                    style={{ fontSize: "13px", fontWeight: "300" }}
+                  >
+                    {getVerifyStatusText("securityCode", "소스코드보안진단")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="processBox">
+        <div
+          className="processItem"
+          onClick={handleSecurityInfraClick}
+          style={{ cursor: "pointer" }}
+        >
+          <div className={`processItemTitle ${getStageClass("securityInfra")}`}>
+            {getStageIndex(ideaData.status) >= 8
+              ? "Infra보안\n진단완료"
+              : "Infra보안\n진단필요"}
+          </div>
+          <div className="lineBox">
+            <div className="line">
+              <div className="circle">
+                <HttpsIcon className="icons" />
+              </div>
+            </div>
+          </div>
+          <div
+            className={`processItemContent ${getStageClass("securityInfra")}`}
+          >
+            <div className="itemcontentWrap">
+              <div className="left">
+                <div className="userInfo">
+                  <div
+                    className="processItemContentTitle"
+                    style={{ fontSize: "13px", fontWeight: "300" }}
+                  >
+                    {getVerifyStatusText("securityInfra", "인프라보안진단")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="processBox">
+        <div
+          className="processItem"
           onClick={() => handleBoxClick("ideaCompleted")}
         >
           <div className={`processItemTitle ${getStageClass("completed")}`}>
@@ -853,6 +1126,24 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
           editMode={true}
           ideaData={ideaData}
           onUpdate={fetchIdeaData}
+        />
+      )}
+
+      {/* 코드보안진단 모달 */}
+      {showSecurityCodeModal && (
+        <SecurityCode
+          onClose={handleCloseSecurityCodeModal}
+          ideaId={id}
+          isViewMode={getStageIndex(ideaData.status) >= 7}
+        />
+      )}
+
+      {/* 웹보안진단 모달 */}
+      {showSecurityInfraModal && (
+        <SecurityInfra
+          onClose={handleCloseSecurityInfraModal}
+          ideaId={id}
+          isViewMode={getStageIndex(ideaData.status) >= 8}
         />
       )}
     </div>

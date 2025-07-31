@@ -1,0 +1,217 @@
+@import "../../../style.scss";
+
+.securityModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+
+  .securityModalContent {
+    color: #565656;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 700px;
+    max-height: 90vh;
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+
+    .titleBox {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0px;
+
+      h2 {
+        text-indent: 10px;
+        margin: 0;
+        color: #565656;
+      }
+      .closeIcon {
+        cursor: pointer;
+        color: #565656;
+        &:hover {
+          color: #000;
+        }
+      }
+    }
+
+    .titleUnderline {
+      border: 0;
+      height: 1px;
+      background-color: #565656;
+      margin: 0;
+    }
+
+    .descriptionBox {
+      background-color: #f8f9fa;
+      padding: 10px;
+      border-radius: 5px;
+      border-left: 4px solid #565656;
+      margin: 0px;
+
+      p {
+        margin: 5px 0;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #565656;
+
+        &:first-child {
+          font-weight: 500;
+        }
+      }
+    }
+
+    .uploadSection {
+      .uploadContainer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 30px 15px;
+        border: 1px dashed #ddd;
+        border-radius: 5px;
+        background-color: #fafafa;
+
+        .uploadBox {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 15px;
+
+          .uploadButton {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background-color: #565656;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+
+            &:hover:not(.disabled) {
+              background-color: #333;
+            }
+
+            &.disabled {
+              background-color: #ccc;
+              cursor: not-allowed;
+            }
+
+            svg {
+              font-size: 18px;
+            }
+          }
+
+          .fileName {
+            font-size: 14px;
+            color: #565656;
+            padding: 8px 12px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: center;
+          }
+        }
+      }
+    }
+
+    .previewSection {
+      .previewContainer {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+
+        .previewBox {
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          padding: 15px;
+          background-color: #fafafa;
+          text-align: center;
+
+          img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+        }
+      }
+    }
+
+    .buttonContainer {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 0px;
+      margin-top: 20px;
+
+      button {
+        padding: 10px 20px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        min-width: 80px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+
+        &:hover:not(:disabled) {
+          transform: scale(1.05);
+        }
+
+        &:active:not(:disabled) {
+          transform: scale(0.95);
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
+      }
+
+      .registerButton {
+        background-color: #565656;
+        color: white;
+
+        &:hover:not(:disabled) {
+          background-color: #333;
+        }
+      }
+
+      .cancelButton {
+        background-color: #999;
+        color: white;
+
+        &:hover:not(:disabled) {
+          background-color: #777;
+        }
+      }
+    }
+
+    .errorMessage {
+      color: #f44336;
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #ffebee;
+      border-radius: 4px;
+      font-size: 14px;
+      border-left: 4px solid #f44336;
+    }
+  }
+}

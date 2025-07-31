@@ -358,7 +358,7 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 16px;
+          font-size: 15px;
           font-weight: 500;
           color: $whitegrayColor;
           background-color: #ffffff;
@@ -366,6 +366,8 @@
           border-radius: 5px;
           box-shadow: 0 0 5px 0 rgba(31, 31, 31, 0.1);
           transition: all 0.3s ease;
+          white-space: pre-line;
+          text-align: center;
 
           &.disabled {
             background-color: #cccccc;

@@ -3,6 +3,10 @@ import "./ideaDevelop.scss";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
 import { AuthContext } from "../../../context/authContext";
 
 const IdeaDevelop = ({ onClose, id }) => {
@@ -11,6 +15,32 @@ const IdeaDevelop = ({ onClose, id }) => {
   const [error, setError] = useState(null);
   const [developers, setDevelopers] = useState([]);
   const [checkingPermission, setCheckingPermission] = useState(true);
+  const [showEnvironmentModal, setShowEnvironmentModal] = useState(false);
+  const [selectedEnvironment, setSelectedEnvironment] = useState("");
+  const [ideaData, setIdeaData] = useState(null);
+  const [checkingProgress, setCheckingProgress] = useState(true);
+
+  // 아이디어 데이터 조회 (개발 시작 여부와 진행율 확인용)
+  useEffect(() => {
+    const fetchIdeaData = async () => {
+      if (!id) return;
+
+      try {
+        setCheckingProgress(true);
+        const response = await axios.get(`/api/ideas/${id}`);
+        setIdeaData(response.data);
+        console.log("아이디어 데이터:", response.data);
+        console.log("개발 시작 여부 (status):", response.data.status);
+        console.log("진행율 (ideaprogress):", response.data.ideaprogress);
+      } catch (error) {
+        console.error("아이디어 데이터 조회 오류:", error);
+      } finally {
+        setCheckingProgress(false);
+      }
+    };
+
+    fetchIdeaData();
+  }, [id]);
 
   // 개발심의에서 선정된 개발자 목록 조회
   useEffect(() => {
@@ -85,6 +115,32 @@ const IdeaDevelop = ({ onClose, id }) => {
     return false;
   };
 
+  // 개발 시작 여부 확인 함수
+  const isDevStarted = () => {
+    if (!ideaData) return false;
+    return ideaData.status === "개발중";
+  };
+
+  // 진행율 100% 확인 함수
+  const isProgressComplete = () => {
+    if (!ideaData) return false;
+    const progress = Number(ideaData.ideaprogress) || 0;
+    return progress === 100;
+  };
+
+  // 개발 완료 조건 확인 함수
+  const canCompleteDevelopment = () => {
+    const devStarted = isDevStarted();
+    const progressComplete = isProgressComplete();
+
+    console.log("개발 완료 조건 확인:");
+    console.log("- 개발 시작 여부:", devStarted);
+    console.log("- 진행율 100%:", progressComplete);
+    console.log("- 전체 조건 만족:", devStarted && progressComplete);
+
+    return devStarted && progressComplete;
+  };
+
   const handleComplete = async () => {
     // 권한 확인
     if (!hasEditPermission()) {
@@ -94,20 +150,45 @@ const IdeaDevelop = ({ onClose, id }) => {
       return;
     }
 
+    // 개발 시작 및 진행율 조건 확인
+    if (!canCompleteDevelopment()) {
+      if (!isDevStarted()) {
+        alert("개발 시작 버튼을 먼저 눌러주세요. 개발이 시작되지 않았습니다.");
+        return;
+      }
+      if (!isProgressComplete()) {
+        const currentProgress = Number(ideaData?.ideaprogress) || 0;
+        alert(
+          `진행율이 100%가 되어야 개발 완료할 수 있습니다. (현재 진행율: ${currentProgress}%)`
+        );
+        return;
+      }
+    }
+
+    // id가 없으면 에러 처리
+    if (!id) {
+      setError("아이디어 ID가 없습니다.");
+      return;
+    }
+
+    // 개발 환경 선택 모달 표시
+    setShowEnvironmentModal(true);
+  };
+
+  const handleEnvironmentComplete = async () => {
+    if (!selectedEnvironment) {
+      alert("개발 환경을 선택해주세요.");
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
 
-      // id가 없으면 에러 처리
-      if (!id) {
-        setLoading(false);
-        setError("아이디어 ID가 없습니다.");
-        return;
-      }
-
       // 아이디어 상태를 "개발완료"로 업데이트
       const response = await axios.put(`/api/ideas/status/${id}`, {
         status: "개발완료",
+        environment: selectedEnvironment, // 선택된 개발 환경도 함께 전송
       });
 
       console.log("API 응답:", response.data);
@@ -115,6 +196,7 @@ const IdeaDevelop = ({ onClose, id }) => {
       // 성공적으로 업데이트 후 모달 닫기
       setLoading(false);
       alert("개발 상태가 변경되었습니다.");
+      setShowEnvironmentModal(false);
       onClose();
 
       // 필요한 경우 페이지 리로드 또는 상태 업데이트
@@ -126,53 +208,173 @@ const IdeaDevelop = ({ onClose, id }) => {
     }
   };
 
+  const handleEnvironmentCancel = () => {
+    setShowEnvironmentModal(false);
+    setSelectedEnvironment("");
+    // 취소 시 상태는 '개발중'으로 유지하고 첫 번째 모달도 함께 닫기
+    onClose();
+  };
+
   return (
-    <div
-      className="developModalOverlay"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="modalContent">
-        <div className="titleBox">
-          <h2>개발 완료</h2>
-          <CloseIcon className="closeIcon" onClick={onClose} />
-        </div>
-
-        <div className="containerBox">
-          <div className="textBox">
-            <p>과제 개발을 완료하시겠습니까?</p>
-          </div>
-          <div className="idNo">
-            <span>ID - </span>
-            <span> {id}</span>
+    <>
+      <div
+        className="developModalOverlay"
+        onClick={(e) => e.target === e.currentTarget && onClose()}
+      >
+        <div className="modalContent">
+          <div className="titleBox">
+            <h2>개발 완료</h2>
+            <CloseIcon className="closeIcon" onClick={onClose} />
           </div>
 
-          {error && <div className="errorMessage">{error}</div>}
+          <div className="containerBox">
+            <div className="textBox">
+              <p>과제 개발을 완료하시겠습니까?</p>
 
-          <div className="buttonBox">
-            <button
-              className="cancelButton"
-              onClick={onClose}
-              disabled={loading}
-            >
-              취소
-            </button>
-            <button
-              className="completeButton"
-              onClick={handleComplete}
-              disabled={
-                loading || !id || checkingPermission || !hasEditPermission()
-              }
-            >
-              {loading ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                "완료"
+              {/* 개발 상태 정보 표시 */}
+              <div
+                className="statusInfo"
+                style={{ marginTop: "15px", fontSize: "14px", color: "#666" }}
+              >
+                <div>
+                  진행율: {ideaData?.ideaprogress || 0}%{" "}
+                  {isProgressComplete() ? "✓" : "✗"}
+                </div>
+              </div>
+
+              {!canCompleteDevelopment() && (
+                <div
+                  className="warningMessage"
+                  style={{
+                    marginTop: "10px",
+                    padding: "10px",
+                    backgroundColor: "#fff3cd",
+                    border: "1px solid #ffeaa7",
+                    borderRadius: "4px",
+                    fontSize: "13px",
+                    color: "#856404",
+                  }}
+                >
+                  ⚠️ 개발 완료 조건: 진행율 100% 달성
+                </div>
               )}
-            </button>
+            </div>
+            <div className="idNo">
+              <span>ID - </span>
+              <span> {id}</span>
+            </div>
+
+            {error && <div className="errorMessage">{error}</div>}
+
+            <div className="buttonBox">
+              <button
+                className="cancelButton"
+                onClick={onClose}
+                disabled={loading}
+              >
+                취소
+              </button>
+              <button
+                className="completeButton"
+                onClick={handleComplete}
+                disabled={
+                  loading ||
+                  !id ||
+                  checkingPermission ||
+                  checkingProgress ||
+                  !hasEditPermission() ||
+                  !canCompleteDevelopment()
+                }
+              >
+                {loading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  "완료"
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* 개발 환경 선택 모달 */}
+      {showEnvironmentModal && (
+        <div
+          className="developModalOverlay"
+          onClick={(e) =>
+            e.target === e.currentTarget && handleEnvironmentCancel()
+          }
+        >
+          <div className="modalContent">
+            <div className="titleBox">
+              <h2>개발 환경 선택</h2>
+              <CloseIcon
+                className="closeIcon"
+                onClick={handleEnvironmentCancel}
+              />
+            </div>
+
+            <div className="containerBox">
+              <div className="textBox">
+                <p>개발 환경을 선택 해 주세요.</p>
+                <p className="notice-text">
+                  SKO서버, 로컬 환경에서 개발 하신 경우 보안 진단을 필수로 시행
+                  해 주셔야합니다.
+                  <br />
+                  (ID CUBE 환경은 보안진단 단계는 건너뜁니다.) <br />
+                  ※ 개발 환경을 선택하지 않으시면 개발 완료 처리가 되지
+                  않습니다. <br />
+                  <br />○ 보안 진단 문의 : 경영기획팀 김동희님
+                </p>
+              </div>
+
+              <div className="environmentSelection">
+                <FormControl component="fieldset">
+                  <RadioGroup
+                    value={selectedEnvironment}
+                    onChange={(e) => setSelectedEnvironment(e.target.value)}
+                  >
+                    <FormControlLabel
+                      value="ID_CUBE"
+                      control={<Radio />}
+                      label="ID CUBE"
+                    />
+                    <FormControlLabel
+                      value="SKO_LOCAL"
+                      control={<Radio />}
+                      label="SKO서버 or 로컬 환경"
+                    />
+                  </RadioGroup>
+                </FormControl>
+              </div>
+
+              {error && <div className="errorMessage">{error}</div>}
+
+              <div className="buttonBox">
+                <button
+                  className="cancelButton"
+                  onClick={handleEnvironmentCancel}
+                  disabled={loading}
+                >
+                  취소
+                </button>
+                <button
+                  className="completeButton"
+                  onClick={handleEnvironmentComplete}
+                  disabled={loading || !selectedEnvironment}
+                >
+                  {loading ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    "완료"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

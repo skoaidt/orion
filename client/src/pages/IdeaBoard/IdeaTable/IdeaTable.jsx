@@ -14,7 +14,7 @@ dayjs.extend(isBetween);
 
 const columns = [
   { field: "display_id", headerName: "ID", width: 50 }, // 화면에 표시되는 ID
-  { field: "status", headerName: "Status", width: 100, editable: true },
+  { field: "status", headerName: "Status", width: 150, editable: true },
   { field: "dev_category", headerName: "개발유형", width: 100, editable: true },
   { field: "biz_category", headerName: "사업분야", width: 100, editable: true },
   {
@@ -43,8 +43,9 @@ const filterOptions = {
     "개발심의",
     "개발중",
     "개발완료",
+    "보안진단",
   ],
-  dev_category: ["선택", "신규개발", "고도화", "내재화"],
+  dev_category: ["선택", "신규개발", "기 완료"],
   biz_category: [
     "선택",
     "Access",
@@ -277,18 +278,31 @@ const IdeaTable = () => {
       }
 
       // 카테고리 필터링
-      const categories = [
-        "status",
-        "dev_category",
-        "biz_category",
-        "workfl_category",
-      ];
+      const categories = ["dev_category", "biz_category", "workfl_category"];
       for (let category of categories) {
         if (
           filters[category] !== "선택" &&
           row[category]?.toLowerCase() !== filters[category]?.toLowerCase()
         ) {
           return false;
+        }
+      }
+
+      // status 필터링 (특별 처리)
+      if (filters.status !== "선택") {
+        if (filters.status === "보안진단") {
+          // "보안진단" 필터가 선택된 경우 두 가지 보안진단 완료 상태를 모두 포함
+          const isSecurityComplete =
+            row.status === "소스코드보안진단완료" ||
+            row.status === "인프라보안진단완료";
+          if (!isSecurityComplete) {
+            return false;
+          }
+        } else {
+          // 다른 status 필터는 기존대로 처리
+          if (row.status?.toLowerCase() !== filters.status?.toLowerCase()) {
+            return false;
+          }
         }
       }
 

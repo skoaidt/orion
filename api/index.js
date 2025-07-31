@@ -20,6 +20,7 @@ const app = express();
 
 // 미들웨어 설정 - 모든 라우트 정의 전에 배치
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
@@ -290,29 +291,8 @@ app.use("/api/kanbans", kanbanRoutes);
 app.use("/api/analytics", analyticsRoutes);
 // 이미지 파일 업로드 로직
 
-// 파일 업로드를 위한 저장소 설정
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadPath = path.join(
-      __dirname,
-      "../client/public/upload",
-      req.body.path && req.body.path.toLowerCase() === "pilot"
-        ? "pilot"
-        : "Completed"
-    );
-
-    // 디렉토리가 없으면 생성
-    fs.mkdirSync(uploadPath, { recursive: true });
-
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    // 파일명 중복 방지를 위해 타임스탬프 추가
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + "-" + file.originalname);
-  },
-});
-
+// 파일 업로드를 위한 저장소 설정 - 메모리 저장 사용
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // 파일 업로드 라우트
@@ -322,18 +302,66 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
       return res.status(400).json({ message: "업로드된 파일이 없습니다." });
     }
 
-    // 파일 경로 반환
-    const relativePath = `/upload/${
-      req.body.path && req.body.path.toLowerCase() === "pilot"
-        ? "Pilot"
-        : "Completed"
-    }/$${req.file.filename}`;
+    // 업로드 폴더명 결정
+    let urlFolder = "Completed"; // 기본값
+    let finalFileName;
+
+    if (req.body.path) {
+      const pathLower = req.body.path.toLowerCase();
+
+      if (pathLower === "pilot") {
+        urlFolder = "pilot";
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        finalFileName = uniqueSuffix + "-" + req.file.originalname;
+      } else if (pathLower === "securitycode") {
+        urlFolder = "SecurityCode";
+
+        // SecurityCode용 특별한 파일명 생성
+        const ideaId = req.body.ideaId || "unknown";
+        const timestamp = Date.now();
+        const ext = path.extname(req.file.originalname);
+        const nameWithoutExt = path.basename(req.file.originalname, ext);
+        finalFileName = `${ideaId}_SecurityCode_${nameWithoutExt}_${timestamp}${ext}`;
+      } else if (pathLower === "securityinfra") {
+        urlFolder = "SecurityInfra";
+
+        // SecurityInfra용 특별한 파일명 생성
+        const ideaId = req.body.ideaId || "unknown";
+        const timestamp = Date.now();
+        const ext = path.extname(req.file.originalname);
+        const nameWithoutExt = path.basename(req.file.originalname, ext);
+        finalFileName = `${ideaId}_SecurityInfra_${nameWithoutExt}_${timestamp}${ext}`;
+      } else {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        finalFileName = uniqueSuffix + "-" + req.file.originalname;
+      }
+    } else {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      finalFileName = uniqueSuffix + "-" + req.file.originalname;
+    }
+
+    // 목적 디렉토리 생성
+    const finalDir = path.join(__dirname, "../client/public/upload", urlFolder);
+    fs.mkdirSync(finalDir, { recursive: true });
+
+    // 메모리에서 파일을 바로 목적 디렉토리에 저장
+    const finalFilePath = path.join(finalDir, finalFileName);
+    fs.writeFileSync(finalFilePath, req.file.buffer);
+
+    // 웹에서 접근 가능한 경로 생성
+    const relativePath = `/upload/${urlFolder}/${finalFileName}`;
+
+    // 간단한 성공 로그
+    console.log(`✅ 파일 업로드 성공: ${urlFolder}/${finalFileName}`);
+
     return res.status(200).json({
       message: "파일 업로드 성공",
       filePath: relativePath,
+      url: relativePath,
+      originalName: req.file.originalname,
     });
   } catch (error) {
-    console.error("파일 업로드 오류:", error);
+    console.error("❌ 파일 업로드 오류:", error);
     return res
       .status(500)
       .json({ message: "파일 업로드 중 오류가 발생했습니다." });

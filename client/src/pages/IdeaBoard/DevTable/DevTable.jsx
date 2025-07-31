@@ -24,6 +24,7 @@ const statusOptions = [
   { value: "전체", label: "전체" },
   { value: "개발중", label: "개발중" },
   { value: "개발완료", label: "개발완료" },
+  { value: "보안진단", label: "보안진단" },
 ];
 
 const DevTable = () => {
@@ -119,6 +120,13 @@ const DevTable = () => {
     ) {
       return "개발완료";
     }
+    // 보안진단 상태 통합
+    if (
+      lowerStatus === "소스코드보안진단완료" ||
+      lowerStatus === "인프라보안진단완료"
+    ) {
+      return "보안진단";
+    }
     return status;
   };
 
@@ -127,9 +135,19 @@ const DevTable = () => {
     return ideas.filter((idea) => {
       // 상태 필터링
       if (statusFilter !== "전체") {
-        const unifiedStatus = getUnifiedStatus(idea.status);
-        if (unifiedStatus !== statusFilter) {
-          return false;
+        if (statusFilter === "보안진단") {
+          // "보안진단" 필터가 선택된 경우 두 가지 보안진단 완료 상태를 모두 포함
+          const isSecurityComplete =
+            idea.status === "소스코드보안진단완료" ||
+            idea.status === "인프라보안진단완료";
+          if (!isSecurityComplete) {
+            return false;
+          }
+        } else {
+          const unifiedStatus = getUnifiedStatus(idea.status);
+          if (unifiedStatus !== statusFilter) {
+            return false;
+          }
         }
       }
 
@@ -188,6 +206,9 @@ const DevTable = () => {
             idea.status === "개발중" ||
             idea.status === "완료" ||
             idea.status === "개발완료" ||
+            idea.status === "보안진단" ||
+            idea.status === "소스코드보안진단완료" ||
+            idea.status === "인프라보안진단완료" ||
             idea.status === "developing" ||
             idea.status === "completed" ||
             idea.status === "developmentCompleted"
@@ -304,7 +325,7 @@ const DevTable = () => {
               return {
                 id: index + 1,
                 idea_id: idea.idea_id || idea.id,
-                status: idea.status,
+                status: idea.status, // 원본 상태 표시
                 project_type: idea.project_type || "-",
                 business_field: idea.business_field || "-",
                 job_field: idea.job_field || "-",
@@ -329,7 +350,7 @@ const DevTable = () => {
               return {
                 id: index + 1,
                 idea_id: idea.idea_id || idea.id,
-                status: idea.status,
+                status: idea.status, // 원본 상태 표시
                 title: idea.title || "-",
                 dept_name: idea.dept_name || "-",
                 name: idea.author || "-",
