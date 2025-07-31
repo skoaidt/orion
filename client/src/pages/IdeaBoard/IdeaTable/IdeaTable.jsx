@@ -45,7 +45,7 @@ const filterOptions = {
     "개발완료",
     "보안진단",
   ],
-  dev_category: ["선택", "신규개발", "고도화", "내재화"],
+  dev_category: ["선택", "신규개발", "기 완료"],
   biz_category: [
     "선택",
     "Access",
