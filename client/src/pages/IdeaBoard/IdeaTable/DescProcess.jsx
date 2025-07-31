@@ -163,6 +163,20 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
   const handleBoxClick = (modalType) => {
     if (!ideaData) return;
 
+    // 조기 단계 건너뛰기 조건에서 해당 단계 클릭 시 메시지 표시
+    if (
+      shouldSkipEarlyStages() &&
+      (modalType === "ideaSelected" ||
+        modalType === "ideaPiloted" ||
+        modalType === "ideaVerify" ||
+        modalType === "ideaDevReview")
+    ) {
+      const skipReason =
+        ideaData.project_type === "기 완료" ? "기 완료" : "자체";
+      alert(`${skipReason} 프로젝트는 해당 단계를 건너뜁니다.`);
+      return;
+    }
+
     // STAGES 상수에서 정의한 상태값과 모달 타입 매핑
     const modalToStageMap = {
       ideaSelected: "선정",
@@ -252,10 +266,70 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
     setOpenModal(modalType);
   };
 
+  // 보안진단 단계 클릭 처리 함수
+  const handleSecurityCodeClick = () => {
+    if (ideaData.dev_env === "ID_CUBE") {
+      alert("ID CUBE 환경에서는 보안 진단 단계를 건너뜁니다.");
+      return;
+    }
+    setShowSecurityCodeModal(true);
+  };
+
+  const handleSecurityInfraClick = () => {
+    if (ideaData.dev_env === "ID_CUBE") {
+      alert("ID CUBE 환경에서는 보안 진단 단계를 건너뜁니다.");
+      return;
+    }
+    setShowSecurityInfraModal(true);
+  };
+
+  // 조기 단계 건너뛰기 확인 함수 (기 완료 또는 자체)
+  const shouldSkipEarlyStages = () => {
+    if (!ideaData) return false;
+    return (
+      ideaData.project_type === "기 완료" || ideaData.target_user === "자체"
+    );
+  };
+
   // 단계 진행 가능 여부 확인 함수
   const canProceedToStage = (stage) => {
     // 필요한 데이터가 없을 경우 진행 불가
     if (!ideaData) return false;
+
+    // 조기 단계 건너뛰기 로직 (기 완료 또는 자체)
+    if (shouldSkipEarlyStages()) {
+      const currentStageIndex = getStageIndex(ideaData.status);
+
+      // 선정~개발심의 단계들은 접근 불가
+      if (
+        stage === "ideaSelected" ||
+        stage === "ideaPiloted" ||
+        stage === "ideaVerify" ||
+        stage === "ideaDevReview"
+      ) {
+        return false;
+      }
+
+      // 개발중 단계는 등록(0) 이상에서 접근 가능
+      if (stage === "ideaDeveloping") {
+        return currentStageIndex >= 0; // 등록 이상
+      }
+    }
+
+    // ID CUBE 환경에서 보안진단 단계 건너뛰기 로직
+    if (ideaData.dev_env === "ID_CUBE") {
+      const currentStageIndex = getStageIndex(ideaData.status);
+
+      // 보안진단 단계들은 접근 불가
+      if (stage === "ideaSecurityCode" || stage === "ideaSecurityInfra") {
+        return false;
+      }
+
+      // 최종완료 단계는 개발완료(6) 이상에서 접근 가능
+      if (stage === "ideaCompleted") {
+        return currentStageIndex >= 6; // 개발완료 이상
+      }
+    }
 
     // Drop 상태인 경우, 특별 처리
     if (ideaData.status === STAGES.DROP) {
@@ -321,12 +395,16 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
         return currentStageIndex >= 5; // 개발중 이상
 
       case "ideaCompleted": // 최종 완료 단계
-        // 개발중 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
-        return currentStageIndex >= 6; // 개발완료 이상
+        // SKO/로컬 환경: 인프라 보안진단(8) 이상, ID CUBE 환경: 개발완료(6) 이상
+        if (ideaData.dev_env === "ID_CUBE") {
+          return currentStageIndex >= 6; // 개발완료 이상
+        } else {
+          return currentStageIndex >= 8; // 인프라 보안진단 완료 이상 (기존 로직)
+        }
 
       case "ideaSecurityCode": // 소스코드 보안진단 완료 단계
         // 개발완료 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
-        return currentStageIndex >= 7; // 소스코드 보안진단 완료 이상
+        return currentStageIndex >= 6; // 개발완료 이상
 
       case "ideaSecurityInfra": // 인프라 보안 진단 완료 단계
         // 소스코드 보안진단 완료 단계를 거친 경우 또는 이미 그 이상 단계인 경우 진행 가능
@@ -349,6 +427,42 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
 
     // 요청된 단계의 인덱스 (0-7)
     const requestedStageIndex = STAGE_ORDER[stage];
+
+    // 조기 단계 건너뛰기 로직 (기 완료 또는 자체)
+    if (shouldSkipEarlyStages()) {
+      // 선정~개발심의 단계들은 회색으로 표시
+      if (
+        stage === "선정" ||
+        stage === "pilot" ||
+        stage === "verified" ||
+        stage === "devReviewed"
+      ) {
+        return "disabled"; // 건너뛴 단계는 회색
+      }
+
+      // 등록 상태에서 개발중 단계는 흰색으로 표시 (다음 진행할 단계)
+      if (currentStageIndex === 0 && stage === "developing") {
+        return ""; // 흰색 (다음 단계)
+      }
+    }
+
+    // ID CUBE 환경에서 개발완료 상태일 때 보안진단 단계 건너뛰기 로직
+    if (ideaData.dev_env === "ID_CUBE" && currentStageIndex >= 6) {
+      // 개발완료(6) 이상
+      // 보안진단 단계들은 건너뛰고 disabled로 표시
+      if (stage === "securityCode" || stage === "securityInfra") {
+        return "disabled"; // 보안진단 단계는 비활성화
+      }
+
+      // 최종완료 단계는 개발완료 직후 바로 활성화
+      if (stage === "sol등록완료") {
+        if (currentStageIndex >= 9) {
+          return "active"; // 이미 완료된 경우
+        } else if (currentStageIndex === 6) {
+          return ""; // 현재 진행 가능한 다음 단계
+        }
+      }
+    }
 
     // Drop 상태일 때 특별 처리
     if (ideaData.status === STAGES.DROP) {
@@ -482,6 +596,16 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
   // 칸반 보드 페이지로 이동 (원래의 handleKanbanNavigate 역할 복원)
   const handleKanbanNavigate = () => {
     if (!ideaData) return;
+
+    // 조기 단계 건너뛰기 조건인 경우 등록 후 바로 개발중 접근 가능
+    if (shouldSkipEarlyStages()) {
+      const currentStageIndex = getStageIndex(ideaData.status);
+      if (currentStageIndex >= 0) {
+        // 등록 이상이면 접근 가능
+        navigate(`/ideaboard/kanban/${id}`);
+        return;
+      }
+    }
 
     // 진행 가능 여부 확인
     if (!canProceedToStage("ideaDeveloping")) {
@@ -803,7 +927,7 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       <div className="processBox">
         <div
           className="processItem"
-          onClick={() => setShowSecurityCodeModal(true)}
+          onClick={handleSecurityCodeClick}
           style={{ cursor: "pointer" }}
         >
           <div className={`processItemTitle ${getStageClass("securityCode")}`}>
@@ -839,7 +963,7 @@ const DescProcess = ({ ideaData: propIdeaData, onStatusChange }) => {
       <div className="processBox">
         <div
           className="processItem"
-          onClick={() => setShowSecurityInfraModal(true)}
+          onClick={handleSecurityInfraClick}
           style={{ cursor: "pointer" }}
         >
           <div className={`processItemTitle ${getStageClass("securityInfra")}`}>

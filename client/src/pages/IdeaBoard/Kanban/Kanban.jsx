@@ -369,8 +369,19 @@ const Kanban = () => {
 
   // DevStart 모달에서 "개발중" 상태로 변경하는 함수
   const handleStartDevelopment = async () => {
-    await updateIdeaStatus("개발중");
-    setShowDevStartModal(false);
+    // 기 완료/자체 프로젝트이면서 이미 개발중 상태인 경우
+    if (shouldSkipEarlyStages() && isDevInProgressStatus) {
+      // 진행율을 1%로 설정하여 개발 시작됨을 표시
+      await handleProgressChange(1);
+      setShowDevStartModal(false);
+      alert(
+        "개발이 시작되었습니다. 이제 진행율을 수정하고 개발 완료를 진행할 수 있습니다."
+      );
+    } else {
+      // 일반적인 경우: 상태를 개발중으로 변경
+      await updateIdeaStatus("개발중");
+      setShowDevStartModal(false);
+    }
   };
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -551,10 +562,32 @@ const Kanban = () => {
     );
   };
 
+  // 조기 단계 건너뛰기 확인 함수 (기 완료 또는 자체)
+  const shouldSkipEarlyStages = () => {
+    return (
+      ideaData.project_type === "기 완료" || ideaData.target_user === "자체"
+    );
+  };
+
   // 개발 버튼 표시 여부
   const isDeveloper = isCurrentUserDeveloper();
   const isDevReviewStatus = ideaData.status === "개발심의";
   const isDevInProgressStatus = ideaData.status === "개발중";
+
+  // 개발 시작 버튼을 보여야 하는 조건
+  const shouldShowDevStartButton = () => {
+    if (!isDeveloper) return false;
+
+    // 일반 프로젝트: 개발심의 상태일 때
+    if (isDevReviewStatus) return true;
+
+    // 기 완료/자체 프로젝트: 개발중 상태이면서 진행율이 0%일 때 (아직 개발 시작을 누르지 않은 것으로 간주)
+    if (shouldSkipEarlyStages() && isDevInProgressStatus && progress === 0) {
+      return true;
+    }
+
+    return false;
+  };
 
   return (
     <div className="kanban">
@@ -671,10 +704,44 @@ const Kanban = () => {
                 ) : (
                   <div className="progress-display">
                     <span>진행율: {progress}%</span>
-                    <Tooltip title="수정" arrow placement="top">
+                    {!isDevInProgressStatus && (
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          color: "#ff6b6b",
+                          marginLeft: "8px",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        (개발 시작 필요)
+                      </span>
+                    )}
+                    <Tooltip
+                      title={
+                        isDevInProgressStatus
+                          ? "수정"
+                          : "개발 시작 후 수정 가능"
+                      }
+                      arrow
+                      placement="top"
+                    >
                       <div
                         className="icon"
-                        onClick={() => setIsEditingProgress(true)}
+                        style={{
+                          opacity: isDevInProgressStatus ? 1 : 0.5,
+                          cursor: isDevInProgressStatus
+                            ? "pointer"
+                            : "not-allowed",
+                        }}
+                        onClick={() => {
+                          if (!isDevInProgressStatus) {
+                            alert(
+                              "개발 시작 버튼을 먼저 눌러주세요. 개발이 시작되어야 진행율을 수정할 수 있습니다."
+                            );
+                            return;
+                          }
+                          setIsEditingProgress(true);
+                        }}
                       >
                         <EditIcon style={{ fontSize: "20px" }} />
                       </div>
@@ -685,13 +752,15 @@ const Kanban = () => {
             )}
           </div>
           <div className="right">
-            {isDeveloper && isDevInProgressStatus && (
-              <button className="developing">
-                <GitHubIcon /> &nbsp;개발중
-              </button>
-            )}
+            {isDeveloper &&
+              isDevInProgressStatus &&
+              !shouldShowDevStartButton() && (
+                <button className="developing">
+                  <GitHubIcon /> &nbsp;개발중
+                </button>
+              )}
 
-            {isDeveloper && isDevReviewStatus && (
+            {shouldShowDevStartButton() && (
               <button className="devStart" onClick={handleDevStart}>
                 <CodeIcon /> &nbsp;Start
               </button>

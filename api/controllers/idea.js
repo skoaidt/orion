@@ -50,6 +50,7 @@ export const registerIdea = (req, res) => {
     prnt_dept_name,
     dept_name,
     VerifyDepartment,
+    status, // 기 완료/자체 프로젝트의 경우 '개발중' 상태로 등록
   } = req.body;
 
   // 모든 필드가 입력되었는지 확인
@@ -113,8 +114,8 @@ export const registerIdea = (req, res) => {
       tboh_status, use_period, use_scope, 
       platform, usability_points, improvement_points,
       user_id, name, prnt_dept_name, dept_name,
-      VerifyDepartment
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      VerifyDepartment, status
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
   `;
 
   const values = [
@@ -140,6 +141,7 @@ export const registerIdea = (req, res) => {
     prnt_dept_name,
     dept_name,
     VerifyDepartment || "",
+    status || "등록", // 기본값은 "등록", 기 완료/자체인 경우 "개발중"
   ];
 
   db.query(q, values, (err, data) => {
@@ -1735,9 +1737,10 @@ export const getAllIdeaViewCounts = (req, res) => {
 
 export const updateIdeaStatus = (req, res) => {
   const id = req.params.id;
-  const { status } = req.body;
+  const { status, environment } = req.body;
 
   console.log("백엔드 아이디어 상태 업데이트 요청:", id, status);
+  console.log("백엔드 개발 환경:", environment);
   console.log("백엔드 id:", id);
   console.log("백엔드 req.body:", req.body);
 
@@ -1745,20 +1748,50 @@ export const updateIdeaStatus = (req, res) => {
     return res.status(400).json({ error: "아이디어 ID와 상태가 필요합니다." });
   }
 
-  const query = `
-    UPDATE special.ITAsset_ideas 
-    SET status = ? 
-    WHERE id = ?
-  `;
-  const values = [status, id];
+  // environment 값이 있는 경우 dev_env 컬럼도 함께 업데이트
+  let query, values;
+
+  if (environment) {
+    query = `
+      UPDATE special.ITAsset_ideas 
+      SET status = ?, dev_env = ?
+      WHERE id = ?
+    `;
+    values = [status, environment, id];
+  } else {
+    query = `
+      UPDATE special.ITAsset_ideas 
+      SET status = ? 
+      WHERE id = ?
+    `;
+    values = [status, id];
+  }
+
   db.query(query, values, (err, data) => {
     if (err) {
       console.error("아이디어 상태 업데이트 오류:", err);
       return res.status(500).json({ error: err.message });
     }
-    return res
-      .status(200)
-      .json({ message: "아이디어 상태가 성공적으로 업데이트되었습니다." });
+
+    let responseMessage;
+    if (environment === "ID_CUBE" && status === "개발완료") {
+      responseMessage =
+        "ID CUBE 환경으로 개발이 완료되었습니다. 보안 진단 단계는 프론트엔드에서 자동으로 건너뜁니다.";
+    } else if (environment === "SKO_LOCAL" && status === "개발완료") {
+      responseMessage =
+        "SKO/로컬 환경으로 개발이 완료되어 소스코드 보안 진단 단계로 이동합니다.";
+    } else if (environment) {
+      responseMessage =
+        "아이디어 상태와 개발 환경이 성공적으로 업데이트되었습니다.";
+    } else {
+      responseMessage = "아이디어 상태가 성공적으로 업데이트되었습니다.";
+    }
+
+    return res.status(200).json({
+      message: responseMessage,
+      status: status,
+      dev_env: environment || null,
+    });
   });
 };
 

@@ -416,6 +416,14 @@ const IdeaRegister = ({
         VerifyDepartment: verifyDepartment ? verifyDepartment.team : "",
       };
 
+      // 기 완료 또는 자체 프로젝트인 경우 상태를 '개발중'으로 설정
+      const finalProjectType = formData.project_type;
+      const finalTargetUser = formData.target_user;
+
+      if (finalProjectType === "기 완료" || finalTargetUser === "자체") {
+        formData.status = "개발중";
+      }
+
       // console.log(`${editMode ? "수정" : "등록"}할 아이디어 데이터:`, formData);
 
       if (editMode) {
@@ -826,6 +834,7 @@ const IdeaRegister = ({
                   <MenuItem value="Noti">Noti</MenuItem>
                   <MenuItem value="Web+Mobile">Web+Mobile</MenuItem>
                   <MenuItem value="Web+Noti">Web+Noti</MenuItem>
+                  <MenuItem value=".exe파일">.exe파일</MenuItem>
                 </Select>
               </FormControl>
             </div>
