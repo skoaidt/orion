@@ -341,7 +341,7 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
     }
 
     // 목적 디렉토리 생성
-    const finalDir = path.join(__dirname, "../client/public/upload", urlFolder);
+    const finalDir = path.join(__dirname, "../client/upload", urlFolder);
     fs.mkdirSync(finalDir, { recursive: true });
 
     // 메모리에서 파일을 바로 목적 디렉토리에 저장
