@@ -95,7 +95,24 @@ const IdeaDevelop = ({ onClose, id }) => {
     console.log("개발 완료 권한 확인 정보:");
     console.log("- 사용자 정보:", currentUser);
     console.log("- 사용자 ID:", userId);
+    console.log("- 아이디어 데이터:", ideaData);
     console.log("- 선정된 개발자 목록:", developers);
+
+    // '기 완료' 또는 '자체' 상태인 경우 작성자에게 권한 부여
+    if (
+      ideaData &&
+      (ideaData.project_type === "기 완료" || ideaData.target_user === "자체")
+    ) {
+      const authorId = ideaData.user_id;
+      console.log("- 아이디어 프로젝트 타입:", ideaData.project_type);
+      console.log("- 아이디어 대상 사용자:", ideaData.target_user);
+      console.log("- 작성자 ID:", authorId);
+
+      if (authorId && authorId === userId) {
+        console.log("'기 완료/자체' 상태 작성자로 확인됨: 권한 있음");
+        return true;
+      }
+    }
 
     // 개발심의 단계에서 선정된 개발자인지 확인
     if (developers && developers.length > 0 && userId) {
@@ -111,13 +128,28 @@ const IdeaDevelop = ({ onClose, id }) => {
       }
     }
 
-    console.log("권한 없음 - 관리자/선정된 개발자가 아님");
+    console.log("권한 없음 - 관리자/선정된 개발자/해당 상태의 작성자가 아님");
     return false;
   };
 
   // 개발 시작 여부 확인 함수
   const isDevStarted = () => {
     if (!ideaData) return false;
+
+    // '기 완료', '자체' 프로젝트이고 작성자인 경우 항상 true
+    if (
+      ideaData &&
+      (ideaData.project_type === "기 완료" || ideaData.target_user === "자체")
+    ) {
+      const authorId = ideaData.user_id;
+      const userId = currentUser?.userId;
+
+      if (authorId && authorId === userId) {
+        console.log("'기 완료/자체' 작성자 - 개발 시작 조건 만족");
+        return true;
+      }
+    }
+
     return ideaData.status === "개발중";
   };
 

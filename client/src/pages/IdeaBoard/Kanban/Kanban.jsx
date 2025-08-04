@@ -545,6 +545,20 @@ const Kanban = () => {
       return true;
     }
 
+    // '기 완료' 또는 '자체' 상태인 경우 작성자에게 권한 부여
+    if (
+      ideaData &&
+      (ideaData.project_type === "기 완료" || ideaData.target_user === "자체")
+    ) {
+      const authorId = ideaData.user_id;
+      const userId = currentUser.userId;
+
+      if (authorId && authorId === userId) {
+        // console.log("'기 완료/자체' 상태 작성자로 확인됨: 권한 있음");
+        return true;
+      }
+    }
+
     // 개발자 목록이 없거나 빈 배열인 경우
     if (
       !devReviewData ||
