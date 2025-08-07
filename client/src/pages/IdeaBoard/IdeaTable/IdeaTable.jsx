@@ -617,7 +617,7 @@ const IdeaTable = () => {
                     ※ 미 이행 시 개발 시스템 오픈 및 사용 불가
                   </span>
                   <br />
-                  <br />○ 보안진단 문의 : 경영기획팀/ 김동희
+                  <br />○ 보안진단 문의 : 경영기획팀/ 김동희 (010-9257-3099)
                 </p>
               </div>
               <div className="popup-footer">
