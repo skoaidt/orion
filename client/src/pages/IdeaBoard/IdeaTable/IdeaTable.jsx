@@ -554,7 +554,10 @@ const IdeaTable = () => {
                   <br />
                   감사합니다.
                   <br />
-                  <br />○ 담당자 : AI/DT기획PL 김민영, 전다현
+                  <br />○ 담당자 : AI/DT기획PL/ 김민영 (010-9445-7194)
+                  <br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  AI/DT기획PL/ 전다현 (010-3194-2888)
                 </p>
               </div>
               <div className="popup-footer">
