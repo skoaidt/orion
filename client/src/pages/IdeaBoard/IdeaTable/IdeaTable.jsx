@@ -83,12 +83,19 @@ const IdeaTable = () => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 팝업 관련 상태 추가
+  // 첫 번째 팝업 관련 상태
   const [showPopup, setShowPopup] = useState(false);
   const [dontShowToday, setDontShowToday] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  // 두 번째 팝업 관련 상태 추가 - 초기 위치를 왼쪽으로 설정
+  const [showPopup2, setShowPopup2] = useState(false);
+  const [dontShowToday2, setDontShowToday2] = useState(false);
+  const [position2, setPosition2] = useState({ x: -500, y: 0 }); // 첫 번째 팝업 왼쪽에 위치
+  const [dragging2, setDragging2] = useState(false);
+  const [dragStart2, setDragStart2] = useState({ x: 0, y: 0 });
 
   // 필터 상태를 객체로 관리
   const [filters, setFilters] = useState({
@@ -109,14 +116,24 @@ const IdeaTable = () => {
     return hiddenDate !== today;
   };
 
-  // 컴포넌트 마운트 시 팝업 표시 여부 확인
+  // 두 번째 팝업 - 오늘 날짜 팝업을 보지 않았는지 확인하는 함수
+  const checkShouldShowPopup2 = () => {
+    const today = new Date().toDateString();
+    const hiddenDate = localStorage.getItem("hidePopupDate2");
+    return hiddenDate !== today;
+  };
+
+  // 컴포넌트 마운트 시 두 팝업 모두 표시 여부 확인
   useEffect(() => {
     if (checkShouldShowPopup()) {
       setShowPopup(true);
     }
+    if (checkShouldShowPopup2()) {
+      setShowPopup2(true);
+    }
   }, []);
 
-  // 팝업 닫기 함수
+  // 첫 번째 팝업 닫기 함수
   const handleClosePopup = () => {
     if (dontShowToday) {
       const today = new Date().toDateString();
@@ -127,7 +144,18 @@ const IdeaTable = () => {
     setPosition({ x: 0, y: 0 }); // 위치 초기화
   };
 
-  // 드래그 관련 함수들
+  // 두 번째 팝업 닫기 함수
+  const handleClosePopup2 = () => {
+    if (dontShowToday2) {
+      const today = new Date().toDateString();
+      localStorage.setItem("hidePopupDate2", today);
+    }
+    setShowPopup2(false);
+    setDontShowToday2(false);
+    setPosition2({ x: -500, y: 0 }); // 위치 초기화 시에도 왼쪽 위치로 설정
+  };
+
+  // 첫 번째 팝업 드래그 관련 함수들
   const handleMouseDown = useCallback(
     (e) => {
       setDragging(true);
@@ -155,7 +183,35 @@ const IdeaTable = () => {
     setDragging(false);
   }, []);
 
-  // 드래그 이벤트 리스너 추가/제거
+  // 두 번째 팝업 드래그 관련 함수들
+  const handleMouseDown2 = useCallback(
+    (e) => {
+      setDragging2(true);
+      setDragStart2({
+        x: e.clientX - position2.x,
+        y: e.clientY - position2.y,
+      });
+    },
+    [position2.x, position2.y]
+  );
+
+  const handleMouseMove2 = useCallback(
+    (e) => {
+      if (dragging2) {
+        setPosition2({
+          x: e.clientX - dragStart2.x,
+          y: e.clientY - dragStart2.y,
+        });
+      }
+    },
+    [dragging2, dragStart2.x, dragStart2.y]
+  );
+
+  const handleMouseUp2 = useCallback(() => {
+    setDragging2(false);
+  }, []);
+
+  // 첫 번째 팝업 드래그 이벤트 리스너 추가/제거
   useEffect(() => {
     if (dragging) {
       document.addEventListener("mousemove", handleMouseMove);
@@ -170,6 +226,22 @@ const IdeaTable = () => {
       document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [dragging, handleMouseMove, handleMouseUp]);
+
+  // 두 번째 팝업 드래그 이벤트 리스너 추가/제거
+  useEffect(() => {
+    if (dragging2) {
+      document.addEventListener("mousemove", handleMouseMove2);
+      document.addEventListener("mouseup", handleMouseUp2);
+    } else {
+      document.removeEventListener("mousemove", handleMouseMove2);
+      document.removeEventListener("mouseup", handleMouseUp2);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove2);
+      document.removeEventListener("mouseup", handleMouseUp2);
+    };
+  }, [dragging2, handleMouseMove2, handleMouseUp2]);
 
   // 데이터 가져오기
   useEffect(() => {
@@ -435,71 +507,137 @@ const IdeaTable = () => {
       {/* 모달 컴포넌트 */}
       {isModalOpen && <IdeaRegister onClose={handleCloseModal} />}
 
-      {/* 팝업 모달 */}
-      {showPopup && (
-        <div className="popup-overlay">
-          <div
-            className="popup-modal"
-            style={{
-              transform: `translate(${position.x}px, ${position.y}px)`,
-              cursor: dragging ? "grabbing" : "grab",
-            }}
-          >
+      {/* 팝업 모달들 - 두 모달을 하나의 컨테이너에서 동시 렌더링 */}
+      {(showPopup || showPopup2) && (
+        <div className="popup-overlay" style={{ zIndex: 1000 }}>
+          {/* 첫 번째 팝업 모달 */}
+          {showPopup && (
             <div
-              className="popup-header"
-              onMouseDown={handleMouseDown}
-              style={{ cursor: "grab" }}
+              className="popup-modal"
+              style={{
+                transform: `translate(${position.x}px, ${position.y}px)`,
+                cursor: dragging ? "grabbing" : "grab",
+              }}
             >
-              <h2>안내사항</h2>
-            </div>
-            <div className="popup-content">
-              <p>
-                본 페이지에서는
-                <br />
-                <span
-                  style={{
-                    color: "#d32f2f",
-                    fontWeight: "bold",
-                    fontSize: "20px",
-                  }}
-                >
-                  신규 개발이 필요한 과제에 대한 제안
-                </span>
-                만 받고 있습니다.
-                <br />
-                <br />
-                기 운영 중인 시스템 기능개선 및 성능개선 관련 제안은
-                <br />
-                추후 별도의 공지를 통해 접수 할 예정이오니, 이 점 양해
-                부탁드립니다.
-                <br />
-                <br />
-                추가로 궁금하신 사항은 담당자에게 문의해 주시면 신속하게
-                답변드리겠습니다.
-                <br />
-                <br />
-                감사합니다.
-                <br />
-                <br />○ 담당자 : AI/DT기획PL 김민영, 전다현
-              </p>
-            </div>
-            <div className="popup-footer">
-              <div className="checkbox-container">
-                <input
-                  type="checkbox"
-                  id="dontShowToday"
-                  checked={dontShowToday}
-                  onChange={(e) => setDontShowToday(e.target.checked)}
-                />
-                <label htmlFor="dontShowToday">
-                  오늘 하루 이 메시지 보지 않기
-                </label>
+              <div
+                className="popup-header"
+                onMouseDown={handleMouseDown}
+                style={{ cursor: "grab" }}
+              >
+                <h2>안내사항</h2>
               </div>
-              <button className="close-button" onClick={handleClosePopup}>
-                닫기
-              </button>
+              <div className="popup-content">
+                <p>
+                  본 페이지에서는
+                  <br />
+                  <span
+                    style={{
+                      color: "#d32f2f",
+                      fontWeight: "bold",
+                      fontSize: "20px",
+                    }}
+                  >
+                    신규 개발이 필요한 과제에 대한 제안
+                  </span>
+                  만 받고 있습니다.
+                  <br />
+                  <br />
+                  기 운영 중인 시스템 기능개선 및 성능개선 관련 제안은
+                  <br />
+                  추후 별도의 공지를 통해 접수 할 예정이오니, 이 점 양해
+                  부탁드립니다.
+                  <br />
+                  <br />
+                  추가로 궁금하신 사항은 담당자에게 문의해 주시면 신속하게
+                  답변드리겠습니다.
+                  <br />
+                  <br />
+                  감사합니다.
+                  <br />
+                  <br />○ 담당자 : AI/DT기획PL 김민영, 전다현
+                </p>
+              </div>
+              <div className="popup-footer">
+                <div className="checkbox-container">
+                  <input
+                    type="checkbox"
+                    id="dontShowToday"
+                    checked={dontShowToday}
+                    onChange={(e) => setDontShowToday(e.target.checked)}
+                  />
+                  <label htmlFor="dontShowToday">
+                    오늘 하루 이 메시지 보지 않기
+                  </label>
+                </div>
+                <button className="close-button" onClick={handleClosePopup}>
+                  닫기
+                </button>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* 두 번째 팝업 모달 */}
+          {showPopup2 && (
+            <div
+              className="popup-modal"
+              style={{
+                transform: `translate(${position2.x}px, ${position2.y}px)`,
+                cursor: dragging2 ? "grabbing" : "grab",
+              }}
+            >
+              <div
+                className="popup-header"
+                onMouseDown={handleMouseDown2}
+                style={{ cursor: "grab" }}
+              >
+                <h2>보안진단 안내</h2>
+              </div>
+              <div className="popup-content">
+                <p>
+                  과제 개발 환경이 SKO서버, 자체 프로그램 등
+                  <br />
+                  <span
+                    style={{
+                      color: "#d32f2f",
+                      fontWeight: "bold",
+                      fontSize: "18px",
+                    }}
+                  >
+                    ID CUBE(Play ground) 외 환경 일 시 보안진단 이행은 필수
+                  </span>
+                  입니다.
+                  <br />
+                  <br />
+                  <span
+                    style={{
+                      color: "#d32f2f",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    ※ 미 이행 시 개발 시스템 오픈 및 사용 불가
+                  </span>
+                  <br />
+                  <br />○ 보안진단 문의 : 경영기획팀/ 김동희 (010-9257-3099)
+                </p>
+              </div>
+              <div className="popup-footer">
+                <div className="checkbox-container">
+                  <input
+                    type="checkbox"
+                    id="dontShowToday2"
+                    checked={dontShowToday2}
+                    onChange={(e) => setDontShowToday2(e.target.checked)}
+                  />
+                  <label htmlFor="dontShowToday2">
+                    오늘 하루 이 메시지 보지 않기
+                  </label>
+                </div>
+                <button className="close-button" onClick={handleClosePopup2}>
+                  닫기
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
